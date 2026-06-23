@@ -1,0 +1,58 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-card">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="font-outfit text-white m-0"><i class="fa-solid fa-cart-shopping text-warning me-2"></i>Quản Lý Đơn Hàng</h4>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Mã Đơn</th>
+          <th>Khách Hàng</th>
+          <th>Sản Phẩm</th>
+          <th>Tổng Tiền</th>
+          <th>Phương thức</th>
+          <th>Trạng thái</th>
+          <th class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(o => { %>
+            <tr>
+              <td class="font-code text-primary">#<%= o.id.substring(0, 8).toUpperCase() %></td>
+              <td><%= o.userId || 'Guest' %></td>
+              <td class="small text-muted">
+                <% if(o.items) { o.items.forEach(i => { %>
+                  <div>- <%= i.title %></div>
+                <% }) } %>
+              </td>
+              <td class="fw-bold text-success"><%= o.totalAmount %></td>
+              <td><span class="badge bg-secondary"><%= o.paymentMethod || 'Bank' %></span></td>
+              <td>
+                <% if (o.status === 'completed') { %>
+                  <span class="badge bg-success">Hoàn thành</span>
+                <% } else { %>
+                  <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                <% } %>
+              </td>
+              <td class="text-center">
+                <% if (o.status !== 'completed') { %>
+                  <form action="/admin/orders/<%= o.id %>/confirm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-success" title="Xác nhận đã nhận tiền">Duyệt</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="7" class="text-center text-muted">Chưa có đơn hàng nào.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

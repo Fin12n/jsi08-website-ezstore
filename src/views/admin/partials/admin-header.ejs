@@ -1,0 +1,54 @@
+<!-- Admin Header/Topbar Partial -->
+<header class="admin-topbar">
+  <!-- Mobile hamburger -->
+  <button class="topbar-icon-btn" style="display:none" @click="sidebarOpen = !sidebarOpen" id="mobile-menu-btn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Command Palette Trigger -->
+  <button class="topbar-search-btn" @click="openPalette()" id="command-palette-trigger">
+    <i class="fas fa-magnifying-glass"></i>
+    <span>Tìm kiếm nhanh...</span>
+    <span class="kbd">Ctrl+K</span>
+  </button>
+
+  <div class="topbar-right">
+    <!-- Notifications Bell -->
+    <div x-data="{ open: false }" style="position: relative;">
+      <button @click="open = !open" class="topbar-icon-btn" title="Thông báo" id="notifications-btn">
+        <i class="fas fa-bell"></i>
+        <span class="notification-dot"></span>
+      </button>
+      <div x-show="open" @click.away="open = false" x-transition style="position:absolute;right:0;top:calc(100% + 8px);background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:240px;box-shadow:var(--shadow);overflow:hidden;z-index:200;padding:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-bell"></i> Thông báo
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:12px 0;">
+          Không có thông báo mới.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <a href="/admin/security" class="topbar-icon-btn" title="Bảo mật">
+      <i class="fas fa-shield-halved"></i>
+    </a>
+
+    <!-- Admin dropdown -->
+    <div x-data="{ open: false }" style="position: relative;">
+      <button @click="open = !open" style="display:flex; align-items:center; gap:8px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 12px; cursor:pointer; color:var(--text-secondary); font-size:13px; font-weight:500; transition:all var(--transition);">
+        <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">
+          <%= user ? (user.displayName || user.email || 'A').charAt(0).toUpperCase() : 'A' %>
+        </div>
+        <span style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= user ? (user.displayName || user.email) : 'Admin' %></span>
+        <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" x-transition style="position:absolute;right:0;top:calc(100% + 8px);background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:180px;box-shadow:var(--shadow);overflow:hidden;z-index:200;">
+        <!-- 2FA link removed -->
+        <a href="/logout" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--danger);text-decoration:none;font-size:13px;transition:background var(--transition);" onmouseover="this.style.background='var(--danger-glow)'" onmouseout="this.style.background='transparent'">
+          <i class="fas fa-right-from-bracket" style="width:16px;"></i> Đăng xuất
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

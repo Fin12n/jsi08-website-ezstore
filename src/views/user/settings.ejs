@@ -1,0 +1,79 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-settings-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <!-- Sidebar content similar to dashboard... -->
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/user/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-wallet me-2"></i>Tổng quan Ví</a>
+            <a href="/user/settings" class="nav-link active font-outfit"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
+            <a href="/logout" class="nav-link text-danger font-outfit mt-2"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <h3 class="text-white font-outfit mb-4">Cài đặt tài khoản</h3>
+        
+        <!-- Profile Card -->
+        <div class="card glass-card p-4 mb-4">
+          <h5 class="text-warning font-outfit mb-3 border-bottom border-secondary border-opacity-25 pb-2">Thông tin cá nhân</h5>
+          <div class="mb-3">
+            <label class="text-secondary small mb-1">Tên hiển thị</label>
+            <input type="text" class="form-control form-glass-input" value="<%= user.username %>" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="text-secondary small mb-1">Email</label>
+            <input type="email" class="form-control form-glass-input" value="<%= user.email %>" readonly>
+          </div>
+        </div>
+
+        <!-- Security Card (2FA) -->
+        <div class="card glass-card p-4" id="security">
+          <h5 class="text-warning font-outfit mb-3 border-bottom border-secondary border-opacity-25 pb-2">Bảo mật (2FA)</h5>
+          
+          <% if (user.isTwoFactorEnabled) { %>
+            <div class="alert bg-success bg-opacity-10 border border-success text-success d-flex align-items-center gap-3">
+              <i class="fa-solid fa-circle-check fs-3"></i>
+              <div>
+                <strong>Bảo mật 2 lớp đã được BẬT</strong><br>
+                Tài khoản của bạn đang được bảo vệ an toàn.
+              </div>
+            </div>
+            <form action="/user/settings/2fa/disable" method="POST">
+              <button type="submit" class="btn btn-outline-danger mt-2">Tắt 2FA</button>
+            </form>
+          <% } else { %>
+            <p class="text-secondary">Bật xác minh 2 bước bằng Google Authenticator hoặc Authy để bảo vệ tài khoản và số dư ví của bạn.</p>
+            
+            <% if (qrCodeUrl) { %>
+              <div class="p-3 bg-dark bg-opacity-50 rounded text-center border border-secondary border-opacity-25">
+                <p class="text-white mb-2">1. Quét mã QR này bằng ứng dụng Authenticator</p>
+                <img src="<%= qrCodeUrl %>" alt="2FA QR Code" class="bg-white p-2 rounded mb-3">
+                
+                <p class="text-white mb-2">2. Nhập mã 6 số để xác nhận</p>
+                <form action="/user/settings/2fa/verify" method="POST" class="d-flex flex-column align-items-center">
+                  <input type="hidden" name="secret" value="<%= tempSecret %>">
+                  <input type="text" name="token" class="form-control form-glass-input text-center w-50 mb-3 letter-spacing-2 fs-4" placeholder="000000" maxlength="6" required>
+                  <button type="submit" class="btn btn-hero px-4">Xác nhận bật 2FA</button>
+                </form>
+              </div>
+            <% } else { %>
+              <form action="/user/settings/2fa/generate" method="POST">
+                <button type="submit" class="btn btn-hero">Bật xác minh 2 bước</button>
+              </form>
+            <% } %>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

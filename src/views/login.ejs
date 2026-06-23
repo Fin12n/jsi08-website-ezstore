@@ -1,0 +1,88 @@
+<%- include('partials/header', { bodyClass: 'body-no-nav' }) %>
+
+<!-- Home button -->
+<a href="/" class="btn btn-homeback font-outfit" id="btn-back-home">
+  <i class="fa-solid fa-house me-2"></i>Trang chủ
+</a>
+
+<div class="auth-wrapper">
+  <div class="card glass-card auth-card">
+    <div class="text-center mb-4">
+      <img src="/imgs/logo.webp" alt="Logo" width="60" height="60" class="mb-3 rounded-3" />
+      <h2 class="text-white font-outfit mb-1">EZ Studio</h2>
+      <p class="text-secondary small">Đăng nhập để tiếp tục mua sắm tài nguyên</p>
+    </div>
+
+    <!-- Alerts are now handled globally via SweetAlert2 Toast -->
+
+    <form action="/login" method="POST" id="login-form">
+      <div class="mb-3">
+        <label for="username" class="form-label small text-secondary">Username hoặc Email *</label>
+        <input type="text" class="form-control form-glass-input" id="username" name="username" placeholder="Nhập tài khoản hoặc email của bạn" required />
+      </div>
+      
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label for="password" class="form-label small text-secondary mb-0">Mật khẩu *</label>
+          <a href="/forgot-password" class="small text-warning">Quên mật khẩu?</a>
+        </div>
+        <div class="position-relative password-wrapper">
+          <input type="password" class="form-control form-glass-input pe-5" id="password" name="password" placeholder="Nhập mật khẩu" required />
+          <button type="button" class="btn btn-password-toggle position-absolute top-50 end-0 translate-middle-y border-0 text-secondary" id="togglePassword">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-form w-100 py-2.5 font-outfit mb-3" id="btn-login-submit">
+        Đăng nhập
+      </button>
+
+      <div class="text-center small text-secondary mt-3">
+        Chưa có tài khoản? <a href="/register" class="text-warning fw-semibold">Đăng ký tại đây</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.btn-password-toggle {
+  background: transparent;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+.btn-password-toggle:hover {
+  color: var(--primary-color) !important;
+  text-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+.password-wrapper input:focus + .btn-password-toggle {
+  color: var(--primary-color) !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleBtn = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+
+  toggleBtn.addEventListener('click', function() {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    // Toggle Icon
+    const icon = this.querySelector('i');
+    if (type === 'text') {
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+      icon.classList.add('text-primary');
+    } else {
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+      icon.classList.remove('text-primary');
+    }
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

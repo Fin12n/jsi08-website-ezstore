@@ -1,0 +1,143 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="products-section" style="padding-top: 120px; min-height: 80vh;">
+  <div class="container">
+    <!-- Back button -->
+    <a href="/products" class="btn btn-outline-light mb-4" id="btn-back-catalog">
+      <i class="fa-solid fa-arrow-left me-2"></i>Quay lại Danh sách sản phẩm
+    </a>
+
+    <div class="row g-5 align-items-center">
+      <!-- Image Carousel -->
+      <div class="col-lg-6">
+        <% if (product.carousel && product.carousel.length > 0) { %>
+          <div id="productDetailCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              <% product.carousel.forEach((image, index) => { %>
+                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                  <img src="<%= image %>" class="d-block w-100" style="max-height: 450px; object-fit: cover;" alt="<%= product.title %> Image <%= index + 1 %>" onerror="this.src='/imgs/logo.webp'" />
+                </div>
+              <% }) %>
+            </div>
+            <% if (product.carousel.length > 1) { %>
+              <button class="carousel-control-prev" type="button" data-bs-target="#productDetailCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#productDetailCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div class="rounded-4 overflow-hidden shadow-lg">
+            <img src="<%= product.image %>" class="img-fluid w-100" alt="<%= product.title %>" onerror="this.src='/imgs/logo.webp'" />
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Core Specs -->
+      <div class="col-lg-6">
+        <div class="card glass-card p-4 h-100">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-secondary bg-opacity-25 text-warning px-3 py-2 small font-outfit text-uppercase"><%= product.category %></span>
+            <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 small font-outfit">Minecraft 1.16+</span>
+          </div>
+          <h1 class="text-white font-outfit display-5 mb-3"><%= product.title %></h1>
+          <p class="lead text-secondary mb-4"><%= product.description %></p>
+
+          <!-- Core features checklist -->
+          <% if (product.features && product.features.length > 0) { %>
+            <ul class="list-unstyled mb-4 d-flex flex-column gap-2">
+              <% product.features.forEach(feat => { %>
+                <li class="d-flex align-items-center gap-2 small text-secondary">
+                  <i class="fa-solid fa-circle-check text-success"></i> <%= feat %>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+          <div class="product-price mb-4">
+            <% if (product.originalPrice && product.originalPrice !== product.salePrice) { %>
+              <span class="text-muted text-decoration-line-through me-2"><%= product.originalPrice %></span>
+            <% } %>
+            <span class="text-success fw-bold fs-2 font-outfit"><%= product.salePrice %></span>
+          </div>
+
+          <div class="mb-4 d-flex align-items-center gap-3">
+            <div class="avatar-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 50%;">
+              <%= (product.sellerName || 'Admin').charAt(0).toUpperCase() %>
+            </div>
+            <div>
+              <p class="mb-0 text-secondary small">Được cung cấp bởi</p>
+              <h6 class="text-white font-outfit mb-0"><%= product.sellerName || 'EZ Studio Official' %> <i class="fa-solid fa-circle-check text-info ms-1" title="Đã xác thực"></i></h6>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mb-4">
+            <form action="/cart/add" method="POST" class="d-inline">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button type="submit" class="btn btn-outline-light btn-lg px-4 font-outfit"><i class="fa-solid fa-cart-plus me-2"></i>Thêm vào giỏ</button>
+            </form>
+            <form action="/cart/add?checkout=true" method="POST" class="d-inline flex-grow-1">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button type="submit" class="btn btn-hero btn-lg w-100 font-outfit"><i class="fa-solid fa-money-bill-wave me-2"></i>Mua ngay</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Information Section -->
+    <div class="row mt-5 pt-4">
+      <div class="col-12">
+        <div class="card glass-card p-4">
+          <h2 class="text-white font-outfit mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+            <i class="fa-solid fa-circle-info text-info me-2"></i>Thông tin chi tiết sản phẩm
+          </h2>
+          
+          <div class="row g-4">
+            <!-- Items list -->
+            <% if (product.itemsList && product.itemsList.length > 0) { %>
+              <div class="col-md-6">
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-box-open me-2"></i>Bộ tài nguyên bao gồm:</h4>
+                <ol class="text-secondary d-flex flex-column gap-2 ps-3 small">
+                  <% product.itemsList.forEach(item => { %>
+                    <li><%= item %></li>
+                  <% }) %>
+                </ol>
+              </div>
+            <% } %>
+
+            <!-- Plugins & gifts -->
+            <div class="col-md-6">
+              <% if (product.plugins && product.plugins.length > 0) { %>
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-puzzle-piece me-2"></i>Plugins tương thích:</h4>
+                <ul class="list-unstyled text-secondary d-flex flex-wrap gap-2 mb-4">
+                  <% product.plugins.forEach(plug => { %>
+                    <li><span class="badge bg-secondary bg-opacity-25 border border-secondary border-opacity-50 text-white font-code px-3 py-1.5"><%= plug %></span></li>
+                  <% }) %>
+                </ul>
+              <% } %>
+
+              <% if (product.gifts && product.gifts.length > 0) { %>
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-gift me-2"></i>Quà tặng và Bảo hành:</h4>
+                <ul class="list-unstyled text-secondary d-flex flex-column gap-2 small">
+                  <% product.gifts.forEach(gift => { %>
+                    <li class="d-flex align-items-center gap-2">
+                      <i class="fa-solid fa-circle-dot text-success" style="font-size: 8px;"></i> <%= gift %>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

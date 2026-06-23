@@ -1,0 +1,57 @@
+<!-- OTP Confirm Modal (Reusable for all dangerous admin actions) -->
+<div x-show="otpModal.show" x-cloak class="modal-container">
+  <div class="modal" @click.outside="closeAllModals()" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-8 scale-95">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:42px;height:42px;border-radius:10px;background:var(--danger-glow);border:1px solid rgba(239,68,68,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--danger);">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+      <div>
+        <div class="modal-title" x-text="otpModal.title || 'Xác nhận hành động'"></div>
+        <div style="font-size:11px;color:var(--text-muted);">Yêu cầu xác nhận cẩn trọng</div>
+      </div>
+    </div>
+
+    <p class="modal-desc" x-text="otpModal.desc || 'Hành động này cần được ghi lại lý do để tiếp tục.'"></p>
+
+    <!-- Error alert -->
+    <div x-show="otpError" class="alert alert-error" style="margin-bottom:14px;" x-text="otpError"></div>
+
+    <!-- Reason input (required) -->
+    <div class="form-group">
+      <label class="form-label">Lý do thực hiện *</label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Nhập lý do (tối thiểu 3 ký tự)..."
+        x-model="otpReason"
+        @keydown.enter="submitOtp()"
+        required
+        x-ref="otpInput"
+      >
+    </div>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <button class="btn btn-ghost" @click="otpModal.show = false" :disabled="otpLoading">
+        Hủy bỏ
+      </button>
+      <button
+        class="btn btn-danger"
+        @click="submitOtp()"
+        :disabled="otpLoading || otpReason.length < 3"
+        :style="otpLoading ? 'opacity:0.7' : ''"
+      >
+        <template x-if="otpLoading"><i class="fas fa-spinner fa-spin"></i></template>
+        <template x-if="!otpLoading"><i class="fas fa-check"></i></template>
+        <span x-text="otpLoading ? 'Đang xử lý...' : 'Xác nhận'"></span>
+      </button>
+    </div>
+
+    <!-- Info note -->
+    <p style="font-size:11px;color:var(--text-muted);margin-top:14px;text-align:center;line-height:1.5;">
+      <i class="fas fa-info-circle"></i>
+      Hành động này sẽ được ghi lại vào Audit Logs.
+    </p>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<%- include('partials/header', { bodyClass: 'body-no-nav' }) %>
+
+<!-- Home button -->
+<a href="/" class="btn btn-homeback font-outfit" id="btn-back-home">
+  <i class="fa-solid fa-house me-2"></i>Trang chủ
+</a>
+
+<div class="auth-wrapper">
+  <div class="card glass-card auth-card">
+    <div class="text-center mb-4">
+      <img src="/imgs/logo.webp" alt="Logo" width="60" height="60" class="mb-3 rounded-3" />
+      <h2 class="text-white font-outfit mb-1">EZ Studio</h2>
+      <p class="text-secondary small">Đăng ký tài khoản mới</p>
+    </div>
+
+    <!-- Alerts are now handled globally via SweetAlert2 Toast -->
+
+    <form action="/register" method="POST" id="register-form">
+      <div class="mb-3">
+        <label for="username" class="form-label small text-secondary">Tên đăng nhập *</label>
+        <input type="text" class="form-control form-glass-input" id="username" name="username" placeholder="Nhập tên đăng nhập" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label small text-secondary">Địa chỉ Email *</label>
+        <input type="email" class="form-control form-glass-input" id="email" name="email" placeholder="example@gmail.com" required />
+      </div>
+      
+      <div class="mb-3">
+        <label for="password" class="form-label small text-secondary">Mật khẩu *</label>
+        <div class="position-relative password-wrapper">
+          <input type="password" class="form-control form-glass-input pe-5" id="password" name="password" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" minlength="6" required />
+          <button type="button" class="btn btn-password-toggle position-absolute top-50 end-0 translate-middle-y border-0 text-secondary toggle-pwd-btn">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="confirmPassword" class="form-label small text-secondary">Xác nhận mật khẩu *</label>
+        <div class="position-relative password-wrapper">
+          <input type="password" class="form-control form-glass-input pe-5" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required />
+          <button type="button" class="btn btn-password-toggle position-absolute top-50 end-0 translate-middle-y border-0 text-secondary toggle-pwd-btn">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-form w-100 py-2.5 font-outfit mb-3" id="btn-register-submit">
+        Đăng ký tài khoản
+      </button>
+
+      <div class="text-center small text-secondary mt-3">
+        Đã có tài khoản? <a href="/login" class="text-warning fw-semibold">Đăng nhập tại đây</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.btn-password-toggle {
+  background: transparent;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+.btn-password-toggle:hover {
+  color: var(--primary-color) !important;
+  text-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+.password-wrapper input:focus + .btn-password-toggle {
+  color: var(--primary-color) !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleBtns = document.querySelectorAll('.toggle-pwd-btn');
+  
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Find the sibling input
+      const input = this.previousElementSibling;
+      const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', type);
+      
+      // Toggle Icon
+      const icon = this.querySelector('i');
+      if (type === 'text') {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        icon.classList.add('text-primary');
+      } else {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        icon.classList.remove('text-primary');
+      }
+    });
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,150 @@
+<%
+  const usersHtml = `
+<div class="page-header">
+  <div class="page-title">👥 Quản lý Thành viên</div>
+  <div class="page-subtitle">Tìm kiếm, phân quyền và quản lý tài chính toàn bộ thành viên trên nền tảng.</div>
+</div>
+
+<!-- Filter Bar -->
+<form method="GET" action="/admin/users" class="filter-bar" id="users-filter-form">
+  <div class="filter-search">
+    <i class="fas fa-magnifying-glass"></i>
+    <input type="text" name="search" class="form-input" placeholder="Tìm theo email, tên, ID..." value="${typeof filters !== 'undefined' && filters.search ? filters.search : ''}">
+  </div>
+  <select name="role" class="form-select" style="width:140px;">
+    <option value="">Tất cả vai trò</option>
+    <option value="user" ${typeof filters !== 'undefined' && filters.role === 'user' ? 'selected' : ''}>User</option>
+    <option value="seller" ${typeof filters !== 'undefined' && filters.role === 'seller' ? 'selected' : ''}>Seller</option>
+    <option value="admin" ${typeof filters !== 'undefined' && filters.role === 'admin' ? 'selected' : ''}>Admin</option>
+  </select>
+  <select name="status" class="form-select" style="width:140px;">
+    <option value="">Tất cả trạng thái</option>
+    <option value="active" ${typeof filters !== 'undefined' && filters.status === 'active' ? 'selected' : ''}>Đang hoạt động</option>
+    <option value="banned" ${typeof filters !== 'undefined' && filters.status === 'banned' ? 'selected' : ''}>Đã cấm</option>
+    <option value="deleted" ${typeof filters !== 'undefined' && filters.status === 'deleted' ? 'selected' : ''}>Đã xóa</option>
+  </select>
+  <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
+  <a href="/admin/users" class="btn btn-ghost"><i class="fas fa-rotate-right"></i> Reset</a>
+  <span style="margin-left:auto;font-size:13px;color:var(--text-muted);">${typeof usersList !== 'undefined' ? usersList.length : 0} kết quả</span>
+</form>
+
+<!-- Users Table -->
+<div class="card">
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Thành viên</th><th>Số dư Ví</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày đăng ký</th><th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  let rowsHtml = '';
+  if (typeof usersList !== 'undefined' && usersList.length > 0) {
+    usersList.forEach(u => {
+      const initial = (u.displayName || u.email || 'U').charAt(0).toUpperCase();
+      const isDeleted = !!u.deletedAt;
+      const isBanned = u.bannedAt && !u.unbannedAt;
+      const roleBadge = u.role === 'admin' ? '<span class="badge badge-danger">Admin</span>'
+        : u.role === 'seller' ? '<span class="badge badge-info">Seller</span>'
+        : '<span class="badge badge-muted">User</span>';
+      const statusBadge = isDeleted
+        ? '<span class="badge badge-danger"><i class="fas fa-trash-can"></i> Đã xóa</span>'
+        : isBanned
+        ? '<span class="badge badge-warning"><i class="fas fa-ban"></i> Bị cấm</span>'
+        : '<span class="badge badge-success"><i class="fas fa-circle"></i> Hoạt động</span>';
+
+      rowsHtml += `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;">${initial}</div>
+              <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13.5px;">${u.displayName || u.email || u.id}</div>
+                <div style="font-size:11px;color:var(--text-muted);">${u.email || u.id}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-weight:600;color:var(--success);">${(u.walletBalance || 0).toLocaleString('vi-VN')}đ</td>
+          <td>${roleBadge}</td>
+          <td>${statusBadge}</td>
+          <td style="font-size:12px;color:var(--text-muted);">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : '--'}</td>
+          <td>
+            <div x-data="{ open: false }" style="position:relative;">
+              <button @click="open = !open" class="btn btn-ghost btn-sm"><i class="fas fa-ellipsis"></i></button>
+              <div x-show="open" @click.away="open = false" x-transition style="position:absolute;right:0;top:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:200px;box-shadow:var(--shadow);z-index:100;overflow:hidden;">
+                ${isDeleted ? `
+                  <button onclick="confirmOtp('Khôi phục tài khoản','Khôi phục tài khoản của ${u.displayName || u.email}?','/admin/api/users/${u.id}/restore',{})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--success);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-trash-arrow-up" style="width:16px;"></i> Khôi phục tài khoản
+                  </button>
+                ` : `
+                  <button onclick="openWalletModal('${u.id}', '${u.displayName || u.email}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--text-secondary);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-wallet" style="width:16px;"></i> Điều chỉnh ví
+                  </button>
+                  <button onclick="confirmOtp('Force Logout','Hủy phiên đăng nhập của ${u.displayName || u.email}?','/admin/api/users/${u.id}/force-logout',{})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--text-secondary);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-right-from-bracket" style="width:16px;"></i> Force Logout
+                  </button>
+                  ${isBanned ? `
+                    <button onclick="confirmOtp('Mở khóa tài khoản','Mở khóa tài khoản ${u.displayName || u.email}?','/admin/api/users/${u.id}/unban',{})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--success);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">
+                      <i class="fas fa-unlock" style="width:16px;"></i> Mở khóa tài khoản
+                    </button>
+                  ` : `
+                    <button onclick="confirmOtp('Cấm tài khoản','Cấm tài khoản ${u.displayName || u.email}? Hành động này cần ghi rõ lý do.','/admin/api/users/${u.id}/ban',{})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--warning);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='rgba(245,158,11,0.1)'" onmouseout="this.style.background='transparent'">
+                      <i class="fas fa-ban" style="width:16px;"></i> Cấm tài khoản
+                    </button>
+                  `}
+                  <button onclick="confirmOtp('Xóa tài khoản','Xóa tài khoản ${u.displayName || u.email}? Hành động này sẽ đưa tài khoản vào danh sách đã xóa.','/admin/api/users/${u.id}/delete',{})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--danger);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;" onmouseover="this.style.background='var(--danger-glow)'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-trash-can" style="width:16px;"></i> Xóa tài khoản
+                  </button>
+                `}
+              </div>
+            </div>
+          </td>
+        </tr>`;
+    });
+  } else {
+    rowsHtml = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Không tìm thấy thành viên nào.</td></tr>';
+  }
+
+  const fullHtml = usersHtml + rowsHtml + `
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Wallet Adjust Modal -->
+<div id="wallet-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;">
+</div>
+`;
+%>
+<%- include('./layout', { body: fullHtml }) %>
+
+<script>
+function confirmOtp(title, desc, action, targetData) {
+  // Trigger Alpine OTP modal
+  window.dispatchEvent(new CustomEvent('open-otp-modal', { detail: { title, desc, action, targetData } }));
+}
+function openWalletModal(userId, userName) {
+  const amount = prompt(`Điều chỉnh ví cho ${userName}\nNhập số tiền (số dương = cộng, số âm = trừ):`);
+  if (!amount) return;
+  const parsedAmount = parseInt(amount);
+  const adjustType = parsedAmount >= 0 ? 'credit' : 'debit';
+  const reason = prompt('Nhập lý do:');
+  if (!reason) return;
+  // Open OTP modal
+  window.dispatchEvent(new CustomEvent('open-otp-modal', { detail: {
+    title: 'Xác nhận điều chỉnh ví',
+    desc: `${adjustType === 'credit' ? 'Cộng' : 'Trừ'} ${Math.abs(parsedAmount).toLocaleString('vi-VN')}đ cho ${userName}`,
+    action: `/admin/api/users/${userId}/wallet`,
+    targetData: { adjustType, amount: Math.abs(parsedAmount), reason }
+  }}));
+}
+// Listen for OTP modal events
+window.addEventListener('open-otp-modal', e => {
+  Alpine.store && console.log('Open OTP:', e.detail);
+  // Trigger via Alpine
+  if (window.Alpine) {
+    Alpine.$data(document.body).openOtpModal(e.detail);
+  }
+});
+</script>

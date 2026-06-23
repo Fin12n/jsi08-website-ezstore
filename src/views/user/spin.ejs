@@ -1,0 +1,98 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="spin-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container text-center">
+    <h2 class="text-warning font-outfit mb-2 display-4 fw-bold text-glow-warning">EZ Lucky Spin</h2>
+    <p class="text-secondary mb-5">Thử vận may của bạn! Mỗi lượt quay tốn 10.000 VND</p>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card glass-card p-4 position-relative overflow-hidden">
+          <!-- The Wheel Graphic -->
+          <div class="wheel-container position-relative mx-auto" style="width: 300px; height: 300px;">
+            <!-- Pointer -->
+            <div class="position-absolute top-0 start-50 translate-middle-x" style="z-index: 10; margin-top: -15px;">
+              <i class="fa-solid fa-caret-down text-danger fs-1"></i>
+            </div>
+            
+            <!-- Wheel -->
+            <div id="spinWheel" class="rounded-circle w-100 h-100 border border-4 border-warning shadow-lg" style="background: conic-gradient(
+                #f39c12 0deg 60deg, 
+                #e74c3c 60deg 120deg, 
+                #9b59b6 120deg 180deg, 
+                #3498db 180deg 240deg, 
+                #2ecc71 240deg 300deg, 
+                #1abc9c 300deg 360deg
+              ); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);">
+              <!-- Simple overlay for slices -->
+              <div class="w-100 h-100 rounded-circle position-absolute" style="background: rgba(0,0,0,0.2);"></div>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <h5 class="text-white font-outfit mb-3">Số dư hiện tại: <span class="text-success"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(user.balance || 0) %></span></h5>
+            
+            <form action="/user/spin" method="POST" id="spinForm">
+              <button type="submit" class="btn btn-hero btn-lg w-100 font-outfit fw-bold rounded-pill shadow-lg text-uppercase letter-spacing-1" id="spinBtn" <%= (user.balance || 0) < 10000 ? 'disabled' : '' %>>
+                <i class="fa-solid fa-rotate me-2"></i> Quay Ngay (10k)
+              </button>
+            </form>
+            <% if ((user.balance || 0) < 10000) { %>
+              <p class="text-danger small mt-2">Bạn không đủ số dư để quay.</p>
+            <% } %>
+          </div>
+
+          <!-- Result Modal Trigger Logic handled by server session redirect -->
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-5 mt-4 mt-md-0 text-start">
+        <div class="card glass-card p-4 h-100">
+          <h4 class="text-white font-outfit border-bottom border-secondary border-opacity-25 pb-3 mb-4">Phần thưởng có thể nhận</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3 d-flex align-items-center"><span class="badge bg-danger p-2 me-3" style="width: 40px;">1</span> <span class="text-white">Giải Jackpot (500.000 VND)</span></li>
+            <li class="mb-3 d-flex align-items-center"><span class="badge bg-warning p-2 me-3" style="width: 40px;">2</span> <span class="text-white">Giải Nhất (100.000 VND)</span></li>
+            <li class="mb-3 d-flex align-items-center"><span class="badge bg-info p-2 me-3" style="width: 40px;">3</span> <span class="text-white">Giải Nhì (50.000 VND)</span></li>
+            <li class="mb-3 d-flex align-items-center"><span class="badge bg-success p-2 me-3" style="width: 40px;">4</span> <span class="text-white">Hoàn Tiền (10.000 VND)</span></li>
+            <li class="mb-3 d-flex align-items-center"><span class="badge bg-secondary p-2 me-3" style="width: 40px;">5</span> <span class="text-secondary">Chúc bạn may mắn lần sau</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SweetAlert2 for animation and result display -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  <% if (typeof spinResult !== 'undefined' && spinResult) { %>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Simulate spinning animation visually
+      const wheel = document.getElementById('spinWheel');
+      // Random extra rotations + final degree
+      const randomRot = 360 * 5 + Math.floor(Math.random() * 360);
+      wheel.style.transform = `rotate(${randomRot}deg)`;
+
+      setTimeout(() => {
+        Swal.fire({
+          title: '<%= spinResult.title %>',
+          text: '<%= spinResult.message %>',
+          icon: '<%= spinResult.isWin ? "success" : "error" %>',
+          background: 'rgba(20,20,20,0.95)',
+          color: '#fff',
+          confirmButtonColor: '#f39c12'
+        });
+      }, 4000); // match transition duration
+    });
+  <% } %>
+
+  document.getElementById('spinForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('spinBtn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang quay...';
+    btn.disabled = true;
+    // Let it submit
+  });
+</script>
+
+<%- include('../partials/footer') %>

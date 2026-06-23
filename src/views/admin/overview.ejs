@@ -1,0 +1,209 @@
+<%- include('./layout', { body: `
+<div class="page-header">
+  <div class="page-title">📊 Dashboard Tổng quan</div>
+  <div class="page-subtitle">Theo dõi số liệu và hoạt động hệ thống EZ Studio theo thời gian thực.</div>
+</div>
+
+<!-- STATS CARDS -->
+<div class="stats-grid" id="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="fas fa-coins"></i></div>
+    <div>
+      <div class="stat-value" id="stat-revenue">--</div>
+      <div class="stat-label">Tổng doanh thu</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-wallet"></i></div>
+    <div>
+      <div class="stat-value" id="stat-wallet">--</div>
+      <div class="stat-label">Số dư ví hệ thống</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow"><i class="fas fa-user-plus"></i></div>
+    <div>
+      <div class="stat-value" id="stat-newusers">--</div>
+      <div class="stat-label">Thành viên mới hôm nay</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red"><i class="fas fa-clock"></i></div>
+    <div>
+      <div class="stat-value" id="stat-pending">--</div>
+      <div class="stat-label">Sản phẩm chờ duyệt</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;">
+  <!-- Revenue Chart -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="card-title" style="margin:0;">Doanh Thu Hệ Thống</div>
+      <div style="display:flex;gap:6px;" id="chart-period-btns">
+        <button onclick="loadChart('day')" class="btn btn-ghost btn-sm" data-period="day">Ngày</button>
+        <button onclick="loadChart('week')" class="btn btn-primary btn-sm" data-period="week">Tuần</button>
+        <button onclick="loadChart('month')" class="btn btn-ghost btn-sm" data-period="month">Tháng</button>
+      </div>
+    </div>
+    <div style="position:relative;height:260px;">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Activity Feed -->
+  <div class="card" style="display:flex;flex-direction:column;">
+    <div class="card-title">Hoạt động Gần đây</div>
+    <div id="activity-feed" style="flex:1;overflow-y:auto;max-height:300px;">
+      <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">
+        <i class="fas fa-spinner fa-spin"></i> Đang tải...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECENT TRANSACTIONS TABLE -->
+<div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="card-title" style="margin:0;">Giao dịch Gần nhất</div>
+    <a href="/admin/transactions" class="btn btn-ghost btn-sm">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Mã GD</th><th>Người dùng</th><th>Loại</th><th>Số tiền</th><th>Trạng thái</th><th>Thời gian</th>
+        </tr>
+      </thead>
+      <tbody id="recent-transactions-body">
+        <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+` }) %>
+
+<script>
+  let revenueChart = null;
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/admin/api/dashboard/stats');
+      const data = await res.json();
+      if (data.success) {
+        const s = data.stats;
+        document.getElementById('stat-revenue').textContent = formatVND(s.totalRevenue);
+        document.getElementById('stat-wallet').textContent = formatVND(s.totalWalletBalance);
+        document.getElementById('stat-newusers').textContent = s.newUsersToday;
+        document.getElementById('stat-pending').textContent = s.pendingProducts;
+      }
+    } catch(e) {}
+  }
+
+  async function loadChart(period = 'week') {
+    // Update active button
+    document.querySelectorAll('#chart-period-btns button').forEach(b => {
+      b.className = b.dataset.period === period ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    });
+    try {
+      const res = await fetch(`/admin/api/dashboard/revenue-chart?period=${period}`);
+      const data = await res.json();
+      if (!data.success) return;
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: [
+            { label: 'Ngân hàng (Sepay)', data: data.bankData, backgroundColor: 'rgba(99,102,241,0.6)', borderColor: '#6366f1', borderWidth: 1, borderRadius: 4 },
+            { label: 'Thẻ cào (Card2k)', data: data.cardData, backgroundColor: 'rgba(16,185,129,0.5)', borderColor: '#10b981', borderWidth: 1, borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9090b0', font: { size: 12 } } } },
+          scales: {
+            x: { ticks: { color: '#5a5a7a', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { color: '#5a5a7a', font: { size: 11 }, callback: v => formatVND(v, true) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+          }
+        }
+      });
+    } catch(e) {}
+  }
+
+  async function loadActivityFeed() {
+    const feed = document.getElementById('activity-feed');
+    try {
+      const res = await fetch('/admin/api/dashboard/activity-feed');
+      const data = await res.json();
+      if (data.success && data.activities.length > 0) {
+        feed.innerHTML = data.activities.map(a => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12.5px;color:var(--text-primary);font-weight:500;">${a.action}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${a.adminEmail} · ${relativeTime(a.timestamp)}</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        feed.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Chưa có hoạt động nào.</div>';
+      }
+    } catch(e) { feed.innerHTML = '<div style="padding:20px;color:var(--text-muted);font-size:12px;">Lỗi tải feed.</div>'; }
+  }
+
+  async function loadRecentTransactions() {
+    const tbody = document.getElementById('recent-transactions-body');
+    try {
+      const res = await fetch('/admin/api/dashboard/recent-transactions');
+      const data = await res.json();
+      if (data.success && data.transactions.length > 0) {
+        tbody.innerHTML = data.transactions.map(t => `
+          <tr>
+            <td style="font-family:monospace;font-size:12px;">#${t.id.slice(-8)}</td>
+            <td>${t.userId || t.buyerId || '--'}</td>
+            <td><span class="badge badge-info">${t.type || 'purchase'}</span></td>
+            <td style="font-weight:600;color:var(--success);">${formatVND(t.totalAmount || t.amount || 0)}</td>
+            <td>${statusBadge(t.status)}</td>
+            <td style="font-size:12px;color:var(--text-muted);">${relativeTime(t.createdAt)}</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Chưa có giao dịch nào.</td></tr>';
+      }
+    } catch(e) {}
+  }
+
+  function formatVND(n, short = false) {
+    if (!n) return '0đ';
+    if (short && n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    return n.toLocaleString('vi-VN') + 'đ';
+  }
+
+  function relativeTime(ts) {
+    if (!ts) return '--';
+    const diff = Date.now() - new Date(ts).getTime();
+    if (diff < 60000) return 'Vừa xong';
+    if (diff < 3600000) return Math.floor(diff/60000) + ' phút trước';
+    if (diff < 86400000) return Math.floor(diff/3600000) + ' giờ trước';
+    return Math.floor(diff/86400000) + ' ngày trước';
+  }
+
+  function statusBadge(status) {
+    const map = { completed: ['success','Hoàn thành'], pending: ['warning','Chờ xử lý'], failed: ['danger','Thất bại'], cancelled: ['muted','Đã hủy'] };
+    const [cls, label] = map[status] || ['muted', status || '--'];
+    return `<span class="badge badge-${cls}">${label}</span>`;
+  }
+
+  // Init
+  loadStats();
+  loadChart('week');
+  loadActivityFeed();
+  loadRecentTransactions();
+
+  // Auto-refresh every 60s
+  setInterval(() => { loadStats(); loadActivityFeed(); }, 60000);
+</script>

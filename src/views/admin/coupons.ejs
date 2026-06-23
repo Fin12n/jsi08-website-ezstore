@@ -1,0 +1,76 @@
+<%- include('../partials/admin-header') %>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="admin-card">
+      <h4 class="mb-4 font-outfit text-white"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Tạo Mã Giảm Giá</h4>
+      <form action="/admin/api/coupons" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-secondary small">Mã Code (ví dụ: EZSUMMER)</label>
+          <input type="text" name="code" class="admin-input" required style="text-transform: uppercase;">
+        </div>
+        <div class="row mb-3">
+          <div class="col-6">
+            <label class="form-label text-secondary small">Loại giảm</label>
+            <select name="discountType" class="admin-input">
+              <option value="percent">Phần trăm (%)</option>
+              <option value="fixed">Tiền mặt/ZCoin</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-secondary small">Mức giảm</label>
+            <input type="number" name="discountValue" class="admin-input" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-secondary small">Giới hạn số lượng (để trống nếu ko giới hạn)</label>
+          <input type="number" name="limit" class="admin-input">
+        </div>
+        <div class="mb-4">
+          <label class="form-label text-secondary small">Hạn sử dụng</label>
+          <input type="date" name="expiryDate" class="admin-input">
+        </div>
+        <button type="submit" class="btn btn-primary w-100 py-2">Tạo Mã Code</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="admin-card h-100">
+      <h4 class="mb-4 font-outfit text-white"><i class="fa-solid fa-ticket text-info me-2"></i>Quản Lý Khuyến Mãi</h4>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Mã Code</th>
+              <th>Giảm Giá</th>
+              <th>Đã Dùng / Giới Hạn</th>
+              <th>Hạn Sử Dụng</th>
+              <th class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (coupons && coupons.length > 0) { %>
+              <% coupons.forEach(c => { %>
+                <tr>
+                  <td class="font-code fw-bold text-primary"><%= c.code %></td>
+                  <td><%= c.discountType === 'percent' ? c.discountValue + '%' : c.discountValue + 'đ' %></td>
+                  <td><%= c.usedCount || 0 %> / <%= c.limit || '∞' %></td>
+                  <td class="small text-muted"><%= c.expiryDate || 'Vĩnh viễn' %></td>
+                  <td class="text-center">
+                    <form action="/admin/api/coupons/<%= c.id %>/delete" method="POST" onsubmit="confirmDelete(event, this, 'Bạn có chắc chắn muốn xóa mã giảm giá này?');" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="5" class="text-center text-muted">Chưa có mã giảm giá.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

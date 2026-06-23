@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-dashboard-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <div class="text-center mb-4">
+            <div class="avatar-circle bg-warning text-dark mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 80px; height: 80px; border-radius: 50%;">
+              <%= user.username.charAt(0).toUpperCase() %>
+            </div>
+            <h5 class="text-white font-outfit mb-0"><%= user.username %></h5>
+            <span class="badge bg-info bg-opacity-25 text-info small mt-1"><%= user.role.toUpperCase() %></span>
+          </div>
+
+          <hr class="border-secondary opacity-25">
+
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/user/dashboard" class="nav-link active font-outfit"><i class="fa-solid fa-wallet me-2"></i>Tổng quan Ví</a>
+            <a href="/user/library" class="nav-link text-white font-outfit"><i class="fa-solid fa-layer-group me-2"></i>Thư viện của tôi</a>
+            <a href="/user/history" class="nav-link text-white font-outfit"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch</a>
+            <a href="/user/settings" class="nav-link text-white font-outfit"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
+            <% if (user.role === 'admin' || user.role === 'seller') { %>
+              <a href="/admin" class="nav-link text-warning font-outfit mt-3 border border-warning border-opacity-25"><i class="fa-solid fa-chart-line me-2"></i>Trang quản lý</a>
+            <% } %>
+            <a href="/logout" class="nav-link text-danger font-outfit mt-2"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <!-- Balance Card -->
+        <div class="card glass-card p-4 mb-4" style="background: linear-gradient(145deg, rgba(20,20,20,0.8) 0%, rgba(30,40,50,0.8) 100%);">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-secondary small mb-1 text-uppercase letter-spacing-1">Số dư khả dụng</p>
+              <h2 class="text-white font-outfit display-5 mb-0 fw-bold">
+                <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(balance) %>
+              </h2>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="/user/topup" class="btn btn-hero font-outfit px-4 py-2"><i class="fa-solid fa-plus me-2"></i>Nạp tiền</a>
+              <a href="/user/withdraw" class="btn btn-outline-light font-outfit px-4 py-2"><i class="fa-solid fa-money-bill-transfer me-2"></i>Rút tiền</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity (Mocked for now) -->
+        <h4 class="text-white font-outfit mb-3">Hoạt động gần đây</h4>
+        <div class="card glass-card p-0 overflow-hidden">
+          <div class="list-group list-group-flush bg-transparent">
+            <div class="list-group-item bg-transparent text-white border-secondary border-opacity-25 py-3 d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-success bg-opacity-25 text-success rounded-circle p-2">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 font-outfit">Nạp tiền thành công</h6>
+                  <small class="text-secondary">Qua mã QR Sepay</small>
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="text-success fw-bold">+ 100.000 đ</div>
+                <small class="text-secondary">Hôm nay 14:30</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

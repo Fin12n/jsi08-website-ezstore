@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-topup-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <!-- Back button -->
+    <a href="/user/dashboard" class="btn btn-outline-light mb-4 font-outfit">
+      <i class="fa-solid fa-arrow-left me-2"></i>Quay lại Bảng điều khiển
+    </a>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h2 class="text-white font-outfit mb-4 text-center">Nạp tiền vào Ví</h2>
+        <p class="text-secondary text-center mb-5">Hệ thống nạp tiền tự động 24/7. Hỗ trợ chuyển khoản ngân hàng và thẻ cào điện thoại.</p>
+
+        <!-- Payment Methods Tabs -->
+        <ul class="nav nav-pills nav-fill gap-3 mb-4" id="topupTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active glass-card text-white py-3 font-outfit border border-secondary border-opacity-25" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank" type="button" role="tab" aria-selected="true">
+              <i class="fa-solid fa-building-columns fs-4 d-block mb-2 text-warning"></i>
+              Chuyển khoản (Sepay)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link glass-card text-white py-3 font-outfit border border-secondary border-opacity-25" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab" aria-selected="false">
+              <i class="fa-solid fa-money-check-dollar fs-4 d-block mb-2 text-info"></i>
+              Thẻ cào (Card2k)
+            </button>
+          </li>
+        </ul>
+
+        <!-- Tab Contents -->
+        <div class="tab-content" id="topupTabContent">
+          <!-- Bank Transfer Tab -->
+          <div class="tab-pane fade show active" id="bank" role="tabpanel">
+            <div class="card glass-card p-4 text-center">
+              <div class="alert bg-warning bg-opacity-10 border border-warning text-warning mb-4 text-start small">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i> <strong>Lưu ý:</strong> Vui lòng nhập ĐÚNG nội dung chuyển khoản để hệ thống cộng tiền tự động. Nếu sau 5 phút chưa được cộng, hãy liên hệ CSKH.
+              </div>
+              
+              <div class="row align-items-center">
+                <div class="col-md-5">
+                  <!-- Sepay standard QR (Mock URL for now) -->
+                  <div class="bg-white p-3 rounded-4 d-inline-block shadow-lg mb-3 mb-md-0">
+                    <img src="https://qr.sepay.vn/img?bank=MBBank&acc=000000&template=compact&amount=50000&des=NAP%20<%= user.id %>" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                  </div>
+                </div>
+                <div class="col-md-7 text-start">
+                  <h4 class="text-white font-outfit mb-3">Thông tin chuyển khoản</h4>
+                  <p class="text-secondary mb-1 small">Ngân hàng:</p>
+                  <h5 class="text-info font-code mb-3">MB Bank (Ngân hàng Quân Đội)</h5>
+                  
+                  <p class="text-secondary mb-1 small">Số tài khoản:</p>
+                  <h5 class="text-white font-code mb-3">000 000 000 000</h5>
+                  
+                  <p class="text-secondary mb-1 small">Chủ tài khoản:</p>
+                  <h5 class="text-white font-code mb-3">NGUYEN VAN A</h5>
+                  
+                  <p class="text-secondary mb-1 small">Nội dung chuyển khoản (Bắt buộc):</p>
+                  <div class="input-group">
+                    <input type="text" class="form-control form-glass-input text-warning fw-bold fs-5 font-code" value="NAP <%= user.id.slice(0,6).toUpperCase() %>" readonly id="transferCode">
+                    <button class="btn btn-outline-warning" type="button" onclick="navigator.clipboard.writeText(document.getElementById('transferCode').value); alert('Đã copy!');">
+                      <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Topup Tab -->
+          <div class="tab-pane fade" id="card" role="tabpanel">
+            <div class="card glass-card p-4">
+              <div class="alert bg-info bg-opacity-10 border border-info text-info mb-4 small">
+                <i class="fa-solid fa-circle-info me-2"></i> <strong>Chiết khấu:</strong> Nạp thẻ cào sẽ bị trừ phí gạch thẻ theo quy định của nhà mạng (thường là 20-30%). Ưu tiên nạp Bank để nhận 100% giá trị.
+              </div>
+
+              <form action="/user/topup/card" method="POST">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small text-secondary">Loại thẻ *</label>
+                    <select class="form-select form-glass-input" name="telco" required>
+                      <option value="VIETTEL">Viettel</option>
+                      <option value="VINAPHONE">Vinaphone</option>
+                      <option value="MOBIFONE">Mobifone</option>
+                      <option value="ZING">Zing</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-secondary">Mệnh giá (VND) *</label>
+                    <select class="form-select form-glass-input" name="amount" required>
+                      <option value="10000">10,000</option>
+                      <option value="20000">20,000</option>
+                      <option value="50000">50,000</option>
+                      <option value="100000">100,000</option>
+                      <option value="200000">200,000</option>
+                      <option value="500000">500,000</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-secondary">Mã số thẻ (PIN) *</label>
+                    <input type="text" class="form-control form-glass-input" name="pin" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-secondary">Số Serial *</label>
+                    <input type="text" class="form-control form-glass-input" name="serial" required>
+                  </div>
+                  <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5">
+                      <i class="fa-solid fa-paper-plane me-2"></i>Gửi thẻ nạp
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

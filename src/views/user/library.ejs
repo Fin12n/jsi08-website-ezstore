@@ -1,0 +1,72 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-library-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <div class="text-center mb-4">
+            <div class="avatar-circle bg-warning text-dark mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 80px; height: 80px; border-radius: 50%;">
+              <%= user.username.charAt(0).toUpperCase() %>
+            </div>
+            <h5 class="text-white font-outfit mb-0"><%= user.username %></h5>
+          </div>
+
+          <hr class="border-secondary opacity-25">
+
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/user/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-wallet me-2"></i>Tổng quan Ví</a>
+            <a href="/user/library" class="nav-link active font-outfit"><i class="fa-solid fa-layer-group me-2"></i>Thư viện của tôi</a>
+            <a href="/user/history" class="nav-link text-white font-outfit"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch</a>
+            <a href="/user/settings" class="nav-link text-white font-outfit"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <h3 class="text-white font-outfit mb-4">Sản phẩm đã mua</h3>
+        
+        <div class="row g-4">
+          <% if (library && library.length > 0) { %>
+            <% library.forEach(item => { %>
+              <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-3 h-100 product-card">
+                  <img src="<%= item.productImage %>" class="card-img-top rounded mb-3" style="height: 150px; object-fit: cover;" onerror="this.src='/imgs/logo.webp'">
+                  <div class="card-body p-0 d-flex flex-column">
+                    <h5 class="text-white font-outfit mb-2"><%= item.productTitle %></h5>
+                    <p class="text-secondary small mb-3">Ngày mua: <%= new Date(item.purchasedAt).toLocaleDateString('vi-VN') %></p>
+                    <div class="mt-auto">
+                      <div class="d-flex gap-2">
+                        <form action="/user/download" method="POST" class="flex-grow-1">
+                          <input type="hidden" name="productId" value="<%= item.productId %>">
+                          <button type="submit" class="btn btn-hero w-100 py-2"><i class="fa-solid fa-download"></i> Tải</button>
+                        </form>
+                        <form action="/user/refund" method="POST" class="flex-shrink-0" onsubmit="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn tiền? Khả năng truy cập file sẽ bị tạm khóa.');">
+                          <input type="hidden" name="productId" value="<%= item.productId %>">
+                          <button type="submit" class="btn btn-outline-danger py-2" title="Yêu cầu hoàn tiền"><i class="fa-solid fa-rotate-left"></i></button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="col-12 text-center py-5">
+              <i class="fa-solid fa-layer-group text-secondary mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+              <h5 class="text-white font-outfit">Thư viện trống</h5>
+              <p class="text-secondary small">Bạn chưa mua sản phẩm nào. Hãy khám phá cửa hàng nhé!</p>
+              <a href="/products" class="btn btn-outline-info mt-2">Đến Cửa hàng</a>
+            </div>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

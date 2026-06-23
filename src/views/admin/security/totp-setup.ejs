@@ -1,0 +1,66 @@
+<!-- TOTP Setup Wizard -->
+<%- include('../layout', { body: `
+<div style="max-width:480px;margin:0 auto;">
+  <div class="page-header" style="text-align:center;">
+    <div style="font-size:48px;margin-bottom:12px;">🔐</div>
+    <div class="page-title">Thiết lập Xác thực 2 Lớp (2FA)</div>
+    <div class="page-subtitle" style="margin-top:8px;">Bảo vệ tài khoản Admin của bạn với Google Authenticator hoặc Authy.</div>
+  </div>
+
+  ${typeof alreadySetup !== 'undefined' && alreadySetup ? `
+    <div class="card" style="text-align:center;padding:32px;">
+      <div style="font-size:48px;margin-bottom:12px;">✅</div>
+      <div style="font-size:17px;font-weight:700;color:var(--success);margin-bottom:8px;">2FA đã được kích hoạt!</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;">Tài khoản Admin của bạn đã được bảo vệ bằng TOTP. Mỗi action quan trọng sẽ yêu cầu OTP từ app của bạn.</div>
+      <a href="/admin/overview" class="btn btn-primary" style="justify-content:center;">← Về Dashboard</a>
+    </div>
+  ` : `
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;gap:16px;align-items:flex-start;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">1</div>
+        <div>
+          <div style="font-weight:600;color:var(--text-primary);margin-bottom:4px;">Tải Google Authenticator</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Tải app từ App Store (iOS) hoặc Play Store (Android).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;gap:16px;align-items:flex-start;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">2</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;color:var(--text-primary);margin-bottom:12px;">Quét mã QR này bằng app</div>
+          ${typeof qrDataUrl !== 'undefined' && qrDataUrl ? `
+            <div style="background:white;padding:12px;border-radius:var(--radius-sm);display:inline-block;margin-bottom:12px;">
+              <img src="${qrDataUrl}" alt="QR Code TOTP" style="width:200px;height:200px;display:block;">
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Không quét được? Nhập thủ công secret key:</div>
+            <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:monospace;font-size:13px;letter-spacing:0.08em;color:var(--accent-light);word-break:break-all;">
+              ${typeof secret !== 'undefined' ? secret : ''}
+            </div>
+          ` : '<div class="alert alert-error">Không thể tạo QR code. Vui lòng refresh trang.</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:16px;align-items:flex-start;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">3</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;color:var(--text-primary);margin-bottom:4px;">Xác nhận với mã OTP đầu tiên</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Nhập mã 6 số từ app để xác nhận thiết lập thành công.</div>
+          <form action="/admin/security/totp-setup" method="POST">
+            <div class="form-group">
+              <label class="form-label">Mã OTP từ App *</label>
+              <input type="text" name="confirmCode" class="form-input otp-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="one-time-code">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+              <i class="fas fa-shield-check"></i> Xác nhận & Kích hoạt 2FA
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `}
+</div>
+` }) %>

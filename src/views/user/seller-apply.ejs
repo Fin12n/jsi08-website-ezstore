@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="seller-apply-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <% if (user.role === 'seller' || user.role === 'admin') { %>
+          <div class="text-center mt-5">
+            <i class="fa-solid fa-shop text-success mb-3" style="font-size: 4rem;"></i>
+            <h2 class="text-white font-outfit">Bạn đã là Seller!</h2>
+            <p class="text-secondary">Bạn hiện đang có quyền đăng bán sản phẩm trên EZ Store.</p>
+            <a href="/seller/dashboard" class="btn btn-hero mt-3">Tới trang quản lý Cửa hàng</a>
+          </div>
+        <% } else { %>
+          <div class="card glass-card p-5">
+            <div class="text-center mb-5">
+              <i class="fa-solid fa-handshake-angle text-warning mb-3" style="font-size: 3rem;"></i>
+              <h2 class="text-white font-outfit">Đăng ký trở thành Đối tác (Seller)</h2>
+              <p class="text-secondary">Mở gian hàng riêng, đăng bán các tài nguyên của bạn và nhận doanh thu tới 80% giá trị sản phẩm.</p>
+            </div>
+
+            <div class="alert bg-info bg-opacity-10 border border-info text-info mb-4">
+              <i class="fa-solid fa-circle-info me-2"></i> Hệ thống sẽ xét duyệt yêu cầu của bạn trong vòng 24-48 giờ. Bạn sẽ cần tuân thủ nghiêm ngặt các quy định về bản quyền.
+            </div>
+
+            <form action="/user/seller/apply" method="POST">
+              <div class="mb-3">
+                <label class="form-label small text-secondary">Giới thiệu ngắn về bạn (Kinh nghiệm, kỹ năng) *</label>
+                <textarea class="form-control form-glass-input" name="bio" rows="4" required placeholder="Tôi là một Model Designer với 3 năm kinh nghiệm làm việc bằng Blockbench..."></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="form-label small text-secondary">Link Portfolio / Sản phẩm mẫu (Tuỳ chọn)</label>
+                <input type="url" class="form-control form-glass-input" name="portfolio" placeholder="https://youtube.com/..." />
+              </div>
+              <div class="form-check mb-4">
+                <input class="form-check-input bg-transparent border-secondary" type="checkbox" id="agree" required>
+                <label class="form-check-label text-secondary small" for="agree">
+                  Tôi cam kết các sản phẩm tải lên là do chính tôi làm ra hoặc có bản quyền thương mại rõ ràng. Tôi chịu hoàn toàn trách nhiệm pháp lý nếu vi phạm.
+                </label>
+              </div>
+              <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5">
+                <i class="fa-solid fa-paper-plane me-2"></i>Gửi yêu cầu xét duyệt
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

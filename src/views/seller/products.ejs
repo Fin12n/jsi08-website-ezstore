@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="seller-products-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <!-- Sidebar -->
+          <div class="text-center mb-4">
+            <h5 class="text-white font-outfit mb-0"><i class="fa-solid fa-shop text-warning me-2"></i>Seller Panel</h5>
+          </div>
+          <hr class="border-secondary opacity-25">
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/seller/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-chart-pie me-2"></i>Thống kê</a>
+            <a href="/seller/products" class="nav-link active font-outfit"><i class="fa-solid fa-boxes-stacked me-2"></i>Sản phẩm của tôi</a>
+            <a href="/seller/add-product" class="nav-link text-white font-outfit"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng sản phẩm mới</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-white font-outfit mb-0">Quản lý Sản phẩm</h3>
+          <a href="/seller/add-product" class="btn btn-hero"><i class="fa-solid fa-plus me-2"></i>Thêm sản phẩm mới</a>
+        </div>
+
+        <div class="card glass-card overflow-hidden p-0">
+          <% if (products && products.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 bg-transparent align-middle">
+                <thead>
+                  <tr class="border-secondary border-opacity-25 text-secondary small text-uppercase">
+                    <th class="py-3 px-4 bg-transparent border-0">Sản phẩm</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Giá bán</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Trạng thái</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Lượt xem</th>
+                  </tr>
+                </thead>
+                <tbody class="border-top-0">
+                  <% products.forEach(p => { %>
+                    <tr class="border-secondary border-opacity-10">
+                      <td class="px-4 py-3 bg-transparent text-white">
+                        <div class="d-flex align-items-center gap-3">
+                          <img src="<%= p.image %>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='/imgs/logo.webp'">
+                          <div>
+                            <div class="font-outfit fw-bold"><%= p.title %></div>
+                            <small class="text-secondary">ID: <%= p.id %></small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent font-outfit text-success fw-bold">
+                        <%= p.salePrice %>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent">
+                        <% if (p.status === 'PENDING') { %>
+                          <span class="badge bg-warning bg-opacity-25 text-warning">Đang duyệt</span>
+                        <% } else if (p.status === 'APPROVED') { %>
+                          <span class="badge bg-success bg-opacity-25 text-success">Đã duyệt</span>
+                        <% } else if (p.status === 'HIDDEN') { %>
+                          <span class="badge bg-secondary bg-opacity-25 text-secondary">Đã ẩn</span>
+                        <% } else { %>
+                          <span class="badge bg-success bg-opacity-25 text-success">Active</span> <!-- Fallback for old products -->
+                        <% } %>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent text-secondary">
+                        <%= p.views || 0 %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="p-5 text-center">
+              <i class="fa-solid fa-box-open text-secondary mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+              <h5 class="text-white font-outfit">Chưa có sản phẩm nào</h5>
+              <p class="text-secondary small">Bạn chưa đăng tải bất kỳ sản phẩm nào lên cửa hàng.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

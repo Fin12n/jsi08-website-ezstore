@@ -1,0 +1,113 @@
+<%
+const transactionsHtml = `
+<div class="page-header">
+  <div class="page-title">🧾 Giao dịch & Nạp tiền</div>
+  <div class="page-subtitle">Sổ cái giao dịch và phê duyệt thủ công yêu cầu nạp tiền.</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn ${typeof activeTab === 'undefined' || activeTab === 'orders' ? 'active' : ''}" onclick="switchTxTab('orders')">
+    <i class="fas fa-receipt"></i> Sổ cái Giao dịch
+  </button>
+  <button class="tab-btn ${typeof activeTab !== 'undefined' && activeTab === 'topup' ? 'active' : ''}" onclick="switchTxTab('topup')">
+    <i class="fas fa-credit-card"></i> Yêu cầu Nạp tiền
+    <span id="pending-topup-count" style="background:rgba(239,68,68,0.15);color:var(--danger);padding:1px 7px;border-radius:10px;font-size:11px;">--</span>
+  </button>
+</div>
+
+<!-- ORDERS TAB -->
+<div id="txtab-orders" style="${typeof activeTab !== 'undefined' && activeTab === 'topup' ? 'display:none' : ''}">
+  <!-- Filter -->
+  <form method="GET" action="/admin/transactions" class="filter-bar">
+    <select name="status" class="form-select" style="width:160px;" onchange="this.form.submit()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="completed" ${typeof filters !== 'undefined' && filters.status === 'completed' ? 'selected' : ''}>✅ Hoàn thành</option>
+      <option value="pending" ${typeof filters !== 'undefined' && filters.status === 'pending' ? 'selected' : ''}>⏳ Chờ xử lý</option>
+      <option value="failed" ${typeof filters !== 'undefined' && filters.status === 'failed' ? 'selected' : ''}>❌ Thất bại</option>
+      <option value="cancelled" ${typeof filters !== 'undefined' && filters.status === 'cancelled' ? 'selected' : ''}>🚫 Đã hủy</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Lọc</button>
+    <span style="margin-left:auto;font-size:13px;color:var(--text-muted);">${typeof orders !== 'undefined' ? orders.length : 0} giao dịch</span>
+  </form>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mã GD</th><th>Người mua</th><th>Sản phẩm</th><th>Số tiền</th><th>Trạng thái</th><th>Thời gian</th></tr>
+        </thead>
+        <tbody>
+          ${typeof orders !== 'undefined' && orders.length > 0 ? orders.slice(0, 50).map(o => `
+            <tr>
+              <td style="font-family:monospace;font-size:12px;">#${(o.id||'').slice(-8)}</td>
+              <td style="font-size:12.5px;">${o.userId || o.buyerId || '--'}</td>
+              <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.productTitle || o.productId || '--'}</td>
+              <td style="font-weight:700;color:var(--success);">${(o.totalAmount || o.amount || 0).toLocaleString('vi-VN')}đ</td>
+              <td>${o.status === 'completed' ? '<span class="badge badge-success">✅ Hoàn thành</span>' : o.status === 'pending' ? '<span class="badge badge-warning">⏳ Đang chờ</span>' : o.status === 'failed' ? '<span class="badge badge-danger">❌ Thất bại</span>' : '<span class="badge badge-muted">Đã hủy</span>'}</td>
+              <td style="font-size:12px;color:var(--text-muted);">${o.createdAt ? new Date(o.createdAt).toLocaleString('vi-VN', {dateStyle:'short',timeStyle:'short'}) : '--'}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Chưa có giao dịch nào.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TOPUP TAB -->
+<div id="txtab-topup" style="${typeof activeTab === 'undefined' || activeTab === 'orders' ? 'display:none' : ''}">
+  <div id="topup-content">
+    <div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
+  </div>
+</div>
+`;
+%>
+<%- include('./layout', { body: transactionsHtml }) %>
+
+<script>
+async function loadTopups() {
+  const res = await fetch('/admin/api/topup-list');
+  const content = document.getElementById('topup-content');
+  // Build topup table from /admin/transactions/topup route or embedded data
+  content.innerHTML = `
+    <div class="card">
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="background:var(--bg-hover);padding:12px 20px;border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Chờ duyệt</div>
+          <div id="topup-pending-cnt" style="font-size:22px;font-weight:800;color:var(--warning);">--</div>
+        </div>
+        <div style="background:var(--bg-hover);padding:12px 20px;border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Đã duyệt hôm nay</div>
+          <div id="topup-today-cnt" style="font-size:22px;font-weight:800;color:var(--success);">--</div>
+        </div>
+      </div>
+      <div id="topup-table-wrap" style="text-align:center;padding:20px;color:var(--text-muted);">
+        <a href="/admin/transactions/topup" class="btn btn-primary">📋 Xem danh sách Topup đầy đủ</a>
+      </div>
+    </div>
+  `;
+
+  // Try to get pending count
+  fetch('/admin/api/dashboard/stats').then(r => r.json()).then(d => {
+    if (d.success) {
+      const cnt = d.stats.pendingTopups || 0;
+      document.getElementById('pending-topup-count').textContent = cnt;
+      document.getElementById('topup-pending-cnt') && (document.getElementById('topup-pending-cnt').textContent = cnt);
+    }
+  }).catch(() => {});
+}
+
+function switchTxTab(tab) {
+  document.getElementById('txtab-orders').style.display = tab === 'orders' ? '' : 'none';
+  document.getElementById('txtab-topup').style.display = tab === 'topup' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0 && tab==='orders') || (i===1 && tab==='topup')));
+  if (tab === 'topup') loadTopups();
+}
+
+// Init
+loadTopups();
+
+// Get pending topup count for badge
+fetch('/admin/api/dashboard/stats').then(r => r.json()).then(d => {
+  if (d.success) document.getElementById('pending-topup-count').textContent = d.stats.pendingTopups || 0;
+}).catch(() => {});
+</script>

@@ -1,0 +1,72 @@
+<!-- Command Palette (Ctrl+K) -->
+<div x-show="showPalette" x-cloak class="palette-container">
+  <div class="command-palette" @click.outside="closeAllModals()" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 -translate-y-4 scale-95">
+    <div class="palette-input-wrap">
+      <i class="fas fa-magnifying-glass"></i>
+      <input
+        class="palette-input"
+        type="text"
+        placeholder="Tìm user, sản phẩm, trang..."
+        x-model="paletteQuery"
+        @input.debounce.300ms="searchPalette()"
+        @keydown.escape="showPalette = false"
+        x-init="$watch('showPalette', v => v && $nextTick(() => $el.focus()))"
+        id="palette-search-input"
+      >
+      <span style="font-size:11px;color:var(--text-muted);background:var(--bg-hover);padding:2px 8px;border-radius:4px;border:1px solid var(--border);">ESC</span>
+    </div>
+    <div class="palette-results">
+      <template x-if="paletteQuery.length < 2">
+        <div>
+          <div style="padding:10px 18px 4px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Truy cập nhanh</div>
+          <a href="/admin/overview" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-chart-line"></i></div>
+            <div><div class="palette-result-text">Dashboard</div><div class="palette-result-sub">Tổng quan hệ thống</div></div>
+          </a>
+          <a href="/admin/users" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-users"></i></div>
+            <div><div class="palette-result-text">Quản lý Thành viên</div><div class="palette-result-sub">Tìm và quản lý user</div></div>
+          </a>
+          <a href="/admin/sellers" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-store"></i></div>
+            <div><div class="palette-result-text">Duyệt Người bán</div><div class="palette-result-sub">Đơn đăng ký Seller</div></div>
+          </a>
+          <a href="/admin/products" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-box"></i></div>
+            <div><div class="palette-result-text">Kiểm duyệt Sản phẩm</div><div class="palette-result-sub">Phê duyệt sản phẩm mới</div></div>
+          </a>
+          <a href="/admin/refunds" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-rotate-left"></i></div>
+            <div><div class="palette-result-text">Xử lý Hoàn tiền</div><div class="palette-result-sub">Phân xử khiếu nại</div></div>
+          </a>
+          <a href="/admin/security" class="palette-result-item" @click="showPalette = false">
+            <div class="palette-result-icon"><i class="fas fa-shield-halved"></i></div>
+            <div><div class="palette-result-text">Giám sát Bảo mật</div><div class="palette-result-sub">Audit logs & Abuse</div></div>
+          </a>
+        </div>
+      </template>
+      <template x-if="paletteQuery.length >= 2 && paletteResults.length > 0">
+        <div>
+          <div style="padding:10px 18px 4px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Kết quả tìm kiếm</div>
+          <template x-for="result in paletteResults" :key="result.id">
+            <a :href="result.href" class="palette-result-item" @click="showPalette = false">
+              <div class="palette-result-icon">
+                <i :class="result.type === 'user' ? 'fas fa-user' : 'fas fa-box'"></i>
+              </div>
+              <div>
+                <div class="palette-result-text" x-text="result.label"></div>
+                <div class="palette-result-sub" x-text="result.sub"></div>
+              </div>
+            </a>
+          </template>
+        </div>
+      </template>
+      <template x-if="paletteQuery.length >= 2 && paletteResults.length === 0">
+        <div class="palette-empty">
+          <i class="fas fa-search" style="font-size:24px;opacity:0.3;display:block;margin-bottom:8px;"></i>
+          Không tìm thấy kết quả cho "<span x-text="paletteQuery"></span>"
+        </div>
+      </template>
+    </div>
+  </div>
+</div>

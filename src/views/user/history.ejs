@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-history-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <!-- Sidebar content similar to dashboard... -->
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/user/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-wallet me-2"></i>Tổng quan Ví</a>
+            <a href="/user/library" class="nav-link text-white font-outfit"><i class="fa-solid fa-layer-group me-2"></i>Thư viện của tôi</a>
+            <a href="/user/history" class="nav-link active font-outfit"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch</a>
+            <a href="/user/settings" class="nav-link text-white font-outfit"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
+            <a href="/logout" class="nav-link text-danger font-outfit mt-2"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-white font-outfit mb-0">Lịch sử giao dịch</h3>
+          <span class="badge bg-secondary bg-opacity-25 text-warning px-3 py-2">Tổng: <%= transactions ? transactions.length : 0 %> giao dịch</span>
+        </div>
+        
+        <div class="card glass-card overflow-hidden p-0">
+          <% if (transactions && transactions.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 bg-transparent align-middle">
+                <thead>
+                  <tr class="border-secondary border-opacity-25 text-secondary small text-uppercase">
+                    <th class="py-3 px-4 bg-transparent border-0">Mã GD</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Loại</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Số tiền</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Trạng thái</th>
+                    <th class="py-3 px-4 bg-transparent border-0">Thời gian</th>
+                  </tr>
+                </thead>
+                <tbody class="border-top-0">
+                  <% transactions.forEach(tx => { %>
+                    <tr class="border-secondary border-opacity-10">
+                      <td class="px-4 py-3 bg-transparent text-white font-code small"><%= tx.id.slice(0,8).toUpperCase() %></td>
+                      <td class="px-4 py-3 bg-transparent">
+                        <% if (tx.type === 'TOPUP') { %>
+                          <span class="badge bg-success bg-opacity-25 text-success"><i class="fa-solid fa-arrow-down me-1"></i>Nạp tiền</span>
+                        <% } else if (tx.type === 'PURCHASE') { %>
+                          <span class="badge bg-danger bg-opacity-25 text-danger"><i class="fa-solid fa-cart-shopping me-1"></i>Mua hàng</span>
+                        <% } else if (tx.type === 'REFUND') { %>
+                          <span class="badge bg-warning bg-opacity-25 text-warning"><i class="fa-solid fa-rotate-left me-1"></i>Hoàn tiền</span>
+                        <% } else if (tx.type === 'EARN') { %>
+                          <span class="badge bg-info bg-opacity-25 text-info"><i class="fa-solid fa-sack-dollar me-1"></i>Bán hàng</span>
+                        <% } %>
+                        <div class="small text-secondary mt-1"><%= tx.description %></div>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent font-outfit fw-bold <%= tx.amount > 0 ? 'text-success' : 'text-danger' %>">
+                        <%= tx.amount > 0 ? '+' : '' %><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tx.amount) %>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent">
+                        <% if (tx.status === 'COMPLETED') { %>
+                          <i class="fa-solid fa-circle-check text-success"></i> <small class="text-success">Thành công</small>
+                        <% } else if (tx.status === 'PENDING') { %>
+                          <i class="fa-solid fa-clock text-warning"></i> <small class="text-warning">Đang xử lý</small>
+                        <% } else { %>
+                          <i class="fa-solid fa-circle-xmark text-danger"></i> <small class="text-danger">Thất bại</small>
+                        <% } %>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent text-secondary small">
+                        <%= new Date(tx.createdAt).toLocaleString('vi-VN') %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="p-5 text-center">
+              <i class="fa-solid fa-money-bill-transfer text-secondary mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+              <h5 class="text-white font-outfit">Chưa có giao dịch nào</h5>
+              <p class="text-secondary small">Bạn chưa thực hiện bất kỳ giao dịch nạp tiền hay mua sắm nào.</p>
+              <a href="/user/topup" class="btn btn-outline-warning mt-2">Nạp tiền ngay</a>
+            </div>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

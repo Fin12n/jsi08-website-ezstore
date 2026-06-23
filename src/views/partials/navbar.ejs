@@ -1,0 +1,120 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top glass-navbar">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="/" id="nav-brand">
+      <img src="/imgs/logo.webp" alt="EZ Studio Logo" width="45" height="45" class="me-2 rounded-3 brand-logo-anim" />
+      <span class="brand-text">EZ Studio</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" id="nav-toggle-btn">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/">
+            <i class="fa-solid fa-house me-1"></i> Trang chủ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/products">
+            <i class="fa-solid fa-box-open me-1"></i> Sản phẩm
+          </a>
+        </li>
+        <!-- Khám phá Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle nav-link-custom" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-compass me-1"></i> Khám phá
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark glass-dropdown shadow-lg border-0" aria-labelledby="exploreDropdown">
+            <li><a class="dropdown-item py-2" href="/services"><i class="fa-solid fa-wrench text-secondary me-2"></i>Dịch vụ</a></li>
+            <li><a class="dropdown-item py-2" href="/user/spin"><i class="fa-solid fa-rotate text-warning me-2"></i>Vòng Quay</a></li>
+            <li><a class="dropdown-item py-2" href="/leaderboard"><i class="fa-solid fa-trophy text-info me-2"></i>Bảng Xếp Hạng</a></li>
+            <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
+            <li><a class="dropdown-item py-2" href="/#about"><i class="fa-solid fa-info-circle text-secondary me-2"></i>Giới thiệu</a></li>
+            <li><a class="dropdown-item py-2" href="/#contact"><i class="fa-solid fa-phone text-secondary me-2"></i>Liên hệ</a></li>
+            <li><a class="dropdown-item py-2" href="/#partner-ls"><i class="fa-solid fa-users text-secondary me-2"></i>Đối tác</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Cart Icon -->
+        <li class="nav-item me-3 my-2 my-lg-0">
+          <a class="nav-link nav-link-custom position-relative" href="/cart">
+            <i class="fa-solid fa-cart-shopping fs-5"></i>
+            <% if (locals.cart && cart.length > 0) { %>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                <%= cart.length %>
+              </span>
+            <% } %>
+          </a>
+        </li>
+        
+        <% if (locals.user) { %>
+          <!-- User Dropdown -->
+          <li class="nav-item dropdown my-2 my-lg-0">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle bg-dark text-white d-flex align-items-center justify-content-center border border-secondary border-opacity-25" style="width: 32px; height: 32px; border-radius: 50%;">
+                <%= user.username.charAt(0).toUpperCase() %>
+              </div>
+              <div class="text-start d-none d-lg-block" style="line-height: 1.2;">
+                <span class="d-block text-secondary" style="font-size: 0.75rem;">Xin chào,</span>
+                <strong class="text-white small"><%= user.username %></strong>
+              </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end glass-dropdown shadow-lg border-0 mt-2" aria-labelledby="userDropdown">
+              <li>
+                <div class="px-3 py-2 border-bottom border-secondary border-opacity-25 mb-2">
+                  <span class="d-block text-white fw-bold"><%= user.username %></span>
+                  <span class="d-block text-secondary small"><%= new Intl.NumberFormat('vi-VN').format(user.balance || 0) %> VND</span>
+                </div>
+              </li>
+              <li>
+                <a class="dropdown-item py-2" href="/user/dashboard">
+                  <i class="fa-solid fa-id-badge text-secondary me-2 w-20px"></i> Quản lý Tài khoản
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2" href="/user/library">
+                  <i class="fa-solid fa-layer-group text-secondary me-2 w-20px"></i> Thư viện của tôi
+                </a>
+              </li>
+              <% if (user.role === 'admin') { %>
+                <li>
+                  <a class="dropdown-item py-2 text-warning" href="/admin">
+                    <i class="fa-solid fa-gauge me-2 w-20px"></i> Quản trị Admin
+                  </a>
+                </li>
+              <% } else if (user.role === 'seller') { %>
+                <li>
+                  <a class="dropdown-item py-2 text-info" href="/seller/dashboard">
+                    <i class="fa-solid fa-shop me-2 w-20px"></i> Kênh Người Bán
+                  </a>
+                </li>
+              <% } %>
+              <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
+              <li>
+                <a class="dropdown-item py-2 text-danger" href="/logout">
+                  <i class="fa-solid fa-right-from-bracket me-2 w-20px"></i> Đăng xuất
+                </a>
+              </li>
+            </ul>
+          </li>
+        <% } else { %>
+          <li class="nav-item my-2 my-lg-0">
+            <a class="btn btn-outline-light btn-login me-2 px-3 py-1.5" href="/login" id="nav-login-btn">
+              Đăng nhập
+            </a>
+          </li>
+          <li class="nav-item my-2 my-lg-0">
+            <a class="btn btn-primary btn-signup px-3 py-1.5" href="/register" id="nav-signup-btn">
+              Đăng ký
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

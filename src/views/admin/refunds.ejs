@@ -1,0 +1,142 @@
+<%
+const refundsHtml = `
+<div class="page-header">
+  <div class="page-title">↩️ Quản lý Hoàn tiền</div>
+  <div class="page-subtitle">Xem xét bằng chứng và phân xử khiếu nại hoàn tiền. Mỗi quyết định yêu cầu xác nhận OTP.</div>
+</div>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <select onchange="filterRefunds(this.value)" class="form-select" style="width:180px;">
+    <option value="all">Tất cả trạng thái</option>
+    <option value="pending" ${typeof filters !== 'undefined' && filters.status === 'pending' ? 'selected' : ''}>⏳ Chờ xử lý</option>
+    <option value="approved" ${typeof filters !== 'undefined' && filters.status === 'approved' ? 'selected' : ''}>✅ Đã hoàn</option>
+    <option value="rejected" ${typeof filters !== 'undefined' && filters.status === 'rejected' ? 'selected' : ''}>❌ Từ chối</option>
+  </select>
+  <span style="margin-left:auto;font-size:13px;color:var(--text-muted);">${typeof refunds !== 'undefined' ? refunds.length : 0} đơn</span>
+</div>
+
+<!-- Refunds Table + Slide-over -->
+<div x-data="{ activeRefund: null, slideover: false }">
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mã đơn</th><th>Người mua</th><th>Người bán</th><th>Số tiền</th><th>Lý do</th><th>Trạng thái</th><th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${typeof refunds !== 'undefined' && refunds.length > 0 ? refunds.map(r => `
+            <tr>
+              <td style="font-family:monospace;font-size:12px;">#${r.id.slice(-8)}</td>
+              <td style="font-size:13px;">${r.buyerId || '--'}</td>
+              <td style="font-size:13px;">${r.sellerId || '--'}</td>
+              <td style="font-weight:700;color:var(--warning);">${(r.amount || 0).toLocaleString('vi-VN')}đ</td>
+              <td style="max-width:200px;font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.reason || '--'}</td>
+              <td>${r.status === 'pending' ? '<span class="badge badge-warning">⏳ Chờ xử lý</span>' : r.status === 'approved' ? '<span class="badge badge-success">✅ Đã hoàn</span>' : '<span class="badge badge-danger">❌ Từ chối</span>'}</td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <button onclick="openRefundDetail('${r.id}')" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-eye"></i> Chi tiết
+                  </button>
+                  ${r.status === 'pending' ? `
+                    <button onclick="approveRefund('${r.id}', ${r.amount})" class="btn btn-success btn-sm">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button onclick="rejectRefund('${r.id}')" class="btn btn-danger btn-sm">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `).join('') : '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Không có đơn hoàn tiền nào.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Slide-over detail panel -->
+  <div x-show="slideover" class="slideover-overlay" @click="slideover = false"></div>
+  <div x-show="slideover" x-transition:enter="transition ease-out duration-250" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" class="slideover">
+    <div class="slideover-header">
+      <div style="font-size:16px;font-weight:700;color:var(--text-primary);">Chi tiết Khiếu nại</div>
+      <button @click="slideover = false" class="btn btn-ghost btn-sm btn-icon"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="slideover-body" id="refund-detail-body">
+      <div style="text-align:center;padding:40px;color:var(--text-muted);">
+        <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+%>
+<%- include('./layout', { body: refundsHtml }) %>
+
+<script>
+async function openRefundDetail(refundId) {
+  if (window.Alpine) {
+    Alpine.$data(document.querySelector('[x-data]')).slideover = true;
+  }
+  const body = document.getElementById('refund-detail-body');
+  try {
+    const res = await fetch(`/admin/refunds/${refundId}`);
+    const data = await res.json();
+    const r = data.refund;
+    const o = data.order;
+    body.innerHTML = `
+      <div>
+        <div class="card-title">Thông tin Khiếu nại</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+          <div><div class="form-label">Mã đơn</div><div style="font-family:monospace;font-size:13px;">#${r.id.slice(-8)}</div></div>
+          <div><div class="form-label">Số tiền</div><div style="font-weight:700;color:var(--warning);">${(r.amount||0).toLocaleString('vi-VN')}đ</div></div>
+          <div><div class="form-label">Người mua</div><div style="font-size:13px;">${r.buyerId||'--'}</div></div>
+          <div><div class="form-label">Người bán</div><div style="font-size:13px;">${r.sellerId||'--'}</div></div>
+          <div style="grid-column:1/-1;"><div class="form-label">Lý do khiếu nại</div><div style="font-size:13px;color:var(--text-secondary);">${r.reason||'Không có lý do.'}</div></div>
+        </div>
+        ${r.evidenceUrls && r.evidenceUrls.length > 0 ? `
+          <div class="card-title">Bằng chứng đính kèm</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+            ${r.evidenceUrls.map(url => `<a href="${url}" target="_blank"><img src="${url}" style="width:100px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border);" onerror="this.src='/img/no-img.png'"></a>`).join('')}
+          </div>
+        ` : ''}
+        ${o ? `
+          <div class="card-title">Thông tin Đơn hàng gốc</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Mã: #${o.id}<br>Tổng: ${(o.totalAmount||0).toLocaleString('vi-VN')}đ<br>Ngày: ${o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '--'}</div>
+        ` : ''}
+        ${r.status === 'pending' ? `
+          <div style="margin-top:24px;display:flex;gap:10px;">
+            <button onclick="approveRefund('${r.id}',${r.amount})" class="btn btn-success" style="flex:1;justify-content:center;"><i class="fas fa-check"></i> Chấp nhận hoàn tiền</button>
+            <button onclick="rejectRefund('${r.id}')" class="btn btn-danger" style="flex:1;justify-content:center;"><i class="fas fa-times"></i> Từ chối</button>
+          </div>
+        ` : `<div class="alert ${r.status === 'approved' ? 'alert-success' : 'alert-error'}" style="margin-top:16px;">${r.status === 'approved' ? '✅ Đã hoàn tiền' : '❌ Đã từ chối'} — ${r.resolutionNote || ''}</div>`}
+      </div>
+    `;
+  } catch(e) { body.innerHTML = '<div class="alert alert-error">Không thể tải chi tiết.</div>'; }
+}
+
+function approveRefund(refundId, amount) {
+  window.dispatchEvent(new CustomEvent('open-otp-modal', { detail: {
+    title: 'Xác nhận Hoàn tiền',
+    desc: `Hoàn ${Number(amount).toLocaleString('vi-VN')}đ ngay lập tức (Atomic Transaction — không thể hoàn tác).`,
+    action: `/admin/refunds/${refundId}/approve`,
+    targetData: {}
+  }}));
+}
+
+function rejectRefund(refundId) {
+  const reason = prompt('Lý do từ chối khiếu nại:');
+  if (!reason) return;
+  fetch(`/admin/refunds/${refundId}/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ rejectReason: reason })
+  }).then(r => r.json()).then(d => { if(d.success) location.reload(); else alert(d.error); });
+}
+
+function filterRefunds(status) {
+  window.location.href = `/admin/refunds${status !== 'all' ? '?status=' + status : ''}`;
+}
+</script>

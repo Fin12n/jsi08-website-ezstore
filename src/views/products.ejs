@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="products-section" style="padding-top: 120px;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-subtitle">Danh mục của EZ Studio</span>
+      <h1 class="section-title text-white">Products Catalog</h1>
+      <p class="lead">Khám phá các mô hình 3D, bản đồ và cấu hình máy chủ Minecraft chất lượng tốt nhất.</p>
+    </div>
+
+    <% if (typeof groupedProducts !== 'undefined' && groupedProducts.length > 0) { %>
+      <% groupedProducts.forEach(group => { %>
+        <div class="mb-5" id="category-<%= group.category.slug %>">
+          <div class="d-flex align-items-center mb-4 border-bottom pb-2 border-secondary border-opacity-25">
+            <i class="fa-solid fa-folder-open text-primary-custom fs-3 me-2"></i>
+            <h2 class="text-white font-outfit mb-0 fs-3"><%= group.category.name %></h2>
+          </div>
+          <div class="row g-4">
+            <% if (group.products && group.products.length > 0) { %>
+              <% group.products.forEach(product => { %>
+                <div class="col-lg-4 col-md-6">
+                  <div class="card glass-card card-item">
+                    <div class="card-img-container">
+                      <img src="<%= product.image %>" alt="<%= product.title %>" onerror="this.src='/imgs/logo.webp'" />
+                      <span class="card-category-badge"><%= group.category.name %></span>
+                    </div>
+                    <div class="card-body-custom">
+                      <div>
+                        <h3 class="card-title-custom"><%= product.title %></h3>
+                        <p class="card-desc-custom"><%= product.description %></p>
+                      </div>
+                      <div>
+                        <div class="card-price-container">
+                          <span class="card-price-del"><del><%= product.originalPrice %></del></span>
+                          <span class="card-price-new"><%= product.salePrice %></span>
+                        </div>
+                        <a href="/product/<%= product.id %>" class="btn btn-card">
+                          <i class="fa-solid fa-eye me-2"></i>Xem Chi Tiết
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="col-12"><p class="text-muted">Hiện chưa có sản phẩm nào.</p></div>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="text-center text-muted py-5">
+        <i class="fa-solid fa-box-open fs-1 mb-3"></i>
+        <p>Chưa có danh mục sản phẩm nào.</p>
+      </div>
+    <% } %>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>
