@@ -118,6 +118,23 @@ router.post('/api/settings/seo', async (req, res) => {
   }
 });
 
+// POST /admin/api/settings/chatbot — Update OpenAI API Key for chatbot
+router.post('/api/settings/chatbot', async (req, res) => {
+  try {
+    const { openaiApiKey } = req.body;
+    await db.collection('settings').doc('general').set({
+      chatbot: {
+        openaiApiKey: openaiApiKey ? openaiApiKey.trim() : '',
+        updatedAt: new Date().toISOString()
+      }
+    }, { merge: true });
+    await logAdminAction(req, 'UPDATE_CHATBOT_API_KEY', 'general', 'settings', {});
+    res.redirect('/admin/settings?success=Cập nhật API Key ChatGPT thành công!');
+  } catch (err) {
+    res.redirect(`/admin/settings?error=${err.message}`);
+  }
+});
+
 // POST /admin/api/settings/refresh-cache — Trigger manual cache/aggregated data refresh
 router.post('/api/settings/refresh-cache', async (req, res) => {
   try {

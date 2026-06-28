@@ -141,3 +141,35 @@ a {
 a:hover {
   color: var(--ez-yellow);
 }
+
+/* ==========================================================================
+   THEME CONTRAST OVERRIDES (Bootstrap Color Fixes)
+   ========================================================================== */
+:root[data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="light"] .text-white-50 {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="light"] .text-light {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="light"] .bg-dark {
+  background-color: var(--ez-bg-alt) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme="light"] .bg-secondary {
+  background-color: var(--ez-bg-alt) !important;
+}
+:root[data-theme="light"] .btn-close {
+  filter: invert(1);
+}
+:root[data-theme="light"] .border-secondary {
+  border-color: var(--glass-border) !important;
+}
+:root[data-theme="light"] .badge.bg-dark {
+  background-color: var(--ez-bg-alt) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--glass-border) !important;
+}
+

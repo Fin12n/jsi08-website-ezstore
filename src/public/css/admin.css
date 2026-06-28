@@ -336,3 +336,10 @@ select.form-select option {
     margin-left: 0;
   }
 }
+
+/* Action Dropdown Container Fixes */
+.action-dropdown-container {
+  position: relative !important;
+  display: inline-block !important;
+}
+

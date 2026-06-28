@@ -398,7 +398,24 @@ router.post('/api/chat', async (req, res) => {
   }
 
   const prompt = message.trim();
-  const apiKey = process.env.OPENAI_API_KEY;
+  
+  let apiKey = null;
+  try {
+    const settingsDoc = await db.collection('settings').doc('general').get();
+    if (settingsDoc.exists) {
+      const settingsData = settingsDoc.data();
+      if (settingsData.chatbot && settingsData.chatbot.openaiApiKey) {
+        apiKey = settingsData.chatbot.openaiApiKey.trim();
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error fetching chatbot api key from firestore:', err.message);
+  }
+
+  // Fallback to process.env if Firestore config is missing
+  if (!apiKey || apiKey === '') {
+    apiKey = process.env.OPENAI_API_KEY;
+  }
 
   if (apiKey) {
     try {

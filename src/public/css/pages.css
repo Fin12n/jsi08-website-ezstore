@@ -97,7 +97,7 @@
 }
 .contact-info-value {
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* Contact Form custom styling */

@@ -59,9 +59,9 @@
         '<td>' + statusBadge + '</td>' +
         '<td style="font-size:12.5px;color:var(--text-muted);">' + (u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : '--') + '</td>' +
         '<td style="text-align:center;">' +
-          '<div x-data="{ open: false }" style="position:relative;display:inline-block;">' +
+          '<div x-data="{ open: false }" class="action-dropdown-container">' +
             '<button @click="open = !open" class="action-btn"><i class="fas fa-ellipsis"></i></button>' +
-            '<div x-show="open" @click.away="open = false" x-transition class="action-dropdown" style="position:absolute;right:0;top:calc(100% + 6px);z-index:100;">' +
+            '<div x-show="open" @click.away="open = false" x-transition class="action-dropdown">' +
               actionItems +
             '</div>' +
           '</div>' +

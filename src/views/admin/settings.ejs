@@ -95,10 +95,31 @@
       <i class="fas fa-rotate"></i> Làm mới Cache Thống kê
     </button>
     <div id="cache-result" style="margin-top:14px; display:none;"></div>
-    <div style="height:1px; background:var(--border); margin:24px 0;"></div>
-    
-    <!-- Banner Upload -->
-    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+  </div>
+
+  <!-- EZ Assistant (Col 1-6) -->
+  <div class="card" style="grid-column: span 6; background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-robot" style="color: var(--accent);"></i> EZ Assistant (ChatGPT OpenAI)
+    </div>
+    <form action="/admin/api/settings/chatbot" method="POST">
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" style="font-size:12.5px; font-weight:600; color:var(--text-primary); margin-bottom:6px; display:block;">OpenAI API Key</label>
+        <div style="position:relative;">
+          <input type="password" name="openaiApiKey" id="openaiApiKeyInput" class="form-input" placeholder="sk-proj-..." value="${typeof settings !== 'undefined' && settings.chatbot ? (settings.chatbot.openaiApiKey || '') : ''}" style="width: 100%; padding-right: 40px;">
+          <button type="button" onclick="toggleApiKeyVisibility()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">
+            <i class="fas fa-eye" id="apiKeyEyeIcon"></i>
+          </button>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">Mã khóa API OpenAI dùng để kích hoạt trợ lý AI ChatGPT của cửa hàng.</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 8px;"><i class="fas fa-save"></i> Lưu cấu hình Trợ lý</button>
+    </form>
+  </div>
+
+  <!-- Banner Website (Col 7-12) -->
+  <div class="card" style="grid-column: span 6; background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
       <i class="fas fa-image" style="color: var(--accent);"></i> Banner Website
     </div>
     <form action="/admin/api/settings/banner" method="POST" enctype="multipart/form-data">
@@ -206,6 +227,17 @@ async function refreshCache() {
   }
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-rotate"></i> Làm mới Cache Thống kê';
+}
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('openaiApiKeyInput');
+  const icon = document.getElementById('apiKeyEyeIcon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
 }
 </script>
 ` }) %>
