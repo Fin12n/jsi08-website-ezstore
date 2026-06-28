@@ -28,7 +28,13 @@ async function logAdminAction(req, action, targetId, targetType, details = {}) {
         ...details,
         reason: req.adminActionReason || details.reason || null,
       },
-      ip: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown',
+      ip: (() => {
+        let clientIp = req.headers['x-forwarded-for'] || req.ip || (req.connection && req.connection.remoteAddress) || 'unknown';
+        if (typeof clientIp === 'string' && clientIp.includes(',')) {
+          clientIp = clientIp.split(',')[0].trim();
+        }
+        return clientIp;
+      })(),
       userAgent: req.headers['user-agent'] || 'unknown',
       timestamp: new Date().toISOString(),
     };
