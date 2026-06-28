@@ -18,6 +18,16 @@ router.get('/', async (req, res) => {
     const snapshot = await db.collection('users').get();
     let usersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+    // Auto-cleanup: Hard delete any previously soft-deleted users in Firestore
+    const softDeletedUsers = usersList.filter(u => u.deletedAt);
+    if (softDeletedUsers.length > 0) {
+      for (const u of softDeletedUsers) {
+        await db.collection('users').doc(u.id).delete();
+      }
+      const newSnapshot = await db.collection('users').get();
+      usersList = newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
     // Apply filters
     if (search) {
       const q = search.toLowerCase();
@@ -30,16 +40,12 @@ router.get('/', async (req, res) => {
     if (role && role !== 'all') {
       usersList = usersList.filter(u => u.role === role);
     }
-    // Filter out deleted users by default, unless status is explicitly 'deleted'
-    if (status === 'deleted') {
-      usersList = usersList.filter(u => u.deletedAt);
-    } else {
-      usersList = usersList.filter(u => !u.deletedAt);
-      if (status === 'banned') {
-        usersList = usersList.filter(u => u.bannedAt && !u.unbannedAt);
-      } else if (status === 'active') {
-        usersList = usersList.filter(u => !u.bannedAt || u.unbannedAt);
-      }
+    
+    // Filter status
+    if (status === 'banned') {
+      usersList = usersList.filter(u => u.bannedAt && !u.unbannedAt);
+    } else if (status === 'active') {
+      usersList = usersList.filter(u => !u.bannedAt || u.unbannedAt);
     }
 
     res.render('admin/users', {
@@ -192,55 +198,31 @@ router.post('/api/users/:id/reset-password', async (req, res) => {
   }
 });
 
-// DELETE /admin/api/users/:id — Soft delete a user account (requires OTP)
+// DELETE /admin/api/users/:id — Hard delete a user account (requires OTP)
 router.delete('/api/users/:id', requireAdminOtp, async (req, res) => {
   try {
     const { id } = req.params;
     if (id === req.session.user.id) {
       return res.status(400).json({ success: false, error: 'Bạn không thể tự xóa tài khoản của chính mình!' });
     }
-    await db.collection('users').doc(id).set({
-      deletedAt: new Date().toISOString(),
-      deletedBy: req.session.user.email,
-      deleteReason: req.adminActionReason,
-    }, { merge: true });
-    await logAdminAction(req, 'SOFT_DELETE_USER', id, 'user', { reason: req.adminActionReason });
-    res.json({ success: true, message: 'Đã xóa tài khoản (soft delete).' });
+    await db.collection('users').doc(id).delete();
+    await logAdminAction(req, 'HARD_DELETE_USER', id, 'user', { reason: req.adminActionReason });
+    res.json({ success: true, message: 'Đã xóa hoàn toàn tài khoản khỏi hệ thống.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST /admin/api/users/:id/delete — Soft delete a user account (requires OTP)
+// POST /admin/api/users/:id/delete — Hard delete a user account (requires OTP)
 router.post('/api/users/:id/delete', requireAdminOtp, async (req, res) => {
   try {
     const { id } = req.params;
     if (id === req.session.user.id) {
       return res.status(400).json({ success: false, error: 'Bạn không thể tự xóa tài khoản của chính mình!' });
     }
-    await db.collection('users').doc(id).set({
-      deletedAt: new Date().toISOString(),
-      deletedBy: req.session.user.email,
-      deleteReason: req.adminActionReason,
-    }, { merge: true });
-    await logAdminAction(req, 'SOFT_DELETE_USER', id, 'user', { reason: req.adminActionReason });
-    res.json({ success: true, message: 'Đã xóa tài khoản (soft delete).' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// POST /admin/api/users/:id/restore — Restore a deleted user account
-router.post('/api/users/:id/restore', requireAdminOtp, async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.collection('users').doc(id).set({
-      deletedAt: null,
-      deletedBy: null,
-      deleteReason: null,
-    }, { merge: true });
-    await logAdminAction(req, 'RESTORE_USER', id, 'user', { reason: req.adminActionReason });
-    res.json({ success: true, message: 'Đã khôi phục tài khoản thành công.' });
+    await db.collection('users').doc(id).delete();
+    await logAdminAction(req, 'HARD_DELETE_USER', id, 'user', { reason: req.adminActionReason });
+    res.json({ success: true, message: 'Đã xóa hoàn toàn tài khoản khỏi hệ thống.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

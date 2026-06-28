@@ -21,30 +21,24 @@
           : '<span class="badge badge-muted">User</span>';
 
       // Status badge — new dot-indicator style
-      const statusBadge = isDeleted
-        ? '<span class="badge badge-danger"><i class="fas fa-trash-can" style="font-size:9px;margin-right:2px;"></i> Đã xóa</span>'
-        : isBanned
-          ? '<span class="badge badge-warning"><i class="fas fa-ban" style="font-size:9px;margin-right:2px;"></i> Bị cấm</span>'
-          : '<span class="badge badge-success">Hoạt động</span>';
+      const statusBadge = isBanned
+        ? '<span class="badge badge-warning"><i class="fas fa-ban" style="font-size:9px;margin-right:2px;"></i> Bị cấm</span>'
+        : '<span class="badge badge-success">Hoạt động</span>';
 
       // Wallet balance color
       const balance = (u.walletBalance || 0).toLocaleString('vi-VN');
 
       // Build action dropdown with new classes
       let actionItems = '';
-      if (isDeleted) {
-        actionItems = '<button class="action-dropdown-item success" onclick="confirmOtp(\'Khôi phục tài khoản\',\'Khôi phục tài khoản của ' + uName + '?\',\'/admin/api/users/' + uid + '/restore\',{})"><i class="fas fa-trash-arrow-up"></i> Khôi phục</button>';
+      actionItems  = '<button class="action-dropdown-item" onclick="openWalletModal(\'' + uid + '\', \'' + uName.replace(/'/g, "\\'") + '\')"><i class="fas fa-wallet" style="color:var(--accent-light);"></i> Điều chỉnh ví</button>';
+      actionItems += '<button class="action-dropdown-item" onclick="confirmOtp(\'Force Logout\',\'Hủy phiên đăng nhập của ' + uName + '?\',\'/admin/api/users/' + uid + '/force-logout\',{})"><i class="fas fa-right-from-bracket"></i> Force Logout</button>';
+      if (isBanned) {
+        actionItems += '<button class="action-dropdown-item success" onclick="confirmOtp(\'Mở khóa tài khoản\',\'Mở khóa tài khoản ' + uName + '?\',\'/admin/api/users/' + uid + '/unban\',{})"><i class="fas fa-unlock"></i> Mở khóa</button>';
       } else {
-        actionItems  = '<button class="action-dropdown-item" onclick="openWalletModal(\'' + uid + '\', \'' + uName.replace(/'/g, "\\'") + '\')"><i class="fas fa-wallet" style="color:var(--accent-light);"></i> Điều chỉnh ví</button>';
-        actionItems += '<button class="action-dropdown-item" onclick="confirmOtp(\'Force Logout\',\'Hủy phiên đăng nhập của ' + uName + '?\',\'/admin/api/users/' + uid + '/force-logout\',{})"><i class="fas fa-right-from-bracket"></i> Force Logout</button>';
-        if (isBanned) {
-          actionItems += '<button class="action-dropdown-item success" onclick="confirmOtp(\'Mở khóa tài khoản\',\'Mở khóa tài khoản ' + uName + '?\',\'/admin/api/users/' + uid + '/unban\',{})"><i class="fas fa-unlock"></i> Mở khóa</button>';
-        } else {
-          actionItems += '<button class="action-dropdown-item warning" onclick="confirmOtp(\'Cấm tài khoản\',\'Cấm tài khoản ' + uName + '? Hành động này cần ghi rõ lý do.\',\'/admin/api/users/' + uid + '/ban\',{})"><i class="fas fa-ban"></i> Cấm tài khoản</button>';
-        }
-        actionItems += '<div class="action-dropdown-divider"></div>';
-        actionItems += '<button class="action-dropdown-item danger" onclick="confirmOtp(\'Xóa tài khoản\',\'Xóa tài khoản ' + uName + '? Hành động này sẽ đưa tài khoản vào danh sách đã xóa.\',\'/admin/api/users/' + uid + '/delete\',{})"><i class="fas fa-trash-can"></i> Xóa tài khoản</button>';
+        actionItems += '<button class="action-dropdown-item warning" onclick="confirmOtp(\'Cấm tài khoản\',\'Cấm tài khoản ' + uName + '? Hành động này cần ghi rõ lý do.\',\'/admin/api/users/' + uid + '/ban\',{})"><i class="fas fa-ban"></i> Cấm tài khoản</button>';
       }
+      actionItems += '<div class="action-dropdown-divider"></div>';
+      actionItems += '<button class="action-dropdown-item danger" onclick="confirmOtp(\'Xóa tài khoản\',\'Xóa tài khoản ' + uName + '? Hành động này sẽ XÓA VĨNH VIỄN tài khoản khỏi hệ thống và không thể khôi phục.\',\'/admin/api/users/' + uid + '/delete\',{})"><i class="fas fa-trash-can"></i> Xóa tài khoản</button>';
 
       rowsHtml += '<tr>' +
         '<td><div style="display:flex;align-items:center;gap:13px;">' +
@@ -96,7 +90,6 @@
     <option value="">Tất cả trạng thái</option>
     <option value="active" ${filterStatus === 'active' ? 'selected' : ''}>Đang hoạt động</option>
     <option value="banned" ${filterStatus === 'banned' ? 'selected' : ''}>Đã cấm</option>
-    <option value="deleted" ${filterStatus === 'deleted' ? 'selected' : ''}>Đã xóa</option>
   </select>
   <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-search"></i> Tìm kiếm</button>
   <a href="/admin/users" class="btn btn-ghost" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-rotate-right"></i> Reset</a>
