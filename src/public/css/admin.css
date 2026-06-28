@@ -252,6 +252,8 @@ body.admin-body {
 .admin-table tr td:last-child {
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
+  position: relative;
+  overflow: visible;
 }
 
 .admin-table tr:hover td {
