@@ -10,7 +10,7 @@ const { upload } = require('../../config/cloudinary');
 const { logAdminAction } = require('../../middlewares/audit-logger');
 
 // GET /admin/settings — Settings page (consolidates all setting sections)
-router.get('/', async (req, res) => {
+router.get('/settings', async (req, res) => {
   try {
     const [settingsDoc, couponsSnap] = await Promise.all([
       db.collection('settings').doc('general').get(),

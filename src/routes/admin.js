@@ -149,23 +149,7 @@ router.get('/coupons', async (req, res) => {
   }
 });
 
-// GET Settings
-router.get('/settings', async (req, res) => {
-  try {
-    const docRef = await db.collection('settings').doc('general').get();
-    const settings = docRef.exists ? docRef.data() : { exchangeRate: 1, bankInfo: '', footerText: '' };
-    
-    res.render('admin/settings', { 
-      title: 'Cài đặt - EZ Studio', 
-      activePage: 'settings',
-      settings,
-      success: req.query.success,
-      error: req.query.error
-    });
-  } catch (error) {
-    res.render('admin/settings', { title: 'Cài đặt', activePage: 'settings', settings: {}, error: 'Lỗi tải cài đặt' });
-  }
-});
+// GET Settings page moved to routes/admin/settings.js
 
 // --- API ACTIONS ---
 

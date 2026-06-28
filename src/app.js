@@ -205,7 +205,7 @@ app.use('/admin/products', isAdmin, adminProductsRouter);
 app.use('/admin/transactions', isAdmin, adminTransactionsRouter);
 app.use('/admin/refunds', isAdmin, adminRefundsRouter);
 app.use('/admin/security', isAdmin, adminSecurityRouter);
-app.use('/admin/settings', isAdmin, adminSettingsRouter);
+app.use('/admin', isAdmin, adminSettingsRouter);
 
 // Legacy admin router (categories, overview, applications — to be migrated later)
 const adminRouter = require('./routes/admin');
