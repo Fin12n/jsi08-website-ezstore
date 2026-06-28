@@ -51,7 +51,7 @@
           <template x-for="result in paletteResults" :key="result.id">
             <a :href="result.href" class="palette-result-item" @click="showPalette = false">
               <div class="palette-result-icon">
-                <i :class="result.type === 'user' ? 'fas fa-user' : 'fas fa-box'"></i>
+                <i :class="result.icon || 'fas fa-magnifying-glass'"></i>
               </div>
               <div>
                 <div class="palette-result-text" x-text="result.label"></div>

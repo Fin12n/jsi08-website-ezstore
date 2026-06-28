@@ -455,16 +455,62 @@
 
         async searchPalette() {
           if (this.paletteQuery.length < 2) { this.paletteResults = []; return; }
+          
+          const normalizeSearch = (str) => {
+            if (!str) return '';
+            return str.toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/đ/g, 'd')
+              .replace(/y/g, 'i')
+              .trim();
+          };
+
+          const queryNorm = normalizeSearch(this.paletteQuery);
+          
+          // 1. Search Static Dashboard Pages
+          const staticPages = [
+            { label: 'Dashboard Overview', sub: 'Tổng quan hệ thống', href: '/admin/overview', icon: 'fas fa-chart-line' },
+            { label: 'Quản lý Thành viên', sub: 'Tìm và quản lý user', href: '/admin/users', icon: 'fas fa-users' },
+            { label: 'Duyệt Người bán', sub: 'Đơn đăng ký Seller', href: '/admin/sellers', icon: 'fas fa-store' },
+            { label: 'Kiểm duyệt Sản phẩm', sub: 'Phê duyệt sản phẩm mới', href: '/admin/products', icon: 'fas fa-box' },
+            { label: 'Xử lý Hoàn tiền', sub: 'Phân xử khiếu nại', href: '/admin/refunds', icon: 'fas fa-rotate-left' },
+            { label: 'Giám sát Bảo mật', sub: 'Audit logs & Abuse', href: '/admin/security', icon: 'fas fa-shield-halved' },
+            { label: 'Cài đặt hệ thống', sub: 'Cài đặt chung, ngân hàng, chatbot', href: '/admin/settings', icon: 'fas fa-screwdriver-wrench' }
+          ];
+
+          const matchedPages = staticPages.filter(p => 
+            normalizeSearch(p.label).includes(queryNorm) || 
+            normalizeSearch(p.sub).includes(queryNorm)
+          ).map(p => ({
+            type: 'page',
+            id: p.href,
+            label: p.label,
+            sub: p.sub,
+            href: p.href,
+            icon: p.icon
+          }));
+
+          this.paletteResults = matchedPages;
+
+          // 2. Fetch Dynamic Users from DB
           try {
             const res = await fetch(`/admin/api/users?search=${encodeURIComponent(this.paletteQuery)}&format=json`);
             if (res.ok) {
               const data = await res.json();
-              this.paletteResults = (data.users || []).slice(0, 6).map(u => ({
-                type: 'user', id: u.id, label: u.displayName || u.email, sub: u.email,
+              const matchedUsers = (data.users || []).slice(0, 6).map(u => ({
+                type: 'user',
+                id: u.id,
+                label: u.displayName || u.email,
+                sub: u.email,
                 href: `/admin/users?search=${u.email}`,
+                icon: 'fas fa-user'
               }));
+              this.paletteResults = [...matchedPages, ...matchedUsers];
             }
-          } catch(e) { this.paletteResults = []; }
+          } catch(e) { 
+            // Fallback to static pages only on error
+          }
         },
 
         openOtpModal(config) {
