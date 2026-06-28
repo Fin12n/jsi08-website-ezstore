@@ -237,9 +237,12 @@ router.post('/checkout', async (req, res) => {
       return res.redirect('/user/topup?error=Số dư ví không đủ để thanh toán. Vui lòng nạp thêm.');
     }
 
+    // Fetch commission settings from Firestore
+    const settingsDoc = await db.collection('settings').doc('general').get();
+    const settingsData = settingsDoc.exists ? settingsDoc.data() : {};
+    const commissionRates = settingsData.commissionRates || { standard: 10, premium: 8, elite: 5 };
+
     // Process Purchases (In a real DB, use transactions)
-    const commissionRate = 0.20; // 20% platform fee
-    
     for (const item of itemsToBuy) {
       // Add to Library
       await db.collection('library').add({
@@ -269,13 +272,19 @@ router.post('/checkout', async (req, res) => {
 
       // Give money to Seller
       if (item.sellerId && item.sellerId !== req.session.user.id) {
-        const sellerEarned = Math.floor(item.priceNumber * (1 - commissionRate));
-        
         const sellerRef = db.collection('users').doc(item.sellerId);
         const sellerDoc = await sellerRef.get();
         if (sellerDoc.exists) {
+          const sellerData = sellerDoc.data();
+          const sellerRank = sellerData.rank || 'standard';
+          // commissionRates are in percent (e.g. 10 for 10%), divide by 100
+          const ratePercent = commissionRates[sellerRank] !== undefined ? commissionRates[sellerRank] : 10;
+          const rateDecimal = ratePercent / 100;
+          const sellerEarned = Math.floor(item.priceNumber * (1 - rateDecimal));
+
           await sellerRef.set({
-            balance: (sellerDoc.data().balance || 0) + sellerEarned
+            balance: (sellerData.balance || 0) + sellerEarned,
+            walletBalance: (sellerData.walletBalance || 0) + sellerEarned
           }, { merge: true });
           
           await db.collection('transactions').add({
@@ -283,7 +292,7 @@ router.post('/checkout', async (req, res) => {
             type: 'EARN',
             amount: sellerEarned,
             status: 'COMPLETED',
-            description: `Bán sản phẩm: ${item.title} (-20% phí)`,
+            description: `Bán sản phẩm: ${item.title} (-${ratePercent}% phí)`,
             createdAt: new Date().toISOString()
           });
         }
@@ -291,8 +300,10 @@ router.post('/checkout', async (req, res) => {
     }
 
     // Deduct buyer balance
+    const buyerNewBalance = (userData.balance || 0) - total;
     await userRef.set({
-      balance: userData.balance - total
+      balance: buyerNewBalance,
+      walletBalance: buyerNewBalance
     }, { merge: true });
 
     req.session.user.balance = userData.balance - total;
@@ -377,6 +388,78 @@ router.get('/seed', async (req, res) => {
   } catch (error) {
     res.send('Lỗi khi seed: ' + error.message);
   }
+});
+
+// POST AI Chatbot endpoint
+router.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
+  if (!message || message.trim() === '') {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const prompt = message.trim();
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (apiKey) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `Bạn là "EZ Assistant" - một trợ lý AI thông minh, nhiệt tình và thân thiện của EZ Studio (ezstore).
+EZ Studio là nền tảng cung cấp tài nguyên Minecraft chuyên nghiệp hàng đầu tại Việt Nam.
+Các dịch vụ chính của EZ Studio:
+1. Minecraft Server Setup: Survival, Skyblock, Lifesteal, Bedwars... thiết lập từ A-Z tối ưu hiệu năng tốt nhất.
+2. Custom Models: Thiết kế Item/Armor/Weapon 3D độc quyền (ItemsAdder, Oraxen, MythicMobs).
+3. Tối ưu hóa & Bảo mật: Chống lag, chống crash, chống DDoS chuyên sâu cho Server.
+Người sáng lập: Fin12n. Co-Owner: tomy067.
+Bạn trả lời các câu hỏi bằng Tiếng Việt một cách ngắn gọn, súc tích và có kèm emoji thân thiện. Hãy hướng dẫn người dùng mua hàng hoặc liên hệ nếu cần hỗ trợ trực tiếp.`
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const reply = data.choices[0].message.content;
+      return res.json({ reply });
+    } catch (error) {
+      console.error('❌ OpenAI API Error:', error.message);
+      // Fallback to mock on error
+    }
+  }
+
+  // Fallback / Mock Response Logic
+  const msgLower = prompt.toLowerCase();
+  let reply = 'Chào bạn! Mình là trợ lý AI của EZ Studio. Mình có thể giúp gì cho bạn về các tài nguyên Minecraft, thiết lập Server hoặc thiết kế 3D Models không?';
+
+  if (msgLower.includes('setup') || msgLower.includes('server') || msgLower.includes('cài đặt')) {
+    reply = 'EZ Studio cung cấp dịch vụ cài đặt Server Minecraft trọn gói (Survival, Skyblock, Bedwars, Lifesteal...) tối ưu hiệu năng tốt nhất, TPS ổn định 20. Bạn có thể tham khảo mục Dịch Vụ hoặc inbox trực tiếp để nhận tư vấn nhé! 🎮';
+  } else if (msgLower.includes('model') || msgLower.includes('3d') || msgLower.includes('itemsadder') || msgLower.includes('oraxen')) {
+    reply = 'EZ Studio chuyên thiết kế Item/Armor/Weapon 3D độc quyền và cấu hình ItemsAdder/Oraxen/MythicMobs hoàn chỉnh. Xem các sản phẩm có sẵn trên web hoặc gửi yêu cầu đặt vẽ riêng qua mục Liên hệ nhé! ⚔️';
+  } else if (msgLower.includes('nạp') || msgLower.includes('zcoin') || msgLower.includes('tiền') || msgLower.includes('ví')) {
+    reply = 'Để nạp zCoin, bạn chỉ cần đăng nhập, bấm vào Avatar góc trên bên phải -> chọn "Quản lý tài khoản" -> mục Nạp tiền để thanh toán tự động qua PayOS/SePay cực kỳ nhanh chóng và an toàn! 💳';
+  } else if (msgLower.includes('admin') || msgLower.includes('liên hệ') || msgLower.includes('sđt') || msgLower.includes('phone')) {
+    reply = 'Bạn có thể liên hệ trực tiếp với EZ Studio qua hotline: +84 327 194 114 (Fin12n) hoặc qua email: tranthinh2000bn@gmail.com, hoặc gửi tin nhắn ở biểu mẫu chân trang. 📞';
+  } else if (msgLower.includes('chào') || msgLower.includes('hi') || msgLower.includes('hello')) {
+    reply = 'Xin chào! Mình là EZ Assistant, chatbot AI hỗ trợ khách hàng của EZ Studio. Mình có thể giúp bạn giải đáp thắc mắc về Server setup, custom model 3D hoặc nạp zCoin. Bạn cần mình tư vấn dịch vụ nào? 😊';
+  }
+
+  return res.json({ reply });
 });
 
 module.exports = router;

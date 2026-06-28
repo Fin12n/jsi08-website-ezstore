@@ -42,7 +42,7 @@ const transactionsHtml = `
               <td style="font-family:monospace;font-size:12px;">#${(o.id||'').slice(-8)}</td>
               <td style="font-size:12.5px;">${o.userId || o.buyerId || '--'}</td>
               <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.productTitle || o.productId || '--'}</td>
-              <td style="font-weight:700;color:var(--success);">${(o.totalAmount || o.amount || 0).toLocaleString('vi-VN')}đ</td>
+              <td style="font-weight:700;color:var(--success);">${(o.totalAmount || o.amount || 0).toLocaleString('vi-VN')} zCoin</td>
               <td>${o.status === 'completed' ? '<span class="badge badge-success">✅ Hoàn thành</span>' : o.status === 'pending' ? '<span class="badge badge-warning">⏳ Đang chờ</span>' : o.status === 'failed' ? '<span class="badge badge-danger">❌ Thất bại</span>' : '<span class="badge badge-muted">Đã hủy</span>'}</td>
               <td style="font-size:12px;color:var(--text-muted);">${o.createdAt ? new Date(o.createdAt).toLocaleString('vi-VN', {dateStyle:'short',timeStyle:'short'}) : '--'}</td>
             </tr>
@@ -59,16 +59,12 @@ const transactionsHtml = `
     <div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
   </div>
 </div>
-`;
-%>
-<%- include('./layout', { body: transactionsHtml }) %>
 
 <script>
 async function loadTopups() {
   const res = await fetch('/admin/api/topup-list');
   const content = document.getElementById('topup-content');
-  // Build topup table from /admin/transactions/topup route or embedded data
-  content.innerHTML = `
+  content.innerHTML = \`
     <div class="card">
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
         <div style="background:var(--bg-hover);padding:12px 20px;border-radius:var(--radius-sm);text-align:center;">
@@ -84,9 +80,8 @@ async function loadTopups() {
         <a href="/admin/transactions/topup" class="btn btn-primary">📋 Xem danh sách Topup đầy đủ</a>
       </div>
     </div>
-  `;
+  \`;
 
-  // Try to get pending count
   fetch('/admin/api/dashboard/stats').then(r => r.json()).then(d => {
     if (d.success) {
       const cnt = d.stats.pendingTopups || 0;
@@ -111,3 +106,6 @@ fetch('/admin/api/dashboard/stats').then(r => r.json()).then(d => {
   if (d.success) document.getElementById('pending-topup-count').textContent = d.stats.pendingTopups || 0;
 }).catch(() => {});
 </script>
+`;
+%>
+<%- include('./layout', { body: transactionsHtml }) %>

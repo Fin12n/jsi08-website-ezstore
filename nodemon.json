@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ignore": ["sessions/*", "public/*", "*.md"],
+  "ext": "js,ejs,json",
+  "delay": 500
+}

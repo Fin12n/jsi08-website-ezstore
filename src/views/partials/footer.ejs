@@ -70,6 +70,59 @@
 <!-- Custom JS script -->
 <script src="/js/auth.js"></script>
 <script src="/js/animations.js"></script>
+<!-- AI Chatbot Bubble & Widget -->
+<div id="chatbot-wrapper">
+  <!-- Bubble toggle button -->
+  <button id="chatbot-toggle" class="chatbot-toggle-btn" title="Trò chuyện với EZ Assistant">
+    <i class="fa-solid fa-comments"></i>
+    <span id="chatbot-pulse" class="chatbot-pulse-dot"></span>
+  </button>
+
+  <!-- Chat container -->
+  <div id="chatbot-container" class="chatbot-container">
+    <!-- Particles background canvas -->
+    <canvas id="chatbot-particles" class="chatbot-particles-canvas"></canvas>
+
+    <!-- Header -->
+    <div class="chatbot-header">
+      <div class="chatbot-header-info">
+        <div class="chatbot-avatar">EZ</div>
+        <div class="chatbot-title-container">
+          <span class="chatbot-name">EZ Assistant</span>
+          <span class="chatbot-status">Trực tuyến</span>
+        </div>
+      </div>
+      <button id="chatbot-close" class="chatbot-close-btn" title="Đóng">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="chatbot-messages" class="chatbot-messages">
+      <div class="chatbot-message chatbot-message-bot">
+        Xin chào! Mình là EZ Assistant, chatbot trí tuệ nhân tạo hỗ trợ khách hàng của EZ Studio. Mình có thể giúp gì cho bạn hôm nay? 😊
+      </div>
+    </div>
+
+    <!-- Quick replies -->
+    <div class="chatbot-quick-replies">
+      <button class="chatbot-reply-btn" data-reply="Cài đặt Server Minecraft?">🎮 Server setup</button>
+      <button class="chatbot-reply-btn" data-reply="Thiết kế Custom Model 3D?">⚔️ Vẽ Model 3D</button>
+      <button class="chatbot-reply-btn" data-reply="Làm sao nạp zCoin?">💳 Nạp tiền</button>
+      <button class="chatbot-reply-btn" data-reply="Liên hệ trực tiếp Admin?">📞 Liên hệ</button>
+    </div>
+
+    <!-- Input form -->
+    <form id="chatbot-form" class="chatbot-input-container">
+      <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" />
+      <button type="submit" class="chatbot-send-btn" title="Gửi">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/chatbot.js"></script>
 <%- include('flash-messages') %>
 </body>
 </html>

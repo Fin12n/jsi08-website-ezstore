@@ -1,46 +1,89 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
-<section class="seller-apply-section" style="padding-top: 100px; min-height: 80vh;">
+<section class="user-seller-apply-section" style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(circle at 10% 20%, rgba(154, 91, 237, 0.03) 0%, transparent 50%);">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <%- include('../partials/user-sidebar') %>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <!-- Alerts -->
+        <% if (locals.success) { %>
+          <div class="alert bg-success bg-opacity-10 border border-success border-opacity-20 text-success alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-check fs-5"></i>
+            <div><%= success %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+        <% if (locals.error) { %>
+          <div class="alert bg-danger bg-opacity-10 border border-danger border-opacity-20 text-danger alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-exclamation fs-5"></i>
+            <div><%= error %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+
         <% if (user.role === 'seller' || user.role === 'admin') { %>
-          <div class="text-center mt-5">
-            <i class="fa-solid fa-shop text-success mb-3" style="font-size: 4rem;"></i>
-            <h2 class="text-white font-outfit">Bạn đã là Seller!</h2>
-            <p class="text-secondary">Bạn hiện đang có quyền đăng bán sản phẩm trên EZ Store.</p>
-            <a href="/seller/dashboard" class="btn btn-hero mt-3">Tới trang quản lý Cửa hàng</a>
+          <div class="card glass-card p-5 text-center" style="border-color: rgba(255, 255, 255, 0.05); background: rgba(255,255,255,0.015);">
+            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);">
+              <i class="fa-solid fa-shop fs-1"></i>
+            </div>
+            <h3 class="text-white font-outfit fw-bold mb-2">Quyền Seller đang hoạt động!</h3>
+            <p class="text-secondary small mb-4">Bạn hiện đang có đầy đủ đặc quyền đăng bán sản phẩm và kiếm tiền trên EZ Store.</p>
+            <div class="d-flex justify-content-center gap-3">
+              <% if (user.role === 'admin') { %>
+                <a href="/admin" class="btn btn-hero px-4 py-2 font-outfit">Đến Admin Panel</a>
+              <% } else { %>
+                <a href="/seller/dashboard" class="btn btn-hero px-4 py-2 font-outfit">Đến Kênh Người Bán</a>
+              <% } %>
+            </div>
           </div>
         <% } else { %>
-          <div class="card glass-card p-5">
-            <div class="text-center mb-5">
-              <i class="fa-solid fa-handshake-angle text-warning mb-3" style="font-size: 3rem;"></i>
-              <h2 class="text-white font-outfit">Đăng ký trở thành Đối tác (Seller)</h2>
-              <p class="text-secondary">Mở gian hàng riêng, đăng bán các tài nguyên của bạn và nhận doanh thu tới 80% giá trị sản phẩm.</p>
+          <div class="card glass-card p-4" style="border-color: rgba(255, 255, 255, 0.05); background: rgba(255,255,255,0.015);">
+            <div class="d-flex align-items-center gap-3 mb-4 border-bottom border-secondary border-opacity-15 pb-3">
+              <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <i class="fa-solid fa-handshake-angle fs-4"></i>
+              </div>
+              <div>
+                <h4 class="text-white font-outfit mb-0 fw-bold">Đăng ký trở thành Đối tác (Seller)</h4>
+                <p class="text-secondary small mb-0">Nhận doanh thu tới 80% giá trị sản phẩm được tải về.</p>
+              </div>
             </div>
 
-            <div class="alert bg-info bg-opacity-10 border border-info text-info mb-4">
-              <i class="fa-solid fa-circle-info me-2"></i> Hệ thống sẽ xét duyệt yêu cầu của bạn trong vòng 24-48 giờ. Bạn sẽ cần tuân thủ nghiêm ngặt các quy định về bản quyền.
+            <div class="alert bg-info bg-opacity-10 border border-info border-opacity-20 text-info mb-4 small d-flex gap-2">
+              <i class="fa-solid fa-circle-info mt-0.5 fs-5"></i>
+              <div>
+                <strong>Lưu ý xét duyệt:</strong> Yêu cầu của bạn sẽ được đội ngũ hỗ trợ kiểm tra thủ công trong vòng 24 - 48 giờ. Vui lòng cung cấp link portfolio sản phẩm chất lượng để đẩy nhanh tiến độ phê duyệt.
+              </div>
             </div>
 
             <form action="/user/seller/apply" method="POST">
               <div class="mb-3">
-                <label class="form-label small text-secondary">Giới thiệu ngắn về bạn (Kinh nghiệm, kỹ năng) *</label>
-                <textarea class="form-control form-glass-input" name="bio" rows="4" required placeholder="Tôi là một Model Designer với 3 năm kinh nghiệm làm việc bằng Blockbench..."></textarea>
+                <label class="form-label small text-secondary font-outfit">Giới thiệu bản thân & kinh nghiệm *</label>
+                <textarea class="form-control form-glass-input" name="bio" rows="4" required placeholder="Ví dụ: Tôi là nhà thiết kế Model Resource Minecraft chuyên nghiệp bằng Blockbench, có kinh nghiệm build server 3 năm..." style="font-size: 0.9rem; line-height: 1.5;"></textarea>
               </div>
+              
               <div class="mb-4">
-                <label class="form-label small text-secondary">Link Portfolio / Sản phẩm mẫu (Tuỳ chọn)</label>
-                <input type="url" class="form-control form-glass-input" name="portfolio" placeholder="https://youtube.com/..." />
+                <label class="form-label small text-secondary font-outfit">Liên kết Portfolio / Sản phẩm mẫu</label>
+                <div class="position-relative">
+                  <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-secondary opacity-50"><i class="fa-solid fa-link"></i></span>
+                  <input type="url" class="form-control form-glass-input ps-5" name="portfolio" placeholder="https://youtube.com/channel/..." />
+                </div>
               </div>
-              <div class="form-check mb-4">
-                <input class="form-check-input bg-transparent border-secondary" type="checkbox" id="agree" required>
-                <label class="form-check-label text-secondary small" for="agree">
-                  Tôi cam kết các sản phẩm tải lên là do chính tôi làm ra hoặc có bản quyền thương mại rõ ràng. Tôi chịu hoàn toàn trách nhiệm pháp lý nếu vi phạm.
+              
+              <div class="form-check mb-4 p-0 d-flex gap-2 align-items-start">
+                <input class="form-check-input bg-transparent border-secondary" type="checkbox" id="agree" required style="width: 17px; height: 17px; margin-top: 2px;">
+                <label class="form-check-label text-secondary small" for="agree" style="line-height: 1.4; user-select: none; cursor: pointer;">
+                  Tôi cam kết toàn bộ tài nguyên tải lên đều thuộc quyền sở hữu trí tuệ của chính tôi hoặc có giấy phép phân phối thương mại hợp pháp. Tôi xin tự chịu mọi trách nhiệm trước pháp luật nếu xảy ra tranh chấp bản quyền.
                 </label>
               </div>
-              <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5">
-                <i class="fa-solid fa-paper-plane me-2"></i>Gửi yêu cầu xét duyệt
+              
+              <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5 shadow-lg d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-paper-plane text-dark"></i> Gửi yêu cầu xét duyệt
               </button>
             </form>
           </div>

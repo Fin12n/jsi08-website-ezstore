@@ -1,63 +1,65 @@
 <%
 const categoriesHtml = `
-<div class="page-header">
-  <div class="page-title">📁 Quản lý Danh mục</div>
-  <div class="page-subtitle">Thêm mới, chỉnh sửa và quản lý các danh mục sản phẩm trên hệ thống.</div>
+<div class="page-header" style="margin-bottom: 28px; display: flex; flex-direction: column; gap: 6px;">
+  <div class="page-title" style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(90deg, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 10px;">
+    <i class="fas fa-folder-tree" style="color: var(--accent); font-size: 22px;"></i> Quản lý Danh mục
+  </div>
+  <div class="page-subtitle" style="font-size: 13.5px; color: var(--text-secondary); opacity: 0.85;">Thêm mới, chỉnh sửa và quản lý các danh mục sản phẩm trên hệ thống.</div>
 </div>
 
-<div style="display:grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+<div class="stats-grid" style="grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: start;">
   
-  <!-- Categories List -->
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-list text-primary"></i> Danh Sách Danh Mục
+  <!-- Categories List (Col 1-8) -->
+  <div class="card" style="grid-column: span 8; min-width: 0; background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-list" style="color: var(--accent);"></i> Danh Sách Danh Mục
     </div>
     
     <div class="table-wrap">
-      <table>
+      <table class="admin-table">
         <thead>
           <tr>
             <th>Slug</th>
             <th>Tên Danh Mục</th>
             <th>Mô tả</th>
-            <th style="text-align: right;">Thao tác</th>
+            <th style="width: 80px; text-align: center;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
           ${typeof categories !== 'undefined' && categories.length > 0 ? categories.map(cat => `
-            <tr>
-              <td><span class="badge badge-info">${cat.slug}</span></td>
-              <td style="font-weight: 600; color: var(--text-primary);">${cat.name}</td>
-              <td style="color: var(--text-secondary); font-size: 13px;">${cat.description || 'Không có mô tả'}</td>
-              <td style="text-align: right;">
-                <form action="/admin/categories/${cat.id}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm thuộc danh mục này có thể bị mất phân loại!');">
-                  <button type="submit" class="btn btn-danger btn-sm btn-icon">
-                    <i class="fas fa-trash"></i>
+            <tr style="transition: background var(--transition);">
+              <td><span class="badge badge-info" style="background:var(--info-glow); border-color:var(--info); color:var(--info); font-size:11px; font-weight:600; font-family:monospace;">${cat.slug}</span></td>
+              <td style="font-weight: 700; color: var(--text-primary); font-size:13.5px; letter-spacing:-0.01em;">${cat.name}</td>
+              <td style="color: var(--text-secondary); font-size: 12.5px; opacity:0.9;">${cat.description || 'Không có mô tả'}</td>
+              <td style="text-align: center;">
+                <form action="/admin/categories/${cat.id}/delete" method="POST" style="display: inline; margin:0;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm thuộc danh mục này có thể bị mất phân loại!');">
+                  <button type="submit" class="btn btn-danger btn-sm btn-icon" style="width:28px; height:28px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:6px;" title="Xóa danh mục">
+                    <i class="fas fa-trash-can" style="font-size:11px;"></i>
                   </button>
                 </form>
               </td>
             </tr>
-          `).join('') : '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Chưa có danh mục nào.</td></tr>'}
+          `).join('') : '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); font-weight:500; padding: 40px;">Chưa có danh mục nào.</td></tr>'}
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Add Category Form -->
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-plus text-success"></i> Thêm Danh Mục
+  <!-- Add Category Form (Col 9-12) -->
+  <div class="card" style="grid-column: span 4; background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-plus" style="color: var(--success);"></i> Thêm Danh Mục
     </div>
     <form action="/admin/categories/add" method="POST">
-      <div class="form-group">
-        <label class="form-label">Tên Danh Mục</label>
-        <input type="text" name="name" class="form-input" placeholder="VD: 3D Models" required>
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Tên Danh Mục *</label>
+        <input type="text" name="name" class="form-input" placeholder="VD: 3D Models" required style="width:100%;">
       </div>
-      <div class="form-group">
-        <label class="form-label">Mô tả (Tùy chọn)</label>
-        <textarea name="description" class="form-textarea" rows="4" placeholder="Nhập mô tả ngắn..."></textarea>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Mô tả (Tùy chọn)</label>
+        <textarea name="description" class="form-textarea" rows="4" placeholder="Nhập mô tả ngắn..." style="width:100%; min-height:100px; resize:vertical;"></textarea>
       </div>
-      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 8px;">
+      <button type="submit" class="btn btn-primary" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px;">
         <i class="fas fa-check"></i> Tạo Danh Mục
       </button>
     </form>

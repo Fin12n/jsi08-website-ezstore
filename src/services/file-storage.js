@@ -46,7 +46,9 @@ if (hasR2Config) {
 }
 
 // Ensure local uploads directory exists
-const LOCAL_UPLOAD_DIR = path.join(__dirname, '../../public/uploads');
+const LOCAL_UPLOAD_DIR = process.env.VERCEL
+  ? '/tmp/uploads'
+  : path.join(__dirname, '../../public/uploads');
 if (!fs.existsSync(LOCAL_UPLOAD_DIR)) {
   fs.mkdirSync(LOCAL_UPLOAD_DIR, { recursive: true });
 }

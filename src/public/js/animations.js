@@ -30,4 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }, observerOptions);
 
   animateElements.forEach(el => observer.observe(el));
+
+  // Chatbot wobble interaction on load
+  const chatbotBtn = document.getElementById('chatbot-toggle');
+  if (chatbotBtn) {
+    setTimeout(() => {
+      chatbotBtn.classList.add('wobble-once');
+      chatbotBtn.addEventListener('animationend', () => {
+        chatbotBtn.classList.remove('wobble-once');
+      });
+    }, 2000);
+  }
 });

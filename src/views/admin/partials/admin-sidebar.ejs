@@ -1,10 +1,12 @@
 <!-- Admin Sidebar Partial -->
 <nav class="admin-sidebar" :class="{ 'open': sidebarOpen }" id="admin-sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">EZ</div>
+  <div class="sidebar-logo" style="display: flex; align-items: center; gap: 12px; padding: 24px; border-bottom: 1px solid var(--border);">
+    <div class="logo-icon" style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: white; box-shadow: 0 4px 12px var(--accent-glow);">
+      <i class="fas fa-cube"></i>
+    </div>
     <div>
-      <div class="logo-text">EZ Studio</div>
-      <div class="logo-badge">ADMIN PANEL</div>
+      <div class="logo-text" style="font-size: 15px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; background: linear-gradient(90deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EZ Studio</div>
+      <div class="logo-badge" style="font-size: 8px; font-weight: 700; color: var(--accent-light); letter-spacing: 0.05em; background: var(--accent-glow); padding: 1.5px 5px; border-radius: 4px; margin-top: 2px; width: fit-content; border: 1px solid rgba(99,102,241,0.15);">PRO PANEL</div>
     </div>
   </div>
 
@@ -15,7 +17,7 @@
     </div>
     <div class="nav-item">
       <a href="/admin/overview" class="nav-link <%= activePage === 'overview' ? 'active' : '' %>">
-        <i class="fas fa-chart-line"></i> Dashboard
+        <i class="fas fa-chart-pie"></i> Dashboard
       </a>
     </div>
 
@@ -25,12 +27,12 @@
     </div>
     <div class="nav-item">
       <a href="/admin/users" class="nav-link <%= activePage === 'users' ? 'active' : '' %>">
-        <i class="fas fa-users"></i> Thành viên
+        <i class="fas fa-user-group"></i> Thành viên
       </a>
     </div>
     <div class="nav-item">
       <a href="/admin/sellers" class="nav-link <%= activePage === 'sellers' ? 'active' : '' %>">
-        <i class="fas fa-store"></i> Người bán
+        <i class="fas fa-shop"></i> Người bán
         <% if (typeof pendingSellersCount !== 'undefined' && pendingSellersCount > 0) { %>
           <span class="nav-badge warning"><%= pendingSellersCount %></span>
         <% } %>
@@ -38,7 +40,7 @@
     </div>
     <div class="nav-item">
       <a href="/admin/products" class="nav-link <%= activePage === 'products' ? 'active' : '' %>">
-        <i class="fas fa-box"></i> Sản phẩm
+        <i class="fas fa-box-open"></i> Sản phẩm
         <% if (typeof pendingProductsCount !== 'undefined' && pendingProductsCount > 0) { %>
           <span class="nav-badge"><%= pendingProductsCount %></span>
         <% } %>
@@ -46,7 +48,7 @@
     </div>
     <div class="nav-item">
       <a href="/admin/categories" class="nav-link <%= activePage === 'categories' ? 'active' : '' %>">
-        <i class="fas fa-tags"></i> Danh mục
+        <i class="fas fa-folder-tree"></i> Danh mục
       </a>
     </div>
 
@@ -56,7 +58,7 @@
     </div>
     <div class="nav-item">
       <a href="/admin/transactions" class="nav-link <%= activePage === 'transactions' ? 'active' : '' %>">
-        <i class="fas fa-receipt"></i> Giao dịch
+        <i class="fas fa-file-invoice-dollar"></i> Giao dịch
       </a>
     </div>
     <div class="nav-item">
@@ -84,7 +86,7 @@
     </div>
     <div class="nav-item">
       <a href="/admin/settings" class="nav-link <%= activePage === 'settings' ? 'active' : '' %>">
-        <i class="fas fa-gear"></i> Cài đặt hệ thống
+        <i class="fas fa-sliders"></i> Cài đặt hệ thống
       </a>
     </div>
 
@@ -93,22 +95,22 @@
       <div class="nav-section-label">Khác</div>
     </div>
     <div class="nav-item">
-      <a href="/" class="nav-link" target="_blank">
-        <i class="fas fa-arrow-up-right-from-square"></i> Xem trang chủ
+      <a href="/" class="nav-link">
+        <i class="fas fa-house"></i> Về trang chủ
       </a>
     </div>
   </div>
 
   <!-- Admin info footer -->
   <div class="sidebar-footer">
-    <div class="admin-avatar">
+    <div class="admin-avatar" style="background: linear-gradient(135deg, var(--accent), #8b5cf6); font-weight: 700; color: white;">
       <%= user && user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A' %>
     </div>
     <div class="admin-info">
-      <div class="admin-name"><%= user ? (user.displayName || user.email) : 'Admin' %></div>
-      <div class="admin-role">Administrator</div>
+      <div class="admin-name" style="font-weight: 600; color: var(--text-primary); font-size:13px;"><%= user ? (user.displayName || user.email) : 'Admin' %></div>
+      <div class="admin-role" style="font-size: 11px; color: var(--text-secondary); opacity: 0.85;">Administrator</div>
     </div>
-    <a href="/logout" title="Đăng xuất" style="color: var(--text-muted); font-size:15px; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">
+    <a href="/logout" title="Đăng xuất" style="color: var(--text-secondary); opacity: 0.7; font-size:14px; transition: all var(--transition);" onmouseover="this.style.color='var(--danger)'; this.style.opacity='1'" onmouseout="this.style.color='var(--text-secondary)'; this.style.opacity='0.7'">
       <i class="fas fa-right-from-bracket"></i>
     </a>
   </div>

@@ -22,7 +22,7 @@
                 <div class="col-lg-4 col-md-6">
                   <div class="card glass-card card-item">
                     <div class="card-img-container">
-                      <img src="<%= product.image %>" alt="<%= product.title %>" onerror="this.src='/imgs/logo.webp'" />
+                      <img src="<%= product.image %>" alt="<%= product.title %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
                       <span class="card-category-badge"><%= group.category.name %></span>
                     </div>
                     <div class="card-body-custom">

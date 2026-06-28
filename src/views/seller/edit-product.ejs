@@ -1,0 +1,83 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="seller-edit-product-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <!-- Sidebar -->
+          <div class="text-center mb-4">
+            <h5 class="text-white font-outfit mb-0"><i class="fa-solid fa-shop text-warning me-2"></i>Seller Panel</h5>
+          </div>
+          <hr class="border-secondary opacity-25">
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/seller/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-chart-pie me-2"></i>Thống kê</a>
+            <a href="/seller/products" class="nav-link active font-outfit"><i class="fa-solid fa-boxes-stacked me-2"></i>Sản phẩm của tôi</a>
+            <a href="/seller/add-product" class="nav-link text-white font-outfit"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng sản phẩm mới</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <h3 class="text-white font-outfit mb-0">Chỉnh sửa sản phẩm</h3>
+          <a href="/seller/products" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+          </a>
+        </div>
+
+        <div class="card glass-card p-4">
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert bg-danger bg-opacity-10 border border-danger text-danger mb-4 small">
+              <i class="fa-solid fa-circle-exclamation me-2"></i> <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/seller/edit-product/<%= product.docId %>" method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+              <div class="col-md-8">
+                <label class="form-label small text-secondary">Tên sản phẩm *</label>
+                <input type="text" class="form-control form-glass-input" name="title" value="<%= product.title %>" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-secondary">Danh mục *</label>
+                <select class="form-select form-glass-input" name="category" required>
+                  <% categories.forEach(c => { %>
+                    <option value="<%= c.slug %>" <%= product.category === c.slug ? 'selected' : '' %>><%= c.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Giá bán (zCoin) *</label>
+                <input type="number" class="form-control form-glass-input" name="price" value="<%= product.priceNumber || 0 %>" required min="0">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Thay đổi ảnh (Để trống nếu giữ nguyên)</label>
+                <input type="file" class="form-control form-glass-input" name="image" accept="image/*">
+                <div class="mt-2 d-flex align-items-center gap-2">
+                  <span class="small text-secondary">Ảnh hiện tại:</span>
+                  <img src="<%= product.image %>" class="rounded border border-secondary border-opacity-25" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-secondary">Mô tả sản phẩm *</label>
+                <textarea class="form-control form-glass-input" name="description" rows="6" required><%= product.description %></textarea>
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5">
+                  <i class="fa-solid fa-save me-2"></i>Lưu thay đổi
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

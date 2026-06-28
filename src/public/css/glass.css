@@ -1,0 +1,33 @@
+/* ==========================================================================
+   GLASSMORPHISM & PREMIUM UTILITIES
+   ========================================================================== */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 24px var(--glass-shadow);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* Styled Alert Boxes */
+.glass-alert {
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}

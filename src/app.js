@@ -27,20 +27,50 @@ app.use(helmet({
 }));
 
 // Body Parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Session Configuration
-const session = require('express-session');
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'ez-studio-super-secret-key-38472948',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // Set to true if deploying over HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 Hours
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString();
   }
 }));
+app.use(express.urlencoded({ extended: true }));
+
+const cookieParser = require('cookie-parser');
+const i18n = require('./middlewares/i18n');
+
+app.use(cookieParser());
+app.use(i18n);
+
+// Session Configuration — using cookie-session (stateless, serverless-compatible)
+// Stores session data in a signed+encrypted cookie on the client.
+// Zero database writes per request — eliminates Firestore DEADLINE_EXCEEDED timeouts on Vercel.
+const cookieSession = require('cookie-session');
+
+app.use(cookieSession({
+  name: 'ez-session',
+  keys: [
+    process.env.SESSION_SECRET || 'ez-studio-super-secret-key-38472948',
+    process.env.SESSION_SECRET_FALLBACK || 'ez-studio-fallback-key-1234567890'
+  ],
+  maxAge: 24 * 60 * 60 * 1000, // 24 Hours
+  httpOnly: true,
+  // Use secure cookies on production (Vercel = HTTPS), allow insecure on local dev
+  secure: process.env.NODE_ENV !== 'development',
+  sameSite: 'lax'
+}));
+
+// Compatibility shim: cookie-session doesn't have a destroy() method by default.
+// Attach req.session.destroy() to match express-session API used in auth routes.
+app.use((req, res, next) => {
+  if (req.session && !req.session.destroy) {
+    req.session.destroy = (cb) => {
+      req.session = null;
+      if (cb) cb(null);
+    };
+  }
+  next();
+});
+
+console.log('✔ Session: Using cookie-session (stateless, serverless-safe)');
 
 // Expose Session variables to EJS views
 app.use((req, res, next) => {
@@ -49,8 +79,61 @@ app.use((req, res, next) => {
     req.session.cart = [];
   }
   res.locals.cart = req.session.cart;
+
+  // Theme selection
+  res.locals.theme = req.cookies.theme || 'dark';
+
+  // Flash message system — read from session, expose to views, then clear
+  // This keeps URLs clean (no ?error= query strings)
+  res.locals.flashError = req.session.flashError || null;
+  res.locals.flashSuccess = req.session.flashSuccess || null;
+  delete req.session.flashError;
+  delete req.session.flashSuccess;
+
+  // Intercept standard res.redirect to automatically convert query parameter alerts to flash messages
+  const originalRedirect = res.redirect;
+  res.redirect = function(url) {
+    if (typeof url === 'string') {
+      try {
+        const dummyBase = 'http://localhost';
+        const parsedUrl = new URL(url, dummyBase);
+        
+        let hasParams = false;
+        if (parsedUrl.searchParams.has('success')) {
+          req.session.flashSuccess = parsedUrl.searchParams.get('success');
+          parsedUrl.searchParams.delete('success');
+          hasParams = true;
+        }
+        if (parsedUrl.searchParams.has('error')) {
+          req.session.flashError = parsedUrl.searchParams.get('error');
+          parsedUrl.searchParams.delete('error');
+          hasParams = true;
+        }
+        
+        if (hasParams) {
+          const cleanPath = url.startsWith('/')
+            ? parsedUrl.pathname + parsedUrl.search + parsedUrl.hash
+            : parsedUrl.href;
+          return originalRedirect.call(this, cleanPath);
+        }
+      } catch (e) {
+        console.error('Error in redirect interceptor:', e);
+      }
+    }
+    return originalRedirect.call(this, url);
+  };
+
+  // Helper: set flash and redirect in one call
+  res.flashRedirect = function(url, type, message) {
+    req.session['flash' + (type === 'error' ? 'Error' : 'Success')] = message;
+    return res.redirect(url);
+  };
+
   next();
 });
+
+
+
 
 // Setup EJS View Engine
 app.set('view engine', 'ejs');
@@ -59,9 +142,18 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve Static Files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Force-logout check: if admin set forceLogoutAt on a user, invalidate their session
-const db = require('./config/firebase');
+// Fallback for missing images to prevent 404 spam
+app.get('/img/no-img.png', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'imgs', 'logo.webp'));
+});
+
+// Force-logout check: if admin set forceLogoutAt on a user, invalidate their session.
+// Only run for authenticated users on non-static paths.
 app.use(async (req, res, next) => {
+  // Skip for static assets to avoid unnecessary Firestore queries
+  const isStaticAsset = /\.(js|css|png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf|eot)$/i.test(req.path);
+  if (isStaticAsset) return next();
+
   if (req.session && req.session.user && req.session.user.id) {
     try {
       const userId = req.session.user.id;
@@ -123,6 +215,15 @@ app.use('/user', userRouter);
 app.use('/webhook', webhookRouter);
 app.use('/seller', sellerRouter);
 
+app.get('/change-lang/:lang', (req, res) => {
+  const lang = req.params.lang;
+  if (lang === 'vi' || lang === 'en') {
+    res.cookie('lang', lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false });
+  }
+  res.redirect(req.get('referer') || '/');
+});
+
+
 // 404 Handle
 app.use((req, res, next) => {
   res.status(404).render('404', { title: '404 - Not Found' });
@@ -134,6 +235,10 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong on the server!');
 });
 
-app.listen(PORT, () => {
-  console.log(`EZ Studio server running on http://localhost:${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`EZ Studio server running on http://localhost:${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+}
+
+module.exports = app;

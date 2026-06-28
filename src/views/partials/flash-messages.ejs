@@ -16,26 +16,47 @@
     }
   });
 
-  <% if (typeof success !== 'undefined' && success) { %>
+  <% const currentSuccess = (typeof flashSuccess !== 'undefined' && flashSuccess) || (typeof success !== 'undefined' && success) || null; %>
+  <% const currentError = (typeof flashError !== 'undefined' && flashError) || (typeof error !== 'undefined' && error) || null; %>
+  <% const currentWarning = (typeof warning !== 'undefined' && warning) || null; %>
+
+  <% if (currentSuccess) { %>
     EZToast.fire({
       icon: 'success',
-      title: `<%= success %>`
+      title: `<%= currentSuccess %>`
     });
   <% } %>
   
-  <% if (typeof error !== 'undefined' && error) { %>
-    EZToast.fire({
+  <% if (currentError) { %>
+    Swal.fire({
       icon: 'error',
-      title: `<%= error %>`
+      title: 'Lỗi',
+      text: `<%= currentError %>`,
+      background: 'rgba(30, 41, 59, 0.95)',
+      color: '#f8fafc',
+      customClass: {
+        popup: 'glass-card border border-danger border-opacity-25'
+      }
     });
   <% } %>
   
-  <% if (typeof warning !== 'undefined' && warning) { %>
+  <% if (currentWarning) { %>
     EZToast.fire({
       icon: 'warning',
-      title: `<%= warning %>`
+      title: `<%= currentWarning %>`
     });
   <% } %>
+
+  // Clear query parameters from URL to keep address bar clean
+  if (window.history.replaceState) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('success') || url.searchParams.has('error') || url.searchParams.has('warning')) {
+      url.searchParams.delete('success');
+      url.searchParams.delete('error');
+      url.searchParams.delete('warning');
+      window.history.replaceState({ path: url.href }, '', url.href);
+    }
+  }
 
   // Premium UI/UX Confirm Delete Modal
   function confirmDelete(event, form, message) {

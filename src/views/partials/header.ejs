@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="<%= locals.theme || 'dark' %>">
 <head>
+  <script>
+    (function() {
+      const theme = document.cookie.match(/theme=([^;]+)/)?.[1] || localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= typeof title !== 'undefined' ? title : 'EZ Studio - Minecraft Resources & Setups' %></title>

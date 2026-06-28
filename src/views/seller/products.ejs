@@ -35,6 +35,7 @@
                     <th class="py-3 px-4 bg-transparent border-0">Giá bán</th>
                     <th class="py-3 px-4 bg-transparent border-0">Trạng thái</th>
                     <th class="py-3 px-4 bg-transparent border-0">Lượt xem</th>
+                    <th class="py-3 px-4 bg-transparent border-0 text-end">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody class="border-top-0">
@@ -42,7 +43,7 @@
                     <tr class="border-secondary border-opacity-10">
                       <td class="px-4 py-3 bg-transparent text-white">
                         <div class="d-flex align-items-center gap-3">
-                          <img src="<%= p.image %>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='/imgs/logo.webp'">
+                          <img src="<%= p.image %>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'">
                           <div>
                             <div class="font-outfit fw-bold"><%= p.title %></div>
                             <small class="text-secondary">ID: <%= p.id %></small>
@@ -65,6 +66,16 @@
                       </td>
                       <td class="px-4 py-3 bg-transparent text-secondary">
                         <%= p.views || 0 %>
+                      </td>
+                      <td class="px-4 py-3 bg-transparent text-end">
+                        <a href="/seller/edit-product/<%= p.docId %>" class="btn btn-sm btn-outline-warning rounded-pill me-1" title="Sửa sản phẩm">
+                          <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <form action="/seller/delete-product/<%= p.docId %>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Xóa sản phẩm">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </form>
                       </td>
                     </tr>
                   <% }) %>

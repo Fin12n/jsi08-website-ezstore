@@ -26,7 +26,7 @@
                   <tr>
                     <td>
                       <div class="d-flex align-items-center gap-3">
-                        <img src="<%= item.image %>" alt="<%= item.title %>" class="rounded border border-secondary border-opacity-25" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.src='/imgs/logo.webp'">
+                        <img src="<%= item.image %>" alt="<%= item.title %>" class="rounded border border-secondary border-opacity-25" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'">
                         <span class="font-outfit fw-bold text-white"><%= item.title %></span>
                       </div>
                     </td>
@@ -69,19 +69,19 @@
           <% if (locals.cart && cart.length > 0) { %>
             <div class="d-flex justify-content-between mb-3">
               <span class="text-secondary">Tạm tính:</span>
-              <span class="text-white font-outfit fw-bold"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total) %></span>
+              <span class="text-white font-outfit fw-bold"><%= total.toLocaleString('vi-VN') %> zCoin</span>
             </div>
             
             <div class="d-flex justify-content-between mb-4">
               <span class="text-secondary">Thuế (0%):</span>
-              <span class="text-white font-outfit fw-bold">0 đ</span>
+              <span class="text-white font-outfit fw-bold">0 zCoin</span>
             </div>
             
             <hr class="border-secondary opacity-25">
             
             <div class="d-flex justify-content-between mb-4 align-items-end">
               <span class="text-white fs-5">Tổng thanh toán:</span>
-              <span class="text-success font-outfit fw-bold fs-3"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total) %></span>
+              <span class="text-success font-outfit fw-bold fs-3"><%= total.toLocaleString('vi-VN') %> zCoin</span>
             </div>
             
             <form action="/checkout" method="POST" class="mb-3">

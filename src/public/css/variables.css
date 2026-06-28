@@ -1,0 +1,143 @@
+/* ==========================================================================
+   DESIGN TOKENS & SYSTEM VARIABLES (Modern Minimal)
+   ========================================================================== */
+:root {
+  /* Ultra-dark Minimalist Colors */
+  --ez-bg-raw: 220, 15%, 5%;
+  --ez-bg: hsl(var(--ez-bg-raw));
+  --ez-bg-alt: hsl(220, 15%, 7%);
+  --ez-bg-card: hsl(220, 15%, 9%);
+  
+  /* Brand colors (Muted for elegance) */
+  --ez-yellow: hsl(45, 100%, 65%);
+  --ez-blue: hsl(196, 80%, 65%);
+  --ez-green: hsl(100, 60%, 60%);
+  --ez-accent: hsl(260, 70%, 70%);
+  --ez-accent-glow: hsla(260, 70%, 70%, 0.2);
+
+  /* Typography Colors (High Contrast) */
+  --text-primary: hsl(0, 0%, 100%);
+  --text-secondary: hsl(220, 10%, 70%);
+  --text-muted: hsl(220, 10%, 45%);
+  
+  /* Minimal Glassmorphism settings */
+  --glass-bg: rgba(255, 255, 255, 0.015);
+  --glass-border: rgba(255, 255, 255, 0.03);
+  --glass-shadow: rgba(0, 0, 0, 0.2);
+
+  /* Soft Shadows */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.4);
+
+  /* Refined Border radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Font Families */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+
+  /* Header compensation */
+  --navbar-height: 80px;
+
+  /* Theme-aware backgrounds */
+  --glass-navbar-bg: rgba(13, 15, 18, 0.85);
+  --glass-dropdown-bg: rgba(15, 17, 23, 0.95);
+  --glass-dropdown-hover-bg: rgba(255, 255, 255, 0.04);
+  --glass-dropdown-border: rgba(255, 255, 255, 0.08);
+  --glass-dropdown-divider: rgba(255, 255, 255, 0.08);
+  --glass-card-bg: rgba(20, 22, 32, 0.5);
+}
+
+/* Light Theme Variables */
+:root[data-theme="light"] {
+  --ez-bg-raw: 220, 20%, 97%;
+  --ez-bg: hsl(var(--ez-bg-raw));
+  --ez-bg-alt: hsl(220, 20%, 93%);
+  --ez-bg-card: hsl(0, 0%, 100%);
+  
+  /* Brand colors (adjusted for readability on light) */
+  --ez-yellow: hsl(35, 95%, 45%);
+  --ez-blue: hsl(196, 85%, 45%);
+  --ez-green: hsl(100, 60%, 35%);
+  --ez-accent: hsl(260, 65%, 55%);
+  --ez-accent-glow: hsla(260, 65%, 55%, 0.15);
+
+  /* Typography Colors */
+  --text-primary: hsl(220, 25%, 10%);
+  --text-secondary: hsl(220, 15%, 35%);
+  --text-muted: hsl(220, 10%, 55%);
+  
+  /* Glassmorphism Settings */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
+
+  --glass-navbar-bg: rgba(255, 255, 255, 0.85);
+  --glass-dropdown-bg: rgba(255, 255, 255, 0.96);
+  --glass-dropdown-hover-bg: rgba(0, 0, 0, 0.04);
+  --glass-dropdown-border: rgba(0, 0, 0, 0.08);
+  --glass-dropdown-divider: rgba(0, 0, 0, 0.08);
+  --glass-card-bg: rgba(255, 255, 255, 0.75);
+}
+
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--ez-bg);
+  color: var(--text-primary);
+  margin-top: var(--navbar-height);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.body-no-nav {
+  margin-top: 0 !important;
+}
+
+/* Smooth Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ez-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(222, 20%, 22%);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ez-accent);
+}
+
+/* Typography styles */
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--ez-blue);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+a:hover {
+  color: var(--ez-yellow);
+}

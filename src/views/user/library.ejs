@@ -1,52 +1,65 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
-<section class="user-library-section" style="padding-top: 100px; min-height: 80vh;">
+<section class="user-library-section" style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(circle at 10% 20%, rgba(154, 91, 237, 0.03) 0%, transparent 50%);">
   <div class="container">
     <div class="row g-4">
       <!-- Sidebar -->
       <div class="col-lg-3">
-        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
-          <div class="text-center mb-4">
-            <div class="avatar-circle bg-warning text-dark mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 80px; height: 80px; border-radius: 50%;">
-              <%= user.username.charAt(0).toUpperCase() %>
-            </div>
-            <h5 class="text-white font-outfit mb-0"><%= user.username %></h5>
-          </div>
-
-          <hr class="border-secondary opacity-25">
-
-          <div class="nav flex-column nav-pills gap-2">
-            <a href="/user/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-wallet me-2"></i>Tổng quan Ví</a>
-            <a href="/user/library" class="nav-link active font-outfit"><i class="fa-solid fa-layer-group me-2"></i>Thư viện của tôi</a>
-            <a href="/user/history" class="nav-link text-white font-outfit"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch</a>
-            <a href="/user/settings" class="nav-link text-white font-outfit"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
-          </div>
-        </div>
+        <%- include('../partials/user-sidebar') %>
       </div>
 
       <!-- Main Content -->
       <div class="col-lg-9">
-        <h3 class="text-white font-outfit mb-4">Sản phẩm đã mua</h3>
+        <!-- Success/Error Alerts -->
+        <% if (locals.success) { %>
+          <div class="alert bg-success bg-opacity-10 border border-success border-opacity-20 text-success alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-check fs-5"></i>
+            <div><%= success %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+        <% if (locals.error) { %>
+          <div class="alert bg-danger bg-opacity-10 border border-danger border-opacity-20 text-danger alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-exclamation fs-5"></i>
+            <div><%= error %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+
+        <h3 class="text-white font-outfit mb-4 fw-bold">Thư viện của tôi</h3>
         
         <div class="row g-4">
           <% if (library && library.length > 0) { %>
             <% library.forEach(item => { %>
               <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-3 h-100 product-card">
-                  <img src="<%= item.productImage %>" class="card-img-top rounded mb-3" style="height: 150px; object-fit: cover;" onerror="this.src='/imgs/logo.webp'">
-                  <div class="card-body p-0 d-flex flex-column">
-                    <h5 class="text-white font-outfit mb-2"><%= item.productTitle %></h5>
-                    <p class="text-secondary small mb-3">Ngày mua: <%= new Date(item.purchasedAt).toLocaleDateString('vi-VN') %></p>
+                <div class="card glass-card p-3 h-100 hover-scale-sm d-flex flex-column" style="border-color: rgba(255, 255, 255, 0.05); background: rgba(255,255,255,0.015);">
+                  <div class="position-relative mb-3 rounded-3 overflow-hidden" style="height: 160px; background: rgba(0,0,0,0.2);">
+                    <img src="<%= item.productImage %>" class="w-100 h-100" style="object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-2" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                      <span class="text-warning small font-code"><%= item.productId.slice(0,8).toUpperCase() %></span>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex flex-column flex-grow-1">
+                    <h5 class="text-white font-outfit mb-1 fw-bold tracking-tight text-truncate" title="<%= item.productTitle %>"><%= item.productTitle %></h5>
+                    <p class="text-secondary small mb-4 opacity-75">
+                      <i class="fa-regular fa-calendar-check me-1"></i> Mua ngày: <%= new Date(item.purchasedAt).toLocaleDateString('vi-VN') %>
+                    </p>
+                    
                     <div class="mt-auto">
                       <div class="d-flex gap-2">
                         <form action="/user/download" method="POST" class="flex-grow-1">
                           <input type="hidden" name="productId" value="<%= item.productId %>">
-                          <button type="submit" class="btn btn-hero w-100 py-2"><i class="fa-solid fa-download"></i> Tải</button>
+                          <button type="submit" class="btn btn-hero w-100 py-2.5 font-outfit d-flex align-items-center justify-content-center gap-1.5 shadow-lg">
+                            <i class="fa-solid fa-download text-dark"></i> Tải về
+                          </button>
                         </form>
-                        <form action="/user/refund" method="POST" class="flex-shrink-0" onsubmit="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn tiền? Khả năng truy cập file sẽ bị tạm khóa.');">
+                        <form action="/user/refund" method="POST" class="flex-shrink-0" onsubmit="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn tiền cho sản phẩm này? Quyền truy cập tệp tin sẽ bị tạm khoá cho đến khi xử lý xong.');">
                           <input type="hidden" name="productId" value="<%= item.productId %>">
-                          <button type="submit" class="btn btn-outline-danger py-2" title="Yêu cầu hoàn tiền"><i class="fa-solid fa-rotate-left"></i></button>
+                          <button type="submit" class="btn btn-outline-danger py-2.5 px-3" title="Yêu cầu hoàn tiền">
+                            <i class="fa-solid fa-rotate-left"></i>
+                          </button>
                         </form>
                       </div>
                     </div>
@@ -56,10 +69,12 @@
             <% }) %>
           <% } else { %>
             <div class="col-12 text-center py-5">
-              <i class="fa-solid fa-layer-group text-secondary mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
-              <h5 class="text-white font-outfit">Thư viện trống</h5>
-              <p class="text-secondary small">Bạn chưa mua sản phẩm nào. Hãy khám phá cửa hàng nhé!</p>
-              <a href="/products" class="btn btn-outline-info mt-2">Đến Cửa hàng</a>
+              <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                <i class="fa-solid fa-layer-group fs-2"></i>
+              </div>
+              <h5 class="text-white font-outfit fw-bold">Thư viện trống</h5>
+              <p class="text-secondary small">Bạn chưa mua sản phẩm nào trên hệ thống của chúng tôi.</p>
+              <a href="/products" class="btn btn-outline-info mt-3 px-4 font-outfit">Đến cửa hàng ngay</a>
             </div>
           <% } %>
         </div>

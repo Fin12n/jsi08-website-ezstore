@@ -7,6 +7,9 @@ const { verifyToken } = require('../services/totp-service');
 // Block authenticated users from guest pages (like login/register)
 function isGuest(req, res, next) {
   if (req.session && req.session.user) {
+    if (req.session.user.role === 'admin') {
+      return res.redirect('/admin');
+    }
     return res.redirect('/');
   }
   next();
@@ -17,7 +20,8 @@ function isAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
     return next();
   }
-  res.redirect('/login?error=Bạn cần đăng nhập để thực hiện chức năng này!');
+  req.session.flashError = 'Bạn cần đăng nhập để thực hiện chức năng này!';
+  res.redirect('/login');
 }
 
 // Block non-admin users from admin dashboard pages
@@ -34,7 +38,8 @@ function isAdmin(req, res, next) {
     // }
     return next();
   }
-  res.redirect('/login?error=Bạn cần tài khoản quyền Admin để truy cập trang này!');
+  req.session.flashError = 'Bạn cần tài khoản quyền Admin để truy cập trang này!';
+  res.redirect('/login');
 }
 
 // Block non-seller users from seller dashboard pages
@@ -42,7 +47,8 @@ function isSeller(req, res, next) {
   if (req.session && req.session.user && (req.session.user.role === 'seller' || req.session.user.role === 'admin')) {
     return next();
   }
-  res.redirect('/login?error=Bạn cần tài khoản quyền Người bán (Seller) để truy cập trang này!');
+  req.session.flashError = 'Bạn cần tài khoản quyền Người bán (Seller) để truy cập trang này!';
+  res.redirect('/login');
 }
 
 /**

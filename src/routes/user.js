@@ -17,14 +17,30 @@ router.get('/dashboard', async (req, res) => {
     // Refresh session balance
     req.session.user.balance = userData.balance || 0;
 
+    // Fetch transactions for recent activities
+    const snapshot = await db.collection('transactions')
+      .where('userId', '==', req.session.user.id)
+      .get();
+      
+    const transactions = [];
+    snapshot.docs.forEach(doc => {
+      transactions.push({ id: doc.id, ...doc.data() });
+    });
+    
+    // Sort descending by date locally
+    transactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const recentActivities = transactions.slice(0, 5);
+
     res.render('user/dashboard', {
       title: 'Bảng điều khiển - EZ Studio',
       activePage: 'dashboard',
       balance: req.session.user.balance,
+      transactions: recentActivities,
       success: req.query.success,
       error: req.query.error
     });
   } catch (error) {
+    console.error('❌ Error loading user dashboard:', error);
     res.redirect('/?error=Lỗi tải dữ liệu người dùng');
   }
 });
@@ -114,11 +130,18 @@ router.post('/settings/2fa/disable', async (req, res) => {
 
 // GET Topup Page
 router.get('/topup', async (req, res) => {
-  res.render('user/topup', {
-    title: 'Nạp tiền vào Ví - EZ Studio',
-    activePage: 'topup',
-    user: req.session.user
-  });
+  try {
+    const settingsDoc = await db.collection('settings').doc('general').get();
+    const settings = settingsDoc.exists ? settingsDoc.data() : {};
+    res.render('user/topup', {
+      title: 'Nạp tiền vào Ví - EZ Studio',
+      activePage: 'topup',
+      user: req.session.user,
+      settings
+    });
+  } catch (error) {
+    res.redirect('/user/dashboard?error=Lỗi tải dữ liệu nạp tiền');
+  }
 });
 
 // GET History Page
@@ -159,13 +182,13 @@ router.post('/topup/card', async (req, res) => {
     // For this demonstration, we'll mock a successful response after 2 seconds with a 20% fee deduction.
     
     const parsedAmount = parseInt(amount);
-    const receivedAmount = parsedAmount * 0.8; // 20% fee
+    const receivedAmount = Math.round((parsedAmount * 0.8) / 1000); // 20% fee, converted to zCoin
 
     // Save transaction as PENDING first
     const txRef = await db.collection('transactions').add({
       userId: req.session.user.id,
       type: 'TOPUP',
-      amount: receivedAmount, // Expected to receive
+      amount: receivedAmount, // Expected to receive in zCoin
       status: 'PENDING',
       description: `Nạp thẻ ${telco} mệnh giá ${parsedAmount}`,
       serial: serial,
@@ -189,7 +212,7 @@ router.post('/topup/card', async (req, res) => {
           status: 'COMPLETED'
         }, { merge: true });
         
-        console.log(`Mock Card2k: Thẻ ${serial} nạp thành công, cộng ${receivedAmount}đ`);
+        console.log(`Mock Card2k: Thẻ ${serial} nạp thành công, cộng ${receivedAmount} zCoin`);
       } catch (err) {
         console.log('Mock Card2k error:', err);
       }
@@ -327,7 +350,7 @@ router.post('/spin', async (req, res) => {
     const userDoc = await db.collection('users').doc(req.session.user.id).get();
     const userData = userDoc.data();
     const currentBalance = userData.balance || 0;
-    const spinCost = 10000;
+    const spinCost = 10;
 
     if (currentBalance < spinCost) {
       return res.redirect('/user/spin?error=Không đủ số dư để quay');
@@ -338,10 +361,10 @@ router.post('/spin', async (req, res) => {
 
     // Define Prizes
     const prizes = [
-      { id: 1, name: 'Jackpot', value: 500000, chance: 0.01 }, // 1%
-      { id: 2, name: 'Giải Nhất', value: 100000, chance: 0.05 }, // 5%
-      { id: 3, name: 'Giải Nhì', value: 50000, chance: 0.10 }, // 10%
-      { id: 4, name: 'Hoàn Tiền', value: 10000, chance: 0.20 }, // 20%
+      { id: 1, name: 'Jackpot', value: 500, chance: 0.01 }, // 1%
+      { id: 2, name: 'Giải Nhất', value: 100, chance: 0.05 }, // 5%
+      { id: 3, name: 'Giải Nhì', value: 50, chance: 0.10 }, // 10%
+      { id: 4, name: 'Hoàn Tiền', value: 10, chance: 0.20 }, // 20%
       { id: 5, name: 'Chúc bạn may mắn lần sau', value: 0, chance: 0.64 } // 64%
     ];
 
@@ -365,7 +388,8 @@ router.post('/spin', async (req, res) => {
 
     // Atomic Update DB
     await db.collection('users').doc(req.session.user.id).set({
-      balance: newBalance
+      balance: newBalance,
+      walletBalance: newBalance
     }, { merge: true });
 
     req.session.user.balance = newBalance;
@@ -393,8 +417,9 @@ router.post('/spin', async (req, res) => {
 
     req.session.spinResult = {
       title: wonPrize.value > 0 ? 'Chúc mừng!' : 'Rất tiếc!',
-      message: wonPrize.value > 0 ? `Bạn đã trúng ${wonPrize.name} (${new Intl.NumberFormat('vi-VN').format(wonPrize.value)} VND)` : 'Chúc bạn may mắn lần sau nhé!',
-      isWin: wonPrize.value > 0
+      message: wonPrize.value > 0 ? `Bạn đã trúng ${wonPrize.name} (${wonPrize.value} zCoin)` : 'Chúc bạn may mắn lần sau nhé!',
+      isWin: wonPrize.value > 0,
+      prizeName: wonPrize.name
     };
 
     res.redirect('/user/spin');

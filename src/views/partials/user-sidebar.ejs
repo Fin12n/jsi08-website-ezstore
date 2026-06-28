@@ -1,0 +1,77 @@
+<div class="card glass-card p-4 sticky-top user-dashboard-sidebar" style="top: 100px; border-color: rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.015);">
+  <!-- User Profile Header -->
+  <div class="text-center mb-4">
+    <div class="avatar-circle-glow mx-auto mb-3 position-relative" style="width: 80px; height: 80px;">
+      <div class="avatar-circle-inner bg-gradient-premium text-white mx-auto d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 80px; height: 80px; border-radius: 50%; box-shadow: 0 0 20px rgba(154, 91, 237, 0.3); border: 2px solid rgba(255, 255, 255, 0.1);">
+        <%= user.username ? user.username.charAt(0).toUpperCase() : 'U' %>
+      </div>
+      <% if (user.role === 'admin') { %>
+        <span class="position-absolute bottom-0 end-0 bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 24px; height: 24px; border: 2px solid var(--ez-bg);" title="Administrator">
+          <i class="fa-solid fa-crown" style="font-size: 10px;"></i>
+        </span>
+      <% } else if (user.role === 'seller') { %>
+        <span class="position-absolute bottom-0 end-0 bg-info text-dark rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 24px; height: 24px; border: 2px solid var(--ez-bg);" title="Seller">
+          <i class="fa-solid fa-shop" style="font-size: 10px;"></i>
+        </span>
+      <% } %>
+    </div>
+    
+    <h5 class="text-white font-outfit mb-1 fw-bold tracking-tight"><%= user.username %></h5>
+    <div class="d-flex align-items-center justify-content-center gap-2">
+      <span class="badge bg-purple-glow text-purple small px-2.5 py-1" style="font-size: 0.7rem; letter-spacing: 0.05em; font-weight: 600; text-transform: uppercase;">
+        <%= user.role %>
+      </span>
+      <% if (user.isTwoFactorEnabled) { %>
+        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 d-flex align-items-center gap-1" style="font-size: 0.7rem;" title="Bảo mật 2FA Đang Bật">
+          <i class="fa-solid fa-shield-halved" style="font-size: 9px;"></i> 2FA
+        </span>
+      <% } %>
+    </div>
+  </div>
+
+  <hr class="border-secondary opacity-15 my-3">
+
+  <!-- Sidebar Menu List -->
+  <div class="nav flex-column nav-pills gap-2 user-sidebar-menu">
+    <% const current = typeof activePage !== 'undefined' ? activePage : ''; %>
+    
+    <a href="/user/dashboard" class="nav-link d-flex align-items-center justify-content-between font-outfit px-3 py-2.5 rounded-3 <%= current === 'dashboard' ? 'active' : 'text-secondary-hover' %>">
+      <span class="d-flex align-items-center"><i class="fa-solid fa-wallet me-2.5 text-center" style="width: 20px;"></i>Tổng quan Ví</span>
+      <i class="fa-solid fa-chevron-right small opacity-50 menu-arrow-anim"></i>
+    </a>
+    
+    <a href="/user/library" class="nav-link d-flex align-items-center justify-content-between font-outfit px-3 py-2.5 rounded-3 <%= current === 'library' ? 'active' : 'text-secondary-hover' %>">
+      <span class="d-flex align-items-center"><i class="fa-solid fa-layer-group me-2.5 text-center" style="width: 20px;"></i>Thư viện của tôi</span>
+      <i class="fa-solid fa-chevron-right small opacity-50 menu-arrow-anim"></i>
+    </a>
+    
+    <a href="/user/history" class="nav-link d-flex align-items-center justify-content-between font-outfit px-3 py-2.5 rounded-3 <%= current === 'history' ? 'active' : 'text-secondary-hover' %>">
+      <span class="d-flex align-items-center"><i class="fa-solid fa-clock-rotate-left me-2.5 text-center" style="width: 20px;"></i>Lịch sử giao dịch</span>
+      <i class="fa-solid fa-chevron-right small opacity-50 menu-arrow-anim"></i>
+    </a>
+    
+    <a href="/user/settings" class="nav-link d-flex align-items-center justify-content-between font-outfit px-3 py-2.5 rounded-3 <%= current === 'settings' ? 'active' : 'text-secondary-hover' %>">
+      <span class="d-flex align-items-center"><i class="fa-solid fa-gear me-2.5 text-center" style="width: 20px;"></i>Cài đặt tài khoản</span>
+      <i class="fa-solid fa-chevron-right small opacity-50 menu-arrow-anim"></i>
+    </a>
+
+    <!-- Action Shortcuts -->
+    <% if (user.role === 'admin') { %>
+      <a href="/admin" class="nav-link d-flex align-items-center font-outfit px-3 py-2.5 rounded-3 text-warning border border-warning border-opacity-15 mt-3 hover-scale-sm">
+        <i class="fa-solid fa-crown me-2.5 text-center" style="width: 20px;"></i>Trang quản lý Admin
+      </a>
+    <% } else if (user.role === 'seller') { %>
+      <a href="/seller/dashboard" class="nav-link d-flex align-items-center font-outfit px-3 py-2.5 rounded-3 text-info border border-info border-opacity-15 mt-3 hover-scale-sm">
+        <i class="fa-solid fa-shop me-2.5 text-center" style="width: 20px;"></i>Kênh Người Bán
+      </a>
+    <% } else { %>
+      <a href="/user/seller/apply" class="nav-link d-flex align-items-center font-outfit px-3 py-2.5 rounded-3 text-info border border-info border-opacity-15 mt-3 hover-scale-sm <%= current === 'seller-apply' ? 'active' : '' %>">
+        <i class="fa-solid fa-handshake-angle me-2.5 text-center" style="width: 20px;"></i>Đăng ký Seller
+      </a>
+    <% } %>
+
+    <a href="/logout" class="nav-link d-flex align-items-center font-outfit px-3 py-2.5 rounded-3 text-danger border border-danger border-opacity-15 mt-2 hover-scale-sm">
+      <i class="fa-solid fa-right-from-bracket me-2.5 text-center" style="width: 20px;"></i>Đăng xuất
+    </a>
+  </div>
+</div>

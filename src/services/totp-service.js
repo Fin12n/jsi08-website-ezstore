@@ -1,19 +1,10 @@
 /**
  * TOTP Service — Two-Factor Authentication
- * Uses otplib v13.4+ (TOTP class API) + qrcode for QR generation.
+ * Uses otplib v12 (authenticator API) + qrcode for QR generation.
  * Implements Option B: OTP confirm dialog before sensitive admin actions.
  */
-const { TOTP, generateSecret: genSecret } = require('otplib');
+const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
-
-// Create a TOTP instance with custom options
-const totp = new TOTP();
-totp.options = {
-  window: 1,
-  step: 30,
-  digits: 6,
-  algorithm: 'sha1',
-};
 
 /**
  * Generate a new TOTP secret for an admin account.
@@ -22,7 +13,7 @@ totp.options = {
  * @returns {string} Base32-encoded TOTP secret
  */
 function generateSecret() {
-  return genSecret(20); // 20 bytes = strong enough for TOTP
+  return authenticator.generateSecret();
 }
 
 /**
@@ -34,7 +25,7 @@ function generateSecret() {
  * @returns {string} otpauth:// URI
  */
 function generateOtpAuthUrl(email, secret, issuer = 'EZ Studio Admin') {
-  return totp.keyuri(email, issuer, secret);
+  return authenticator.keyuri(email, issuer, secret);
 }
 
 /**
@@ -69,7 +60,7 @@ function verifyToken(secret, token) {
   try {
     if (!secret || !token) return false;
     const cleanToken = String(token).replace(/\s/g, '').trim();
-    return totp.verify({ token: cleanToken, secret });
+    return authenticator.check(cleanToken, secret);
   } catch (err) {
     console.error('[TOTP] Verification error:', err.message);
     return false;
@@ -84,7 +75,7 @@ function verifyToken(secret, token) {
  * @returns {string} Current 6-digit TOTP code
  */
 function getCurrentToken(secret) {
-  return totp.generate(secret);
+  return authenticator.generate(secret);
 }
 
 module.exports = {

@@ -10,20 +10,20 @@
       <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
         <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill border border-secondary border-opacity-25 bg-dark bg-opacity-50 mb-4 backdrop-blur">
           <span class="badge bg-primary rounded-pill">New</span>
-          <span class="text-secondary small font-outfit">Trải nghiệm EZ Marketplace Beta</span>
+          <span class="text-secondary small font-outfit"><%= __('hero_badge') %></span>
         </div>
         <h1 class="font-outfit display-2 fw-bold mb-4 text-glow-primary" style="line-height: 1.1;">
-          Nâng Tầm <br /> <span class="text-primary">Server Minecraft</span> <br /> Của Bạn
+          <%= __('hero_title_1') %> <br /> <span class="text-primary"><%= __('hero_title_2') %></span> <br /> <%= __('hero_title_3') %>
         </h1>
         <p class="lead text-secondary mb-5" style="max-width: 500px;">
-          Nền tảng cung cấp tài nguyên, Plugins bản quyền và 3D Models chất lượng cao, tối ưu tuyệt đối cho cộng đồng Việt Nam.
+          <%= __('hero_subtitle') %>
         </p>
         <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
           <a href="#products" class="btn btn-hero btn-lg px-4 py-3 rounded-pill fw-bold letter-spacing-1 shadow-lg">
-            <i class="fa-solid fa-rocket me-2"></i> Khám Phá Ngay
+            <i class="fa-solid fa-rocket me-2"></i> <%= __('explore_now') %>
           </a>
           <a href="https://discord.gg/ezstudio" target="_blank" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill fw-bold">
-            <i class="fa-brands fa-discord me-2 text-primary"></i> Tham Gia Cộng Đồng
+            <i class="fa-brands fa-discord me-2 text-primary"></i> <%= __('join_community') %>
           </a>
         </div>
       </div>
@@ -47,11 +47,11 @@
   <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5">
       <div>
-        <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small"><i class="fa-solid fa-fire me-2"></i>Sản phẩm nổi bật</span>
-        <h2 class="display-5 text-white font-outfit fw-bold mt-2 mb-0">Trending Resources</h2>
+        <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small"><i class="fa-solid fa-fire me-2"></i><%= __('featured_resources') %></span>
+        <h2 class="display-5 text-white font-outfit fw-bold mt-2 mb-0"><%= __('trending_resources') %></h2>
       </div>
       <a href="/products" class="btn btn-outline-secondary rounded-pill px-4 mt-3 mt-md-0 btn-hover-glow">
-        Xem tất cả <i class="fa-solid fa-arrow-right ms-2"></i>
+        <%= __('view_all') %> <i class="fa-solid fa-arrow-right ms-2"></i>
       </a>
     </div>
 
@@ -61,7 +61,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="card glass-card h-100 border-0 shadow-lg overflow-hidden product-card-hover" style="transition: all 0.3s ease;">
               <div class="position-relative overflow-hidden" style="height: 220px;">
-                <img src="<%= product.image %>" alt="<%= product.title %>" class="w-100 h-100 object-fit-cover transition-transform" onerror="this.src='/imgs/logo.webp'" />
+                <img src="<%= product.image %>" alt="<%= product.title %>" class="w-100 h-100 object-fit-cover transition-transform" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
                 <div class="position-absolute top-0 end-0 m-3">
                   <span class="badge bg-dark bg-opacity-75 border border-secondary text-white px-3 py-2 rounded-pill backdrop-blur">
                     <% 
@@ -93,7 +93,7 @@
         <% }) %>
       <% } else { %>
         <div class="col-12 text-center py-5">
-          <p class="text-secondary"><i class="fa-solid fa-box-open fs-1 mb-3 d-block"></i>Hiện chưa có sản phẩm nào.</p>
+          <p class="text-secondary"><i class="fa-solid fa-box-open fs-1 mb-3 d-block"></i><%= __('no_products') %></p>
         </div>
       <% } %>
     </div>
@@ -104,8 +104,8 @@
 <section class="services-section py-5 position-relative" id="services">
   <div class="container py-5">
     <div class="text-center mb-5">
-      <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small">Giải pháp toàn diện</span>
-      <h2 class="display-5 text-white font-outfit fw-bold mt-2">Dịch Vụ Nổi Bật</h2>
+      <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small"><%= __('services_subtitle') %></span>
+      <h2 class="display-5 text-white font-outfit fw-bold mt-2"><%= __('services_title') %></h2>
     </div>
 
     <div class="row g-4 justify-content-center">
@@ -134,13 +134,13 @@
       <div class="col-lg-6 bg-dark p-5 position-relative">
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('/imgs/2Banner_sapphire.jpg') center/cover; opacity: 0.15;"></div>
         <div class="position-relative z-1 h-100 d-flex flex-column justify-content-center">
-          <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small mb-2">Về Chúng Tôi</span>
+          <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small mb-2"><%= __('about_title') %></span>
           <h2 class="display-6 text-white font-outfit fw-bold mb-4">EZ Studio</h2>
           <p class="text-secondary fs-5 mb-4" style="line-height: 1.8;">
-            Được thành lập bởi <strong>Fin12n</strong> và hỗ trợ bởi Co-Owner <strong>tomy067</strong>, EZ Studio là nơi cung cấp các sản phẩm Minecraft Plugins, 3D Models và Server Setups bản quyền với chi phí tối ưu nhất cho cộng đồng Việt Nam.
+            <%= __('about_desc') %>
           </p>
           <div class="mt-auto pt-4">
-            <h6 class="text-white font-outfit mb-3">Đối Tác Tin Cậy</h6>
+            <h6 class="text-white font-outfit mb-3"><%= __('partner_title') %></h6>
             <a href="https://card2k.com/" target="_blank" class="d-inline-block bg-white bg-opacity-10 p-2 rounded-3 border border-secondary border-opacity-25 hover-lift">
               <img src="/imgs/2K9XTEAM_851_x_315_px.png" alt="Card2K" style="height: 30px; object-fit: contain;">
             </a>
@@ -150,23 +150,23 @@
       
       <!-- Contact Half -->
       <div class="col-lg-6 glass-panel p-5 d-flex flex-column justify-content-center">
-        <h3 class="text-white font-outfit fw-bold mb-2">Liên Hệ Ngay</h3>
-        <p class="text-secondary mb-4">Bạn cần hỗ trợ thiết lập Server hoặc thiết kế độc quyền? Gửi tin nhắn cho chúng tôi.</p>
+        <h3 class="text-white font-outfit fw-bold mb-2"><%= __('contact_title') %></h3>
+        <p class="text-secondary mb-4"><%= __('contact_desc') %></p>
         
         <form action="#" method="POST" class="modern-form">
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <input type="text" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="Họ và tên" required>
+              <input type="text" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="<%= __('contact_name') %>" required>
             </div>
             <div class="col-md-6">
-              <input type="email" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="Email liên hệ" required>
+              <input type="email" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="<%= __('contact_email') %>" required>
             </div>
           </div>
           <div class="mb-4">
-            <textarea class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" rows="3" placeholder="Nội dung yêu cầu..." required></textarea>
+            <textarea class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" rows="3" placeholder="<%= __('contact_msg') %>" required></textarea>
           </div>
           <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold letter-spacing-1 shadow-sm">
-            Gửi Tin Nhắn <i class="fa-solid fa-paper-plane ms-2"></i>
+            <%= __('send_msg') %> <i class="fa-solid fa-paper-plane ms-2"></i>
           </button>
         </form>
 

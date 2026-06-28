@@ -41,7 +41,9 @@ if (!isCloudinaryActive) {
   
   storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const uploadDir = path.join(__dirname, '../public/uploads');
+      const uploadDir = process.env.VERCEL
+        ? '/tmp/uploads'
+        : path.join(__dirname, '../public/uploads');
       // Create folder if it doesn't exist
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });

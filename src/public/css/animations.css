@@ -1,0 +1,153 @@
+/* ==========================================================================
+   PREMIUM UI/UX ANIMATIONS & GLOW EFFECTS
+   ========================================================================== */
+
+/* Glow Effect - Muted for minimalism */
+.glow-accent {
+  position: relative;
+}
+.glow-accent::after {
+  content: '';
+  position: absolute;
+  filter: blur(60px);
+  z-index: -1;
+  opacity: 0.15;
+  transition: opacity 0.4s;
+}
+
+/* IntersectionObserver animations */
+.premium-anim-hidden {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.premium-anim-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Button Pulse/Glow on Hover */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+.btn:hover::after {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+}
+
+/* Keyframes for Glow Pulse */
+@keyframes pulse-glow {
+  0% { transform: scale(0.98); opacity: 0.25; }
+  100% { transform: scale(1.02); opacity: 0.45; }
+}
+
+/* Glow animation for special tags */
+.text-glow-warning {
+  text-shadow: 0 0 15px rgba(243, 156, 18, 0.3);
+}
+.text-glow-success {
+  text-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+}
+
+/* Card Shine Effect on Hover */
+.card, .glass-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before, .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: 0.75s;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card:hover::before, .glass-card:hover::before {
+  left: 150%;
+  transition: 0.75s;
+}
+
+/* Micro-interaction Chatbot Wobble */
+@keyframes chatbot-wobble {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  15% { transform: scale(1.1) rotate(-8deg); }
+  30% { transform: scale(1.1) rotate(6deg); }
+  45% { transform: scale(1.1) rotate(-4deg); }
+  60% { transform: scale(1.1) rotate(2deg); }
+  75% { transform: scale(1.1) rotate(-1deg); }
+}
+
+.chatbot-toggle-btn {
+  animation: chatbot-pulse 2.5s infinite;
+}
+
+.chatbot-toggle-btn.wobble-once {
+  animation: chatbot-wobble 0.9s ease-in-out;
+}
+
+@keyframes chatbot-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(154, 91, 237, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(154, 91, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(154, 91, 237, 0); }
+}
+
+/* Navbar Link Hover animation */
+.nav-link-custom {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link-custom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, hsl(260, 70%, 70%), hsl(196, 80%, 65%));
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link-custom:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* General hover scale for minor elements */
+.hover-scale-sm {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-scale-sm:hover {
+  transform: translateY(-2px) scale(1.02);
+}

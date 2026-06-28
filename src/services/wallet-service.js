@@ -62,7 +62,10 @@ async function creditWallet({ userId, amount, reason, adminInfo = {}, req = null
   const balanceAfter = balanceBefore + Math.floor(amount);
 
   await db.collection('users').doc(userId).set(
-    { walletBalance: balanceAfter },
+    { 
+      walletBalance: balanceAfter,
+      balance: balanceAfter
+    },
     { merge: true }
   );
 
@@ -106,7 +109,10 @@ async function debitWallet({ userId, amount, reason, adminInfo = {}, req = null 
   const balanceAfter = balanceBefore - Math.floor(amount);
 
   await db.collection('users').doc(userId).set(
-    { walletBalance: balanceAfter },
+    { 
+      walletBalance: balanceAfter,
+      balance: balanceAfter
+    },
     { merge: true }
   );
 
@@ -157,8 +163,8 @@ async function atomicRefund({ buyerId, sellerId, amount, orderId, reason, adminI
     buyerNewBalance = buyerBefore + Math.floor(amount);
     sellerNewBalance = Math.max(0, sellerBefore - Math.floor(amount));
 
-    await db.collection('users').doc(buyerId).set({ walletBalance: buyerNewBalance }, { merge: true });
-    await db.collection('users').doc(sellerId).set({ walletBalance: sellerNewBalance }, { merge: true });
+    await db.collection('users').doc(buyerId).set({ walletBalance: buyerNewBalance, balance: buyerNewBalance }, { merge: true });
+    await db.collection('users').doc(sellerId).set({ walletBalance: sellerNewBalance, balance: sellerNewBalance }, { merge: true });
     await db.collection('orders').doc(orderId).set({ refundStatus: 'approved', downloadRevoked: true }, { merge: true });
   } else {
     // Real Firestore: use runTransaction for atomicity
@@ -181,8 +187,8 @@ async function atomicRefund({ buyerId, sellerId, amount, orderId, reason, adminI
       buyerNewBalance = buyerBalance + Math.floor(amount);
       sellerNewBalance = Math.max(0, sellerBalance - Math.floor(amount));
 
-      transaction.set(buyerRef, { walletBalance: buyerNewBalance }, { merge: true });
-      transaction.set(sellerRef, { walletBalance: sellerNewBalance }, { merge: true });
+      transaction.set(buyerRef, { walletBalance: buyerNewBalance, balance: buyerNewBalance }, { merge: true });
+      transaction.set(sellerRef, { walletBalance: sellerNewBalance, balance: sellerNewBalance }, { merge: true });
       transaction.set(orderRef, { refundStatus: 'approved', downloadRevoked: true }, { merge: true });
     });
   }

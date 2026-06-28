@@ -12,8 +12,9 @@ const localMockProducts = [
     title: 'Sapphire Knight Set',
     description: 'Stunning armor set of Sapphire Knight ready to suit you',
     image: '/imgs/1Banner_sapphire.png',
-    originalPrice: '300.000đ',
-    salePrice: '199.000 VND',
+    originalPrice: '300 zCoin',
+    salePrice: '199 zCoin',
+    priceNumber: 199,
     carousel: ['/imgs/1Banner_sapphire.png', '/imgs/2Banner_sapphire.jpg'],
     features: [
       'Hỗ trợ cài đặt sau khi nhận hàng!',
@@ -44,8 +45,9 @@ const localMockProducts = [
     title: 'Voidtech Pack [64x]',
     description: 'Voidtech Pack Weapons Tools & Cosmetic',
     image: '/imgs/voidtech-models/01JTWVAVQMWNB58C168CPJ03F1.jpg',
-    originalPrice: '500.000đ',
-    salePrice: '99.000 VND',
+    originalPrice: '500 zCoin',
+    salePrice: '99 zCoin',
+    priceNumber: 99,
     carousel: [
       '/imgs/voidtech-models/01JTWVAVQMWNB58C168CPJ03F1.jpg',
       '/imgs/voidtech-models/01JTWVCG3NBZAHN32675VTJV4H.gif'
@@ -78,8 +80,9 @@ const localMockProducts = [
     title: 'Lobby Underwater City ➔ 800x800',
     description: 'The map is supported for versions 1.8 - 1.18+.',
     image: '/imgs/2Banner_sapphire.jpg',
-    originalPrice: '500.000đ',
-    salePrice: '99.000 VND',
+    originalPrice: '500 zCoin',
+    salePrice: '99 zCoin',
+    priceNumber: 99,
     carousel: ['/imgs/2Banner_sapphire.jpg'],
     features: ['Hỗ trợ cài đặt!', 'Phiên bản 1.8 - 1.18+'],
     itemsList: ['Lobby Spawn 800x800', 'Underwater Theme'],
@@ -92,8 +95,9 @@ const localMockProducts = [
     title: 'Skyblock DHS015',
     description: 'Spigot 1.12.2 (1.12.x -> 1.16.x) custom skyblock island spawn.',
     image: '/imgs/Skyblock DHS015.png',
-    originalPrice: '95.000đ',
-    salePrice: '49.000 VND',
+    originalPrice: '95 zCoin',
+    salePrice: '49 zCoin',
+    priceNumber: 49,
     carousel: ['/imgs/Skyblock DHS015.png'],
     features: ['Spigot 1.12.2 (1.12.x -> 1.16.x)'],
     itemsList: ['Skyblock Island Spawn'],
@@ -106,8 +110,9 @@ const localMockProducts = [
     title: 'Blossom Mega Earth',
     description: 'Full custom earth survival setup with gorgeous resource packs.',
     image: '/imgs/banner1.webp',
-    originalPrice: '350.000đ',
-    salePrice: '249.000 VND',
+    originalPrice: '350 zCoin',
+    salePrice: '249 zCoin',
+    priceNumber: 249,
     carousel: ['/imgs/banner1.webp'],
     features: ['Hỗ trợ setup', 'Resource Pack tùy chỉnh'],
     itemsList: ['Earth Survival Config Files'],
@@ -177,7 +182,7 @@ const store = {
       buyerId: 'user-demo-001',
       sellerId: 'seller-demo-001',
       orderId: 'order-demo-001',
-      amount: 99000,
+      amount: 99,
       reason: 'Sản phẩm không hoạt động đúng như mô tả.',
       evidenceUrls: [],
       status: 'pending',
@@ -188,7 +193,7 @@ const store = {
     {
       id: 'topup-demo-001',
       userId: 'user-demo-001',
-      amount: 200000,
+      amount: 200,
       method: 'bank',
       transferContent: 'NAP200K USER001',
       status: 'pending',
@@ -239,14 +244,17 @@ const mockDb = {
               data: () => item
             };
           },
-          set: async (data) => {
+          set: async (data, options = {}) => {
             const list = store[collectionName];
             const idx = list.findIndex(x => x.id === docId);
-            const newItem = { id: docId, ...data };
             if (idx !== -1) {
-              list[idx] = newItem;
+              if (options.merge) {
+                list[idx] = { ...list[idx], ...data, id: docId };
+              } else {
+                list[idx] = { id: docId, ...data };
+              }
             } else {
-              list.push(newItem);
+              list.push({ id: docId, ...data });
             }
             return true;
           },
@@ -255,6 +263,16 @@ const mockDb = {
             const idx = list.findIndex(x => x.id === docId);
             if (idx !== -1) {
               list.splice(idx, 1);
+            }
+            return true;
+          },
+          update: async (data) => {
+            const list = store[collectionName];
+            const idx = list.findIndex(x => x.id === docId);
+            if (idx !== -1) {
+              list[idx] = { ...list[idx], ...data, id: docId };
+            } else {
+              list.push({ id: docId, ...data });
             }
             return true;
           }
@@ -348,8 +366,8 @@ const dbWrapper = {
           try {
             return await realDb.collection(collectionName).get();
           } catch (err) {
-            console.error(`❌ Firestore collection('${collectionName}').get() failed. Falling back to Mock DB:`, err.message);
-            useMockFallback = true;
+            console.error(`❌ Firestore collection('${collectionName}').get() failed. Using Mock for this request:`, err.message);
+            // Per-request fallback only — do NOT set useMockFallback=true
           }
         }
         return mockDb.collection(collectionName).get();
@@ -361,33 +379,40 @@ const dbWrapper = {
               try {
                 return await realDb.collection(collectionName).doc(docId).get();
               } catch (err) {
-                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').get() failed. Falling back to Mock DB:`, err.message);
-                useMockFallback = true;
+                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').get() failed. Using Mock for this request:`, err.message);
               }
             }
             return mockDb.collection(collectionName).doc(docId).get();
           },
-          set: async (data) => {
+          set: async (data, options = {}) => {
             if (!dbWrapper.isMock) {
               try {
-                return await realDb.collection(collectionName).doc(docId).set(data);
+                return await realDb.collection(collectionName).doc(docId).set(data, options);
               } catch (err) {
-                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').set() failed. Falling back to Mock DB:`, err.message);
-                useMockFallback = true;
+                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').set() failed. Using Mock for this request:`, err.message);
               }
             }
-            return mockDb.collection(collectionName).doc(docId).set(data);
+            return mockDb.collection(collectionName).doc(docId).set(data, options);
           },
           delete: async () => {
             if (!dbWrapper.isMock) {
               try {
                 return await realDb.collection(collectionName).doc(docId).delete();
               } catch (err) {
-                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').delete() failed. Falling back to Mock DB:`, err.message);
-                useMockFallback = true;
+                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').delete() failed. Using Mock for this request:`, err.message);
               }
             }
             return mockDb.collection(collectionName).doc(docId).delete();
+          },
+          update: async (data) => {
+            if (!dbWrapper.isMock) {
+              try {
+                return await realDb.collection(collectionName).doc(docId).update(data);
+              } catch (err) {
+                console.error(`❌ Firestore collection('${collectionName}').doc('${docId}').update() failed. Using Mock for this request:`, err.message);
+              }
+            }
+            return mockDb.collection(collectionName).doc(docId).update(data);
           }
         };
       },
@@ -396,8 +421,7 @@ const dbWrapper = {
           try {
             return await realDb.collection(collectionName).add(data);
           } catch (err) {
-            console.error(`❌ Firestore collection('${collectionName}').add() failed. Falling back to Mock DB:`, err.message);
-            useMockFallback = true;
+            console.error(`❌ Firestore collection('${collectionName}').add() failed. Using Mock for this request:`, err.message);
           }
         }
         return mockDb.collection(collectionName).add(data);
@@ -408,17 +432,19 @@ const dbWrapper = {
         const wrapChain = (realChain, mChain) => {
           return {
             get: async () => {
-              if (!dbWrapper.isMock) {
+              if (!dbWrapper.isMock && realChain) {
                 try {
                   return await realChain.get();
                 } catch (err) {
-                  console.error(`❌ Firestore collection('${collectionName}') query get() failed. Falling back to Mock DB:`, err.message);
-                  useMockFallback = true;
+                  console.error(`❌ Firestore collection('${collectionName}') query get() failed. Using Mock for this request:`, err.message);
                 }
               }
               return mChain.get();
             },
-            orderBy: (fld, dir = 'asc') => wrapChain(realChain.orderBy(fld, dir), mChain.orderBy(fld, dir))
+            orderBy: (fld, dir = 'asc') => wrapChain(
+              realChain ? realChain.orderBy(fld, dir) : null,
+              mChain.orderBy(fld, dir)
+            )
           };
         };
         
@@ -427,7 +453,7 @@ const dbWrapper = {
           try {
             initialRealChain = realDb.collection(collectionName).where(field, op, val);
           } catch(e) {
-            useMockFallback = true;
+            console.error(`❌ Firestore where() chain init failed:`, e.message);
           }
         }
         return wrapChain(initialRealChain, mockChain);
@@ -439,8 +465,7 @@ const dbWrapper = {
               try {
                 return await realDb.collection(collectionName).orderBy(field, direction).get();
               } catch (err) {
-                console.error(`❌ Firestore collection('${collectionName}').orderBy('${field}', '${direction}').get() failed. Falling back to Mock DB:`, err.message);
-                useMockFallback = true;
+                console.error(`❌ Firestore collection('${collectionName}').orderBy('${field}', '${direction}').get() failed. Using Mock for this request:`, err.message);
               }
             }
             return mockDb.collection(collectionName).orderBy(field, direction).get();

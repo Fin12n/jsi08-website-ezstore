@@ -16,7 +16,7 @@
             <div class="carousel-inner">
               <% product.carousel.forEach((image, index) => { %>
                 <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                  <img src="<%= image %>" class="d-block w-100" style="max-height: 450px; object-fit: cover;" alt="<%= product.title %> Image <%= index + 1 %>" onerror="this.src='/imgs/logo.webp'" />
+                  <img src="<%= image %>" class="d-block w-100" style="max-height: 450px; object-fit: cover;" alt="<%= product.title %> Image <%= index + 1 %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
                 </div>
               <% }) %>
             </div>
@@ -33,7 +33,7 @@
           </div>
         <% } else { %>
           <div class="rounded-4 overflow-hidden shadow-lg">
-            <img src="<%= product.image %>" class="img-fluid w-100" alt="<%= product.title %>" onerror="this.src='/imgs/logo.webp'" />
+            <img src="<%= product.image %>" class="img-fluid w-100" alt="<%= product.title %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
           </div>
         <% } %>
       </div>

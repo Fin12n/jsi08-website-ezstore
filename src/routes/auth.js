@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const db = require('../config/firebase');
 const { sendVerificationEmail, isMock: isEmailMock } = require('../config/email');
 const { isGuest, isAuthenticated } = require('../middlewares/auth');
@@ -8,10 +8,12 @@ const { authenticator } = require('otplib');
 
 // GET Login page (Only accessible for guests)
 router.get('/login', isGuest, (req, res) => {
+  // Flash messages come from res.locals (set by app.js flash middleware)
+  // Also support legacy ?error= for backward compat, but prefer flash
   res.render('login', { 
     title: 'Đăng nhập - EZ Studio', 
-    error: req.query.error || null,
-    success: req.query.success || null
+    error: res.locals.flashError || req.query.error || null,
+    success: res.locals.flashSuccess || req.query.success || null
   });
 });
 
@@ -84,11 +86,7 @@ router.post('/login', isGuest, async (req, res) => {
 
     console.log(`✔ User '${userData.username}' logged in successfully. Role: ${userData.role}`);
     
-    if (userData.role === 'admin') {
-      res.redirect('/admin');
-    } else {
-      res.redirect('/');
-    }
+    res.redirect('/');
 
   } catch (error) {
     console.error('❌ Login database error:', error);
@@ -401,11 +399,7 @@ router.post('/login/2fa', isGuest, async (req, res) => {
     delete req.session.pending2FA;
     console.log(`✔ User '${pendingUser.username}' passed 2FA and logged in.`);
 
-    if (pendingUser.role === 'admin') {
-      res.redirect('/admin');
-    } else {
-      res.redirect('/');
-    }
+    res.redirect('/');
 
   } catch (error) {
     console.error('❌ 2FA verification error:', error);

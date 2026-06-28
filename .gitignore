@@ -1,4 +1,16 @@
+# Dependency directories
 node_modules/
+
+# Environment files
 .env
-*.log
-.DS_Store
+.env.*
+!.env.example
+
+# Session/temp files
+sessions/
+scratch/
+vercel-*.txt
+.vercel/
+
+# IDE/system config
+.gemini/

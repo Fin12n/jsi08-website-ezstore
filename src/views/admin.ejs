@@ -31,11 +31,11 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="originalPrice" class="form-label small text-secondary">Giá gốc (nếu có)</label>
-                <input type="text" class="form-control form-glass-input" id="originalPrice" name="originalPrice" placeholder="Ví dụ: 300.000đ" />
+                <input type="text" class="form-control form-glass-input" id="originalPrice" name="originalPrice" placeholder="Ví dụ: 300 zCoin" />
               </div>
               <div class="col-md-6">
                 <label for="salePrice" class="form-label small text-secondary">Giá bán thực tế *</label>
-                <input type="text" class="form-control form-glass-input" id="salePrice" name="salePrice" placeholder="Ví dụ: 199.000 VND" required />
+                <input type="text" class="form-control form-glass-input" id="salePrice" name="salePrice" placeholder="Ví dụ: 199 zCoin" required />
               </div>
             </div>
 
@@ -107,7 +107,7 @@
                   <% products.forEach(prod => { %>
                     <tr class="border-secondary border-opacity-25">
                       <td>
-                        <img src="<%= prod.image %>" alt="<%= prod.title %>" class="rounded-2" width="60" height="45" style="object-fit: cover;" onerror="this.src='/imgs/logo.webp'" />
+                        <img src="<%= prod.image %>" alt="<%= prod.title %>" class="rounded-2" width="60" height="45" style="object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
                       </td>
                       <td>
                         <span class="text-white fw-semibold small d-block"><%= prod.title %></span>

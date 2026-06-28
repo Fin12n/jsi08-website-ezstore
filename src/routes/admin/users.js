@@ -5,7 +5,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const db = require('../../config/firebase');
 const { requireAdminOtp } = require('../../middlewares/auth');
 const { logAdminAction } = require('../../middlewares/audit-logger');

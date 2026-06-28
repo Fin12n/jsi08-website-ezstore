@@ -1,0 +1,296 @@
+/* ==========================================================================
+   LANDING PAGE (HERO SECTION)
+   ========================================================================== */
+.home-section {
+  min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--ez-bg);
+}
+
+.hero-glow {
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--ez-accent-glow) 0%, transparent 60%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.home-section h1 {
+  font-size: 5.5rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.home-section p.lead {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  font-weight: 300;
+}
+
+.btn-hero {
+  background: #fff;
+  color: var(--ez-bg) !important;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 16px 36px;
+  border-radius: 100px; /* Pill shape for minimalist elegance */
+  border: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-hero:hover {
+  transform: translateY(-2px);
+  background: #f5f5f5;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+}
+
+/* ==========================================================================
+   ABOUT & CONTACT SECTION
+   ========================================================================== */
+.about-section {
+  background-color: var(--ez-bg-alt);
+  padding: 80px 0;
+}
+
+.contact-section {
+  background-color: var(--ez-bg);
+  padding: 80px 0;
+}
+
+.contact-info-card {
+  padding: 30px;
+  border-radius: var(--radius-md);
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.contact-info-item i {
+  font-size: 1.25rem;
+  color: var(--ez-blue);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+.contact-info-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.contact-info-value {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Contact Form custom styling */
+.form-glass-input {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary) !important;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s;
+}
+.form-glass-input:focus {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+.form-glass-input::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-form {
+  background: #fff;
+  color: var(--ez-bg);
+  font-weight: 600;
+  border: none;
+  padding: 14px 24px;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-form:hover {
+  transform: translateY(-2px);
+  background: #f5f5f5;
+}
+
+/* ==========================================================================
+   AUTHENTICATION LAYOUT
+   ========================================================================== */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(154, 91, 237, 0.05) 0%, transparent 60%);
+  padding: 40px 15px;
+}
+
+.auth-card {
+  padding: 45px 35px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.btn-homeback {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+.btn-homeback:hover {
+  background: var(--ez-yellow);
+  color: var(--ez-bg);
+}
+
+/* ==========================================================================
+   USER DASHBOARD PREMIUM SYSTEM (Pro Max Custom CSS)
+   ========================================================================== */
+.avatar-circle-glow {
+  position: relative;
+}
+.avatar-circle-glow::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(135deg, hsl(260, 70%, 70%), hsl(220, 80%, 65%));
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.3;
+  filter: blur(8px);
+  animation: pulse-glow 3s infinite alternate;
+}
+
+.bg-gradient-premium {
+  background: linear-gradient(135deg, hsl(260, 60%, 55%) 0%, hsl(220, 70%, 50%) 100%);
+}
+
+.bg-purple-glow {
+  background: rgba(154, 91, 237, 0.1);
+  border: 1px solid rgba(154, 91, 237, 0.2);
+}
+.text-purple {
+  color: hsl(260, 70%, 75%);
+}
+
+/* Sidebar Menu */
+.user-sidebar-menu .nav-link {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+.user-sidebar-menu .nav-link.active {
+  background: linear-gradient(90deg, rgba(154, 91, 237, 0.15) 0%, rgba(154, 91, 237, 0.03) 100%) !important;
+  border-color: rgba(154, 91, 237, 0.3) !important;
+  color: hsl(260, 75%, 75%) !important;
+  box-shadow: 0 4px 15px rgba(154, 91, 237, 0.08);
+}
+.user-sidebar-menu .nav-link.active .menu-arrow-anim {
+  transform: translateX(3px);
+  opacity: 1 !important;
+  color: hsl(260, 75%, 75%);
+}
+.user-sidebar-menu .nav-link:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.03);
+}
+.user-sidebar-menu .nav-link:hover .menu-arrow-anim {
+  transform: translateX(3px);
+  opacity: 0.8;
+}
+
+.menu-arrow-anim {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hover-scale-sm {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.hover-scale-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Balance Card Dashboard */
+.card-balance-gradient {
+  background: linear-gradient(135deg, rgba(15, 17, 23, 0.95) 0%, rgba(26, 32, 45, 0.95) 100%) !important;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+.card-balance-gradient::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(154, 91, 237, 0.08) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Timeline Activity */
+.timeline-activity {
+  position: relative;
+  padding-left: 20px;
+}
+.timeline-activity::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 24px;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-dot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  border: 2px solid var(--ez-bg);
+}
+.timeline-dot.success { background: var(--ez-green); }
+.timeline-dot.danger { background: hsl(0, 80%, 60%); }
+.timeline-dot.warning { background: var(--ez-yellow); }
