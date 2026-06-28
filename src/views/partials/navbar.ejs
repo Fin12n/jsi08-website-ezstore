@@ -81,7 +81,7 @@
               </div>
               <div class="text-start d-none d-lg-block" style="line-height: 1.2;">
                 <span class="d-block text-secondary" style="font-size: 0.75rem;"><%= __('hello') %>,</span>
-                <strong class="text-white small"><%= user.username %></strong>
+                <strong class="small" style="color: var(--text-primary);"><%= user.username %></strong>
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-lg border-0 mt-2" aria-labelledby="userDropdown">
@@ -124,7 +124,7 @@
           </li>
         <% } else { %>
           <li class="nav-item my-2 my-lg-0">
-            <a class="btn btn-outline-light btn-login me-2 px-3 py-1.5" href="/login" id="nav-login-btn">
+            <a class="btn btn-login me-2 px-3 py-1.5" href="/login" id="nav-login-btn">
               <%= __('login') %>
             </a>
           </li>

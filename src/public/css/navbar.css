@@ -41,7 +41,9 @@
 }
 
 .btn-login {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-dropdown-border) !important;
+  color: var(--text-primary) !important;
+  background: transparent;
   border-radius: var(--radius-sm);
   transition: all 0.3s;
   font-weight: 500;
@@ -49,22 +51,24 @@
   padding: 8px 20px;
 }
 .btn-login:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--glass-dropdown-hover-bg) !important;
+  border-color: var(--glass-dropdown-border) !important;
 }
 
 .btn-signup {
-  background: #fff;
-  color: var(--ez-bg) !important;
+  background: var(--ez-accent) !important;
+  color: #fff !important;
   border: none;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.9rem;
   padding: 8px 20px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px var(--ez-accent-glow);
 }
 .btn-signup:hover {
-  background: #f0f0f0;
+  background: hsl(260, 75%, 65%) !important;
+  box-shadow: 0 6px 16px rgba(154, 91, 237, 0.4) !important;
   transform: translateY(-1px);
 }
 
