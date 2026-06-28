@@ -197,8 +197,8 @@
 .service-card-pro:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .product-card-hover:hover .transition-transform { transform: scale(1.05); }
 .transition-transform { transition: transform 0.5s ease; }
-.glass-panel { background: rgba(40,40,45,0.6); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.05); }
-.form-control:focus { background-color: rgba(0,0,0,0.5) !important; color: white !important; box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); border-color: var(--primary-color); }
+.glass-panel { background: var(--glass-card-bg); backdrop-filter: blur(20px); border-left: 1px solid var(--glass-border); }
+.form-control:focus { background-color: var(--ez-bg-alt) !important; color: var(--text-primary) !important; box-shadow: 0 0 0 0.25rem var(--ez-accent-glow); border-color: var(--ez-accent); }
 </style>
 
 <%- include('partials/footer') %>
