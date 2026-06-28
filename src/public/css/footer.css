@@ -2,8 +2,8 @@
    FOOTER
    ========================================================================== */
 .footer {
-  background: hsl(222, 25%, 8%);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--ez-bg-alt);
+  border-top: 1px solid var(--glass-border);
 }
 
 .text-muted-custom {
@@ -11,7 +11,7 @@
 }
 
 .footer-divider {
-  border-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--glass-border);
 }
 
 .footer-links li {
@@ -35,8 +35,8 @@
 .social-icon-btn {
   width: 36px;
   height: 36px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
   color: var(--text-secondary);
   display: flex;
