@@ -133,8 +133,9 @@
   transition: all 0.3s;
 }
 .btn-card:hover {
-  background: #fff;
-  color: var(--ez-bg) !important;
+  background: var(--ez-accent);
+  color: #fff !important;
+  border-color: var(--ez-accent);
 }
 
 /* ==========================================================================

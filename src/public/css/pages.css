@@ -40,8 +40,8 @@
 }
 
 .btn-hero {
-  background: #fff;
-  color: var(--ez-bg) !important;
+  background: linear-gradient(135deg, hsl(260, 70%, 70%) 0%, hsl(240, 70%, 65%) 100%);
+  color: #fff !important;
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 1rem;
@@ -49,11 +49,24 @@
   border-radius: 100px; /* Pill shape for minimalist elegance */
   border: none;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(154, 91, 237, 0.3);
 }
 .btn-hero:hover {
   transform: translateY(-2px);
-  background: #f5f5f5;
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, hsl(260, 75%, 65%) 0%, hsl(240, 75%, 60%) 100%);
+  box-shadow: 0 8px 24px rgba(154, 91, 237, 0.5);
+}
+
+.btn-hero-outline {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  transition: all 0.3s;
+}
+.btn-hero-outline:hover {
+  background: var(--glass-dropdown-hover-bg);
+  border-color: var(--glass-dropdown-border) !important;
+  transform: translateY(-2px);
 }
 
 /* ==========================================================================
@@ -120,17 +133,19 @@
 }
 
 .btn-form {
-  background: #fff;
-  color: var(--ez-bg);
+  background: var(--ez-accent);
+  color: #fff !important;
   font-weight: 600;
   border: none;
   padding: 14px 24px;
   border-radius: var(--radius-sm);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px var(--ez-accent-glow);
 }
 .btn-form:hover {
   transform: translateY(-2px);
-  background: #f5f5f5;
+  background: hsl(260, 75%, 65%);
+  box-shadow: 0 6px 16px rgba(154, 91, 237, 0.4);
 }
 
 /* ==========================================================================
