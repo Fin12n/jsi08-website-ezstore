@@ -608,79 +608,81 @@ router.post('/api/chat', async (req, res) => {
     const settingsDoc = await db.collection('settings').doc('general').get();
     if (settingsDoc.exists) {
       const settingsData = settingsDoc.data();
-      if (settingsData.chatbot && settingsData.chatbot.openaiApiKey) {
-        apiKey = settingsData.chatbot.openaiApiKey.trim();
+      // Kiểm tra cấu hình key Cocolink mới từ hệ thống Firestore (nếu có)
+      if (settingsData.chatbot && settingsData.chatbot.cocolinkApiKey) {
+        apiKey = settingsData.chatbot.cocolinkApiKey.trim();
       }
     }
   } catch (err) {
     console.error('❌ Error fetching chatbot api key from firestore:', err.message);
   }
 
-  // Fallback to process.env if Firestore config is missing
+  // Fallback đọc biến môi trường COCOLINK_API_KEY
   if (!apiKey || apiKey === '') {
-    apiKey = process.env.OPENAI_API_KEY;
+    apiKey = process.env.COCOLINK_API_KEY;
   }
 
-  if (apiKey) {
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `Bạn là "EZ Assistant" - một trợ lý AI thông minh, nhiệt tình và thân thiện của EZ Studio (ezstore).
+  if (!apiKey) {
+    console.error('❌ COCOLINK_API_KEY is missing. Cannot proceed with AI request.');
+    return res.status(500).json({ error: 'Chatbot service configuration missing.' });
+  }
+
+  try {
+    // 1. Lấy dữ liệu sản phẩm thực tế từ Firestore
+    const productsList = await getAllProducts();
+    
+    // 2. Định dạng danh sách sản phẩm thành text để inject vào System Prompt
+    const catalogContext = productsList.length > 0 
+      ? productsList.map(p => `- ${p.title}: ${p.description || 'Không có mô tả'} (Giá: ${p.priceNumber || 0} zCoin)`).join('\n')
+      : 'Hiện tại chưa cập nhật sản phẩm nào trên hệ thống cửa hàng.';
+
+    // 3. Gọi API của Cocolink với model qwen3.6-plus
+    const response = await fetch('https://www.cocolink.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'qwen3.6-plus',
+        messages: [
+          {
+            role: 'system',
+            content: `Bạn là "EZ Assistant" - một trợ lý AI thông minh, nhiệt tình và thân thiện của EZ Studio (ezstore).
 EZ Studio là nền tảng cung cấp tài nguyên Minecraft chuyên nghiệp hàng đầu tại Việt Nam.
 Các dịch vụ chính của EZ Studio:
 1. Minecraft Server Setup: Survival, Skyblock, Lifesteal, Bedwars... thiết lập từ A-Z tối ưu hiệu năng tốt nhất.
 2. Custom Models: Thiết kế Item/Armor/Weapon 3D độc quyền (ItemsAdder, Oraxen, MythicMobs).
 3. Tối ưu hóa & Bảo mật: Chống lag, chống crash, chống DDoS chuyên sâu cho Server.
 Người sáng lập: Fin12n. Co-Owner: tomy067.
+
+Dưới đây là DANH SÁCH SẢN PHẨM THỰC TẾ đang có tại cửa hàng. Hãy dựa vào danh sách này để tư vấn chính xác tên sản phẩm kèm giá cả khi khách hàng hỏi:
+${catalogContext}
+
 Bạn trả lời các câu hỏi bằng Tiếng Việt một cách ngắn gọn, súc tích và có kèm emoji thân thiện. Hãy hướng dẫn người dùng mua hàng hoặc liên hệ nếu cần hỗ trợ trực tiếp.`
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ]
-        })
-      });
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      })
+    });
 
-      if (!response.ok) {
-        throw new Error(`OpenAI API returned status ${response.status}`);
-      }
-
-      const data = await response.json();
-      const reply = data.choices[0].message.content;
-      return res.json({ reply });
-    } catch (error) {
-      console.error('❌ OpenAI API Error:', error.message);
-      // Fallback to mock on error
+    if (!response.ok) {
+      throw new Error(`Cocolink API returned status ${response.status}`);
     }
+
+    const data = await response.json();
+    const reply = data.choices[0].message.content;
+    
+    return res.json({ reply });
+
+  } catch (error) {
+    console.error('❌ Cocolink API Error:', error.message);
+    // Khi có lỗi từ API, trả về status 500 để phía Frontend (chatbot.js) nhảy vào block catch và hiển thị thông báo bảo trì mặc định
+    return res.status(500).json({ error: 'Hệ thống AI đang bận.' });
   }
-
-  // Fallback / Mock Response Logic
-  const msgLower = prompt.toLowerCase();
-  let reply = 'Chào bạn! Mình là trợ lý AI của EZ Studio. Mình có thể giúp gì cho bạn về các tài nguyên Minecraft, thiết lập Server hoặc thiết kế 3D Models không?';
-
-  if (msgLower.includes('setup') || msgLower.includes('server') || msgLower.includes('cài đặt')) {
-    reply = 'EZ Studio cung cấp dịch vụ cài đặt Server Minecraft trọn gói (Survival, Skyblock, Bedwars, Lifesteal...) tối ưu hiệu năng tốt nhất, TPS ổn định 20. Bạn có thể tham khảo mục Dịch Vụ hoặc inbox trực tiếp để nhận tư vấn nhé! 🎮';
-  } else if (msgLower.includes('model') || msgLower.includes('3d') || msgLower.includes('itemsadder') || msgLower.includes('oraxen')) {
-    reply = 'EZ Studio chuyên thiết kế Item/Armor/Weapon 3D độc quyền và cấu hình ItemsAdder/Oraxen/MythicMobs hoàn chỉnh. Xem các sản phẩm có sẵn trên web hoặc gửi yêu cầu đặt vẽ riêng qua mục Liên hệ nhé! ⚔️';
-  } else if (msgLower.includes('nạp') || msgLower.includes('zcoin') || msgLower.includes('tiền') || msgLower.includes('ví')) {
-    reply = 'Để nạp zCoin, bạn chỉ cần đăng nhập, bấm vào Avatar góc trên bên phải -> chọn "Quản lý tài khoản" -> mục Nạp tiền để thanh toán tự động qua PayOS/SePay cực kỳ nhanh chóng và an toàn! 💳';
-  } else if (msgLower.includes('admin') || msgLower.includes('liên hệ') || msgLower.includes('sđt') || msgLower.includes('phone')) {
-    reply = 'Bạn có thể liên hệ trực tiếp với EZ Studio qua hotline: +84 327 194 114 (Fin12n) hoặc qua email: tranthinh2000bn@gmail.com, hoặc gửi tin nhắn ở biểu mẫu chân trang. 📞';
-  } else if (msgLower.includes('chào') || msgLower.includes('hi') || msgLower.includes('hello')) {
-    reply = 'Xin chào! Mình là EZ Assistant, chatbot AI hỗ trợ khách hàng của EZ Studio. Mình có thể giúp bạn giải đáp thắc mắc về Server setup, custom model 3D hoặc nạp zCoin. Bạn cần mình tư vấn dịch vụ nào? 😊';
-  }
-
-  return res.json({ reply });
 });
 
 module.exports = router;
