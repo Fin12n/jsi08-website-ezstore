@@ -1,0 +1,44 @@
+<div class="admin-sidebar">
+  <a href="/" class="admin-brand">
+    <img src="/imgs/logo.webp" alt="EZ Studio Logo">
+    <span>EZ Studio</span>
+  </a>
+  
+  <div class="admin-nav">
+    <a href="/admin/overview" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'overview' ? 'active' : '' %>">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>Overview</span>
+    </a>
+    <a href="/admin/products" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'products' ? 'active' : '' %>">
+      <i class="fa-solid fa-box-open"></i>
+      <span>Products</span>
+    </a>
+    <a href="/admin/categories" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'active' : '' %>">
+      <i class="fa-solid fa-tags"></i>
+      <span>Categories</span>
+    </a>
+    <a href="/admin/users" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">
+      <i class="fa-solid fa-users"></i>
+      <span>Users</span>
+    </a>
+    <a href="/admin/orders" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'orders' ? 'active' : '' %>">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span>Orders & Payments</span>
+    </a>
+    <a href="/admin/coupons" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'coupons' ? 'active' : '' %>">
+      <i class="fa-solid fa-ticket"></i>
+      <span>Coupons</span>
+    </a>
+    <a href="/admin/settings" class="admin-nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
+      <i class="fa-solid fa-gear"></i>
+      <span>Settings</span>
+    </a>
+  </div>
+
+  <div class="mt-auto">
+    <a href="/logout" class="admin-nav-item text-danger mt-3">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</div>

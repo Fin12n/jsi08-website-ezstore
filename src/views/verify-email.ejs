@@ -1,0 +1,75 @@
+<%- include('partials/header', { bodyClass: 'body-no-nav' }) %>
+
+<!-- Back to Register button -->
+<a href="/register" class="btn btn-homeback font-outfit" id="btn-back-register">
+  <i class="fa-solid fa-arrow-left me-2"></i>Quay lại đăng ký
+</a>
+
+<div class="auth-wrapper">
+  <div class="card glass-card auth-card">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle mb-3" style="width: 65px; height: 65px; border: 1px solid rgba(255, 201, 0, 0.25);">
+        <i class="fa-solid fa-envelope-circle-check fs-3"></i>
+      </div>
+      <h2 class="text-white font-outfit mb-1">Xác minh tài khoản</h2>
+      <p class="text-secondary small">Vui lòng nhập mã xác minh OTP gửi tới hộp thư của bạn</p>
+      <div class="badge bg-secondary bg-opacity-25 border border-secondary text-light font-code px-3 py-1.5 mt-2">
+        <%= email %>
+      </div>
+    </div>
+
+    <!-- Alerts are now handled globally via SweetAlert2 Toast -->
+    <% if (typeof isMock !== 'undefined' && isMock) { %>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          setTimeout(() => {
+            Swal.fire({
+              toast: true,
+              position: 'bottom-end',
+              icon: 'info',
+              title: 'Mock Mode Active',
+              text: 'Mã OTP 6 chữ số đã được in ra Terminal/Console của máy chủ. Hãy kiểm tra tab Terminal để lấy mã xác minh!',
+              showConfirmButton: false,
+              timer: 8000,
+              background: 'rgba(30, 41, 59, 0.95)',
+              color: '#f8fafc',
+              customClass: { popup: 'glass-card border border-info border-opacity-25' }
+            });
+          }, 500);
+        });
+      </script>
+    <% } %>
+
+    <!-- Verification form -->
+    <form action="/verify-email" method="POST" id="otp-form">
+      <div class="mb-4 text-center">
+        <label for="otp" class="form-label small text-secondary d-block mb-3">Mã xác thực OTP gồm 6 chữ số</label>
+        <input 
+          type="text" 
+          class="form-control form-glass-input text-center font-outfit fs-2 tracking-wider fw-bold py-2 mx-auto" 
+          id="otp" 
+          name="otp" 
+          maxlength="6" 
+          placeholder="000000" 
+          required 
+          autocomplete="one-time-code"
+          pattern="[0-9]{6}"
+          style="max-width: 200px; letter-spacing: 0.2em;"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-form w-100 py-2.5 font-outfit mb-3" id="btn-otp-submit">
+        Xác minh và Kích hoạt
+      </button>
+    </form>
+
+    <!-- Resend Form -->
+    <form action="/verify-email/resend" method="POST" id="resend-otp-form" class="text-center mt-3">
+      <button type="submit" class="btn btn-link text-warning text-decoration-none small font-outfit p-0">
+        <i class="fa-solid fa-rotate-right me-1"></i>Gửi lại mã xác minh
+      </button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

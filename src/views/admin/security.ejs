@@ -1,0 +1,185 @@
+<%
+const securityHtml = `
+<div class="page-header" style="margin-bottom: 28px; display: flex; flex-direction: column; gap: 6px;">
+  <div class="page-title" style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(90deg, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 10px;">
+    <i class="fas fa-shield-halved" style="color: var(--accent); font-size: 22px;"></i> Bảo mật & Giám sát
+  </div>
+  <div class="page-subtitle" style="font-size: 13.5px; color: var(--text-secondary); opacity: 0.85;">Audit logs bất biến, phát hiện lạm dụng tải file và quản lý lệnh cấm tự động.</div>
+</div>
+
+<div class="tabs" style="display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; overflow-x: auto;">
+  <button class="tab-btn ${typeof activeTab === 'undefined' || activeTab === 'audit' ? 'active' : ''}" onclick="switchSecTab('audit')" style="background: none; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease;">
+    <i class="fas fa-scroll"></i> Audit Logs
+    <span style="background:rgba(99,102,241,0.15); color:var(--accent-light); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700;">${typeof auditLogs !== 'undefined' ? auditLogs.length : 0}</span>
+  </button>
+  <button class="tab-btn ${typeof activeTab !== 'undefined' && activeTab === 'abuse' ? 'active' : ''}" onclick="switchSecTab('abuse')" style="background: none; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease;">
+    <i class="fas fa-triangle-exclamation"></i> Download Abuse
+    <span style="background:rgba(239,68,68,0.15); color:var(--danger); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700;">${typeof abuseFlags !== 'undefined' ? abuseFlags.length : 0}</span>
+  </button>
+  <button class="tab-btn ${typeof activeTab !== 'undefined' && activeTab === 'autoban' ? 'active' : ''}" onclick="switchSecTab('autoban')" style="background: none; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease;">
+    <i class="fas fa-clock"></i> Auto-Unban
+    <span style="background:rgba(245,158,11,0.15); color:var(--warning); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700;">${typeof bannedUsers !== 'undefined' ? bannedUsers.length : 0}</span>
+  </button>
+</div>
+
+<!-- AUDIT LOGS TAB -->
+<div id="sectab-audit" style="${typeof activeTab !== 'undefined' && activeTab !== 'audit' ? 'display:none' : ''}">
+  <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; flex-wrap: wrap; gap:12px;">
+      <div class="card-title" style="margin:0; font-size:15px; font-weight:700; color:var(--text-primary);">Nhật ký hành động Admin (chỉ đọc)</div>
+      <div style="font-size:11.5px; color:var(--text-secondary); opacity:0.85; display:flex; align-items:center; gap:6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);">
+        <i class="fas fa-lock" style="color:var(--success);"></i> Không thể xóa hoặc chỉnh sửa
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Admin</th>
+            <th>Hành động</th>
+            <th>Đối tượng</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${typeof auditLogs !== 'undefined' && auditLogs.length > 0 ? auditLogs.map(log => `
+            <tr style="transition: background var(--transition);">
+              <td style="font-size:12.5px; white-space:nowrap; color:var(--text-secondary);">${log.timestamp ? new Date(log.timestamp).toLocaleString('vi-VN') : '--'}</td>
+              <td style="font-size:12.5px; font-weight:600; color:var(--text-primary);">${log.adminEmail || '--'}</td>
+              <td><span class="badge badge-info" style="background:var(--info-glow); border-color:var(--info); color:var(--info); font-size:11px; font-weight:600;">${log.action || '--'}</span></td>
+              <td style="font-family:monospace; font-size:12px; color:var(--text-secondary); opacity:0.95;">${log.targetType || ''}:${(log.targetId || '').slice(-10)}</td>
+              <td style="font-size:12px; color:var(--text-secondary); opacity:0.8; font-family:monospace;">${log.ip || '--'}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);font-weight:500;">Chưa có log nào.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+    <button onclick="loadMoreLogs()" class="btn btn-ghost btn-sm" style="margin-top:20px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">Tải thêm <i class="fas fa-chevron-down"></i></button>
+  </div>
+</div>
+
+<!-- DOWNLOAD ABUSE TAB -->
+<div id="sectab-abuse" style="display:none">
+  <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px;">Tài khoản bị gắn cờ lạm dụng Download</div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Số lần vi phạm</th>
+            <th>Gắn cờ lúc</th>
+            <th>Trạng thái</th>
+            <th style="width: 180px; text-align: center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${typeof abuseFlags !== 'undefined' && abuseFlags.length > 0 ? abuseFlags.map(f => `
+            <tr style="transition: background var(--transition);">
+              <td style="font-family:monospace; font-size:12px; color:var(--text-secondary); font-weight:500;">${f.userId || '--'}</td>
+              <td><span style="font-weight:800; color:var(--danger); font-size:14px;">${f.count || '--'}</span>x</td>
+              <td style="font-size:12.5px; color:var(--text-secondary);">${f.flaggedAt ? new Date(f.flaggedAt).toLocaleDateString('vi-VN') : '--'}</td>
+              <td>
+                ${f.action === 'banned'
+                  ? '<span class="badge badge-danger" style="background:var(--danger-glow); border-color:var(--danger); color:var(--danger); font-weight:600;">🚫 Bị cấm</span>'
+                  : f.action === 'warned'
+                    ? '<span class="badge badge-warning" style="background:var(--warning-glow); border-color:var(--warning); color:var(--warning); font-weight:600;">⏳ Cảnh cáo</span>'
+                    : '<span class="badge badge-muted" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:var(--text-secondary); font-weight:600;">Chưa xử lý</span>'
+                }
+              </td>
+              <td style="text-align: center;">
+                <div style="display:flex; gap:8px; justify-content:center;">
+                  <button onclick="sendWarning('${f.id}')" class="btn btn-ghost btn-sm" style="display:flex; align-items:center; gap:6px; padding: 6px 12px; font-size:12px;"><i class="fas fa-envelope" style="font-size:11px;"></i> Cảnh báo</button>
+                  <button onclick="banAbuser('${f.id}')" class="btn btn-danger btn-sm" style="display:flex; align-items:center; gap:6px; padding: 6px 12px; font-size:12px;"><i class="fas fa-ban" style="font-size:11px;"></i> Cấm</button>
+                </div>
+              </td>
+            </tr>
+          `).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);font-weight:500;">Không phát hiện vi phạm nào. ✅</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO-UNBAN TAB -->
+<div id="sectab-autoban" style="display:none">
+  <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7));">
+    <div class="card-title" style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:20px;">Tài khoản Cấm Tạm thời (Tự động mở khóa)</div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Tài khoản</th>
+            <th>Lý do cấm</th>
+            <th>Tự mở khóa lúc</th>
+            <th>Còn lại</th>
+            <th style="width: 140px; text-align: center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${typeof bannedUsers !== 'undefined' && bannedUsers.length > 0 ? bannedUsers.map(u => {
+            const remaining = new Date(u.autoUnbanAt) - new Date();
+            const hours = Math.max(0, Math.floor(remaining / 3600000));
+            const mins = Math.max(0, Math.floor((remaining % 3600000) / 60000));
+            return `
+              <tr style="transition: background var(--transition);">
+                <td style="font-size:13px; font-weight:600; color:var(--text-primary);">${u.displayName || u.email || u.id}</td>
+                <td style="font-size:12.5px; color:var(--text-secondary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.banReason || '--'}</td>
+                <td style="font-size:12.5px; color:var(--text-secondary);">${u.autoUnbanAt ? new Date(u.autoUnbanAt).toLocaleString('vi-VN') : '--'}</td>
+                <td style="font-weight:700; color:var(--warning); font-size:13px;">${hours}h ${mins}m</td>
+                <td style="text-align: center;">
+                  <button onclick="manualUnban('${u.id}')" class="btn btn-success btn-sm" style="display:flex; align-items:center; gap:6px; padding: 6px 12px; font-size:12px; margin: 0 auto;">
+                    <i class="fas fa-unlock" style="font-size:11px;"></i> Mở khóa
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('') : '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);font-weight:500;">Không có tài khoản nào trong hàng đợi Auto-Unban. ✅</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchSecTab(tab) {
+  const tabs = ['audit', 'abuse', 'autoban'];
+  tabs.forEach(t => {
+    document.getElementById('sectab-' + t).style.display = t === tab ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', tabs[i] === tab));
+}
+
+function loadMoreLogs() {
+  window.location.href = '/admin/security?tab=audit&page=2';
+}
+
+async function sendWarning(flagId) {
+  if (!confirm('Gửi email cảnh báo cho user này?')) return;
+  const res = await fetch(\`/admin/security/download-abuse/\${flagId}/warn\`, { method: 'POST' });
+  const data = await res.json();
+  alert(data.success ? '✅ ' + data.message : '❌ ' + data.error);
+  if (data.success) location.reload();
+}
+
+function banAbuser(flagId) {
+  window.dispatchEvent(new CustomEvent('open-otp-modal', { detail: {
+    title: 'Cấm tài khoản vi phạm',
+    desc: 'Cấm vĩnh viễn tài khoản này do lạm dụng tải file.',
+    action: \`/admin/security/download-abuse/\${flagId}/ban\`,
+    targetData: {}
+  }}));
+}
+
+async function manualUnban(userId) {
+  if (!confirm('Mở khóa tài khoản này ngay lập tức?')) return;
+  const res = await fetch(\`/admin/security/auto-unban/\${userId}/unban\`, { method: 'POST' });
+  const data = await res.json();
+  alert(data.success ? '✅ ' + data.message : '❌ ' + data.error);
+  if (data.success) location.reload();
+}
+</script>
+`;
+%>
+<%- include('./layout', { body: securityHtml }) %>

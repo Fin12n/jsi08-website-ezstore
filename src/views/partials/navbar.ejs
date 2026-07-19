@@ -1,0 +1,173 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top glass-navbar">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="/" id="nav-brand">
+      <img src="/imgs/logo.webp" alt="EZ Studio Logo" width="45" height="45" class="me-2 rounded-3 brand-logo-anim" />
+      <span class="brand-text">EZ Studio</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" id="nav-toggle-btn">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/">
+            <i class="fa-solid fa-house me-1"></i> <%= __('home') %>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/products">
+            <i class="fa-solid fa-box-open me-1"></i> <%= __('products') %>
+          </a>
+        </li>
+        <!-- Khám phá Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle nav-link-custom" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-compass me-1"></i> <%= __('explore') %>
+          </a>
+          <ul class="dropdown-menu glass-dropdown shadow-lg border-0" aria-labelledby="exploreDropdown">
+            <li><a class="dropdown-item py-2" href="/services"><i class="fa-solid fa-wrench text-secondary me-2"></i><%= __('services') %></a></li>
+            <li><a class="dropdown-item py-2" href="/user/spin"><i class="fa-solid fa-rotate text-warning me-2"></i><%= __('spin') %></a></li>
+            <li><a class="dropdown-item py-2" href="/leaderboard"><i class="fa-solid fa-trophy text-info me-2"></i><%= __('leaderboard') %></a></li>
+            <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
+            <li><a class="dropdown-item py-2" href="/#about"><i class="fa-solid fa-info-circle text-secondary me-2"></i><%= __('about') %></a></li>
+            <li><a class="dropdown-item py-2" href="/#contact"><i class="fa-solid fa-phone text-secondary me-2"></i><%= __('contact') %></a></li>
+            <li><a class="dropdown-item py-2" href="/#partner-ls"><i class="fa-solid fa-users text-secondary me-2"></i><%= __('partners') %></a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Language Selector -->
+        <li class="nav-item dropdown me-3 my-2 my-lg-0">
+          <a class="nav-link dropdown-toggle nav-link-custom d-flex align-items-center gap-1" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-earth-americas me-1"></i> <%= locals.lang === 'vi' ? 'VIE' : 'ENG' %>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-lg border-0" aria-labelledby="langDropdown">
+            <li><a class="dropdown-item py-2 <%= locals.lang === 'vi' ? 'active' : '' %>" href="/change-lang/vi">🇻🇳 Tiếng Việt</a></li>
+            <li><a class="dropdown-item py-2 <%= locals.lang === 'en' ? 'active' : '' %>" href="/change-lang/en">🇺🇸 English</a></li>
+          </ul>
+        </li>
+        <!-- Theme Toggle -->
+        <li class="nav-item me-3 my-2 my-lg-0">
+          <button id="theme-toggle" class="theme-toggle-btn nav-link nav-link-custom border-0 bg-transparent p-0" title="Đổi giao diện">
+            <span class="theme-toggle-track">
+              <span class="theme-toggle-thumb">
+                <i class="theme-icon fa-solid fa-moon"></i>
+              </span>
+            </span>
+          </button>
+        </li>
+        <!-- Cart Icon -->
+        <li class="nav-item me-3 my-2 my-lg-0">
+          <a class="nav-link nav-link-custom position-relative" href="/cart">
+            <i class="fa-solid fa-cart-shopping fs-5"></i>
+            <% if (locals.cart && cart.length > 0) { %>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                <%= cart.length %>
+              </span>
+            <% } %>
+          </a>
+        </li>
+        
+        <% if (locals.user) { %>
+          <!-- User Dropdown -->
+          <li class="nav-item dropdown my-2 my-lg-0">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle nav-user-avatar d-flex align-items-center justify-content-center">
+                <%= user.username.charAt(0).toUpperCase() %>
+              </div>
+              <div class="text-start d-none d-lg-block" style="line-height: 1.2;">
+                <span class="d-block text-secondary" style="font-size: 0.75rem;"><%= __('hello') %>,</span>
+                <strong class="small" style="color: var(--text-primary);"><%= user.username %></strong>
+              </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-lg border-0 mt-2" aria-labelledby="userDropdown">
+              <li>
+                <div class="dropdown-header-user">
+                  <span class="dropdown-user-name"><%= user.username %></span>
+                  <span class="dropdown-user-balance"><%= (user.balance || 0).toLocaleString('vi-VN') %> zCoin</span>
+                </div>
+              </li>
+              <li>
+                <a class="dropdown-item py-2" href="/user/dashboard">
+                  <i class="fa-solid fa-id-badge text-secondary me-2 w-20px"></i> <%= __('account_mgmt') %>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2" href="/user/library">
+                  <i class="fa-solid fa-layer-group text-secondary me-2 w-20px"></i> <%= __('my_library') %>
+                </a>
+              </li>
+              <% if (user.role === 'admin') { %>
+                <li>
+                  <a class="dropdown-item py-2 text-warning" href="/admin">
+                    <i class="fa-solid fa-gauge me-2 w-20px"></i> <%= __('admin_control') %>
+                  </a>
+                </li>
+              <% } else if (user.role === 'seller') { %>
+                <li>
+                  <a class="dropdown-item py-2 text-info" href="/seller/dashboard">
+                    <i class="fa-solid fa-shop me-2 w-20px"></i> <%= __('seller_channel') %>
+                  </a>
+                </li>
+              <% } %>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item py-2 text-danger" href="/logout">
+                  <i class="fa-solid fa-right-from-bracket me-2 w-20px"></i> <%= __('logout') %>
+                </a>
+              </li>
+            </ul>
+          </li>
+        <% } else { %>
+          <li class="nav-item my-2 my-lg-0">
+            <a class="btn btn-login me-2 px-3 py-1.5" href="/login" id="nav-login-btn">
+              <%= __('login') %>
+            </a>
+          </li>
+          <li class="nav-item my-2 my-lg-0">
+            <a class="btn btn-primary btn-signup px-3 py-1.5" href="/register" id="nav-signup-btn">
+              <%= __('register') %>
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      const icon = themeToggle.querySelector('.theme-icon');
+      
+      const updateIcon = (theme) => {
+        if (theme === 'light') {
+          icon.className = 'theme-icon fa-solid fa-sun';
+        } else {
+          icon.className = 'theme-icon fa-solid fa-moon';
+        }
+      };
+
+      // Set initial state
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      updateIcon(currentTheme);
+
+      themeToggle.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateIcon(newTheme);
+        
+        // Save to Cookie and LocalStorage
+        document.cookie = `theme=${newTheme};path=/;max-age=${365 * 24 * 60 * 60}`;
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+  });
+</script>

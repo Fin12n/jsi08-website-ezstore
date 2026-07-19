@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="<%= locals.theme || 'dark' %>">
+<head>
+  <script>
+    (function() {
+      const theme = document.cookie.match(/theme=([^;]+)/)?.[1] || localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'EZ Studio - Minecraft Resources & Setups' %></title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="EZ Studio - Nơi cung cấp tài nguyên Minecraft chuyên nghiệp, giá cả hợp lý và chất lượng cao. Chuyên thiết lập server, thiết kế model 3D, và tối ưu hóa hệ thống." />
+  <meta name="keywords" content="Minecraft, Server Setup, 3D Model Minecraft, Plugins EZ, EZ Studio, Minecraft Vietnam, Plugins, Models" />
+  <meta name="author" content="Fin12n" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'EZ Studio' %>" />
+  <meta property="og:description" content="Nơi cung cấp tài nguyên Minecraft giá rẻ và chất lượng cao. Trải nghiệm dịch vụ tối ưu cùng EZ Studio." />
+  <meta property="og:image" content="/imgs/logo.webp" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/imgs/dbaf5f58968aab486be5a90f6f87e4c0.ico" />
+
+  <!-- Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+    
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <!-- Google Fonts: Outfit (Titles), Inter (Body Text), JetBrains Mono (Code/Specs) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css?v=1.0.4" />
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">

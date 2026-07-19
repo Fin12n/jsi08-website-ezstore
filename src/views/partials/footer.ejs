@@ -1,0 +1,126 @@
+<!-- Footer -->
+<footer class="footer py-5 mt-5">
+  <div class="container">
+    <div class="row g-4 text-start justify-content-between">
+      <div class="col-lg-4 col-md-6">
+        <div class="d-flex align-items-center mb-3">
+          <img src="/imgs/logo.webp" alt="EZ Studio Logo" width="40" height="40" class="me-2 rounded-2" />
+          <h5 class="mb-0 text-white font-outfit font-weight-bold">EZ Studio</h5>
+        </div>
+        <p class="text-muted-custom small mb-4">
+          EZ Studio (tiền thân là Plugins EZ) cung cấp giải pháp, tài nguyên và thiết lập server Minecraft bản quyền với chi phí hợp lý nhất tại Việt Nam.
+        </p>
+        <div class="social-links d-flex gap-3">
+          <a href="https://fb.com/fin12n" target="_blank" class="social-icon-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="social-icon-btn" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+          <a href="#" class="social-icon-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-icon-btn" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h6 class="text-uppercase text-white font-outfit mb-3 small tracking-wider">Đường dẫn nhanh</h6>
+        <ul class="list-unstyled footer-links small">
+          <li><a href="/">Trang chủ</a></li>
+          <li><a href="/products">Sản phẩm</a></li>
+          <li><a href="/services">Dịch vụ</a></li>
+          <li><a href="/#about">Về chúng tôi</a></li>
+          <li><a href="/#contact">Liên hệ</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h6 class="text-uppercase text-white font-outfit mb-3 small tracking-wider">Hỗ trợ</h6>
+        <ul class="list-unstyled footer-links small">
+          <li><a href="#">Chính sách bảo mật</a></li>
+          <li><a href="#">Điều khoản dịch vụ</a></li>
+          <li><a href="#">Trung tâm trợ giúp</a></li>
+          <li><a href="#">Discord Support</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h6 class="text-uppercase text-white font-outfit mb-3 small tracking-wider">Liên hệ trực tiếp</h6>
+        <ul class="list-unstyled footer-contact small text-muted-custom">
+          <li><i class="fa-solid fa-phone me-2 text-primary-custom"></i> +84 327 194 114</li>
+          <li><i class="fa-solid fa-envelope me-2 text-primary-custom"></i> tranthinh2000bn@gmail.com</li>
+          <li><i class="fa-solid fa-location-dot me-2 text-primary-custom"></i> Bắc Ninh, Việt Nam</li>
+        </ul>
+      </div>
+    </div>
+    
+    <hr class="footer-divider my-4" />
+
+    <div class="row align-items-center justify-content-between small">
+      <div class="col-md-6 text-center text-md-start text-muted-custom">
+        <p class="mb-0">&copy; 2026 EZ Studio. Tất cả quyền được bảo lưu.</p>
+      </div>
+      <div class="col-md-6 text-center text-md-end text-muted-custom mt-2 mt-md-0">
+        <p class="mb-0">Phát triển bởi <a href="https://fb.com/fin12n" target="_blank" class="text-primary-custom fw-semibold">Fin12n</a> & <span class="text-primary-custom fw-semibold">tomy067</span></p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS script -->
+<script src="/js/auth.js"></script>
+<script src="/js/animations.js"></script>
+<!-- AI Chatbot Bubble & Widget -->
+<div id="chatbot-wrapper">
+  <!-- Bubble toggle button -->
+  <button id="chatbot-toggle" class="chatbot-toggle-btn" title="Trò chuyện với EZ Assistant">
+    <i class="fa-solid fa-comments"></i>
+    <span id="chatbot-pulse" class="chatbot-pulse-dot"></span>
+  </button>
+
+  <!-- Chat container -->
+  <div id="chatbot-container" class="chatbot-container">
+    <!-- Particles background canvas -->
+    <canvas id="chatbot-particles" class="chatbot-particles-canvas"></canvas>
+
+    <!-- Header -->
+    <div class="chatbot-header">
+      <div class="chatbot-header-info">
+        <div class="chatbot-avatar">EZ</div>
+        <div class="chatbot-title-container">
+          <span class="chatbot-name">EZ Assistant</span>
+          <span class="chatbot-status">Trực tuyến</span>
+        </div>
+      </div>
+      <button id="chatbot-close" class="chatbot-close-btn" title="Đóng">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="chatbot-messages" class="chatbot-messages">
+      <div class="chatbot-message chatbot-message-bot">
+        Xin chào! Mình là EZ Assistant, chatbot trí tuệ nhân tạo hỗ trợ khách hàng của EZ Studio. Mình có thể giúp gì cho bạn hôm nay? 😊
+      </div>
+    </div>
+
+    <!-- Quick replies -->
+    <div class="chatbot-quick-replies">
+      <button class="chatbot-reply-btn" data-reply="Cài đặt Server Minecraft?">🎮 Server setup</button>
+      <button class="chatbot-reply-btn" data-reply="Thiết kế Custom Model 3D?">⚔️ Vẽ Model 3D</button>
+      <button class="chatbot-reply-btn" data-reply="Làm sao nạp zCoin?">💳 Nạp tiền</button>
+      <button class="chatbot-reply-btn" data-reply="Liên hệ trực tiếp Admin?">📞 Liên hệ</button>
+    </div>
+
+    <!-- Input form -->
+    <form id="chatbot-form" class="chatbot-input-container">
+      <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" />
+      <button type="submit" class="chatbot-send-btn" title="Gửi">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/chatbot.js"></script>
+<%- include('flash-messages') %>
+</body>
+</html>

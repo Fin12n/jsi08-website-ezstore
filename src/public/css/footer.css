@@ -1,0 +1,52 @@
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.footer {
+  background: var(--ez-bg-alt);
+  border-top: 1px solid var(--glass-border);
+}
+
+.text-muted-custom {
+  color: var(--text-secondary);
+}
+
+.footer-divider {
+  border-color: var(--glass-border);
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+.footer-links a {
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.footer-links a:hover {
+  color: var(--ez-yellow);
+  padding-left: 4px;
+}
+
+.footer-contact li {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.social-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+}
+.social-icon-btn:hover {
+  color: #fff;
+  background: var(--ez-accent);
+  border-color: var(--ez-accent);
+  transform: scale(1.1);
+}

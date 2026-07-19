@@ -1,0 +1,145 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="products-section" style="padding-top: 120px; min-height: 80vh;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-subtitle">Hệ thống quản lý EZ Studio</span>
+      <h1 class="section-title text-white">Admin Dashboard</h1>
+      <p class="lead text-secondary">Thêm mới tài nguyên, cập nhật cơ sở dữ liệu và tải hình ảnh lên Cloudinary.</p>
+    </div>
+
+    <!-- Alert notifications handled globally via SweetAlert2 Toast -->
+
+    <div class="row g-5">
+      <!-- Add Product Form Column -->
+      <div class="col-lg-5">
+        <div class="card glass-card p-4 glow-accent">
+          <h2 class="text-white font-outfit mb-4"><i class="fa-solid fa-circle-plus text-warning me-2"></i>Đăng sản phẩm mới</h2>
+          
+          <form action="/admin/products/add" method="POST" enctype="multipart/form-data" id="admin-add-form">
+            <div class="mb-3">
+              <label for="title" class="form-label small text-secondary">Tên sản phẩm *</label>
+              <input type="text" class="form-control form-glass-input" id="title" name="title" placeholder="Ví dụ: Voidtech Pack [64x]" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label small text-secondary">Mô tả ngắn *</label>
+              <input type="text" class="form-control form-glass-input" id="description" name="description" placeholder="Mô tả tóm tắt sản phẩm" required />
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="originalPrice" class="form-label small text-secondary">Giá gốc (nếu có)</label>
+                <input type="text" class="form-control form-glass-input" id="originalPrice" name="originalPrice" placeholder="Ví dụ: 300 zCoin" />
+              </div>
+              <div class="col-md-6">
+                <label for="salePrice" class="form-label small text-secondary">Giá bán thực tế *</label>
+                <input type="text" class="form-control form-glass-input" id="salePrice" name="salePrice" placeholder="Ví dụ: 199 zCoin" required />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="category" class="form-label small text-secondary">Danh mục sản phẩm</label>
+              <select class="form-select form-glass-input" id="category" name="category" required>
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                  <% categories.forEach(cat => { %>
+                    <option value="<%= cat.slug %>"><%= cat.name %></option>
+                  <% }) %>
+                <% } else { %>
+                  <option value="models">3D Models</option>
+                  <option value="maps">Server Maps</option>
+                  <option value="setups">File Setups</option>
+                <% } %>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="image" class="form-label small text-secondary">Ảnh sản phẩm * (Upload lên Cloudinary)</label>
+              <input type="file" class="form-control form-glass-input" id="image" name="image" accept="image/*" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="features" class="form-label small text-secondary">Tính năng chính (phân cách bằng dấu phẩy)</label>
+              <textarea class="form-control form-glass-input" id="features" name="features" rows="2" placeholder="Ví dụ: Cài đặt dễ dàng, Bản 1.16+, Hỗ trợ 24/7"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="itemsList" class="form-label small text-secondary">Vật phẩm đi kèm (phân cách bằng dấu phẩy)</label>
+              <textarea class="form-control form-glass-input" id="itemsList" name="itemsList" rows="2" placeholder="Ví dụ: Sword, Helmet, Bow, Wings"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="plugins" class="form-label small text-secondary">Plugins tương thích (phân cách bằng dấu phẩy)</label>
+              <input type="text" class="form-control form-glass-input" id="plugins" name="plugins" placeholder="Ví dụ: Nexo, ItemsAdder, Oraxen" />
+            </div>
+
+            <div class="mb-4">
+              <label for="gifts" class="form-label small text-secondary">Quà tặng / Bảo hành (phân cách bằng dấu phẩy)</label>
+              <input type="text" class="form-control form-glass-input" id="gifts" name="gifts" placeholder="Ví dụ: Bảo hành 15 ngày, Quà tặng Resourcepack" />
+            </div>
+
+            <button type="submit" class="btn btn-form w-100 py-3 font-outfit" id="btn-admin-submit">
+              <i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng tải lên Hệ thống
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Current Products List Column -->
+      <div class="col-lg-7">
+        <div class="card glass-card p-4 h-100">
+          <h2 class="text-white font-outfit mb-4"><i class="fa-solid fa-folder-open text-info me-2"></i>Sản phẩm hiện tại</h2>
+          
+          <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+              <thead>
+                <tr class="border-secondary border-opacity-50">
+                  <th scope="col" class="text-secondary small">Ảnh</th>
+                  <th scope="col" class="text-secondary small">Tên sản phẩm</th>
+                  <th scope="col" class="text-secondary small">Giá bán</th>
+                  <th scope="col" class="text-secondary small">Danh mục</th>
+                  <th scope="col" class="text-secondary small text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (products && products.length > 0) { %>
+                  <% products.forEach(prod => { %>
+                    <tr class="border-secondary border-opacity-25">
+                      <td>
+                        <img src="<%= prod.image %>" alt="<%= prod.title %>" class="rounded-2" width="60" height="45" style="object-fit: cover;" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
+                      </td>
+                      <td>
+                        <span class="text-white fw-semibold small d-block"><%= prod.title %></span>
+                        <span class="text-muted small font-code"><%= prod.id %></span>
+                      </td>
+                      <td>
+                        <span class="text-success small fw-bold"><%= prod.salePrice %></span>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary bg-opacity-25 border border-secondary border-opacity-50 text-white font-outfit small"><%= prod.category %></span>
+                      </td>
+                      <td class="text-center">
+                        <form action="/admin/products/delete/<%= prod.docId || prod.id %>" method="POST" onsubmit="confirmDelete(event, this, 'Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                          <button type="submit" class="btn btn-outline-danger btn-sm px-2.5 py-1.5 rounded-3">
+                            <i class="fa-solid fa-trash-can"></i> Xóa
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Không có sản phẩm nào trong cơ sở dữ liệu.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

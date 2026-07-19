@@ -1,0 +1,133 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-dashboard-section" style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(circle at 10% 20%, rgba(154, 91, 237, 0.03) 0%, transparent 50%);">
+  <div class="container">
+    <!-- Success/Error Alerts -->
+    <% if (locals.success) { %>
+      <div class="alert bg-success bg-opacity-10 border border-success border-opacity-20 text-success alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+        <i class="fa-solid fa-circle-check fs-5"></i>
+        <div><%= success %></div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+      </div>
+    <% } %>
+    <% if (locals.error) { %>
+      <div class="alert bg-danger bg-opacity-10 border border-danger border-opacity-20 text-danger alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+        <i class="fa-solid fa-circle-exclamation fs-5"></i>
+        <div><%= error %></div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+      </div>
+    <% } %>
+
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <%- include('../partials/user-sidebar') %>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <!-- Balance Card -->
+        <div class="card glass-card card-balance-gradient p-4 mb-4">
+          <div class="row align-items-center g-4 position-relative" style="z-index: 1;">
+            <div class="col-md-7">
+              <span class="text-secondary text-uppercase small tracking-wider font-outfit opacity-75">Số dư khả dụng</span>
+              <h2 class="text-white font-outfit display-5 mb-0 fw-bold mt-1 text-glow-success">
+                <%= balance.toLocaleString('vi-VN') %> zCoin
+              </h2>
+            </div>
+            <div class="col-md-5 d-flex gap-3 justify-content-md-end">
+              <a href="/user/topup" class="btn btn-hero font-outfit px-4 py-2.5 d-flex align-items-center gap-2 shadow-lg">
+                <i class="fa-solid fa-wallet text-dark"></i> Nạp tiền
+              </a>
+              <a href="javascript:void(0);" onclick="Swal.fire({ title: 'Rút tiền', text: 'Tính năng rút tiền đang được bảo trì. Vui lòng liên hệ Admin qua discord để rút tiền trực tiếp.', icon: 'info', background: 'rgba(20,20,20,0.95)', color: '#fff', confirmButtonColor: '#f39c12' });" class="btn btn-outline-light font-outfit px-4 py-2.5 d-flex align-items-center gap-2 hover-scale-sm">
+                <i class="fa-solid fa-money-bill-transfer"></i> Rút tiền
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Dashboard Panel -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-white font-outfit mb-0 fw-bold">Hoạt động gần đây</h4>
+          <a href="/user/history" class="text-secondary small hover-underline">Xem tất cả <i class="fa-solid fa-arrow-right-long ms-1"></i></a>
+        </div>
+
+        <div class="card glass-card p-4">
+          <!-- Timeline layout -->
+          <div class="timeline-activity">
+            <% 
+            function formatRelativeTime(dateStr) {
+              const date = new Date(dateStr);
+              const now = new Date();
+              const diffMs = now - date;
+              const diffMins = Math.floor(diffMs / 60000);
+              const diffHours = Math.floor(diffMins / 60);
+              
+              if (diffMins < 1) return 'Vừa xong';
+              if (diffMins < 60) return `${diffMins} phút trước`;
+              if (diffHours < 24) {
+                if (date.getDate() === now.getDate()) {
+                  return `Hôm nay ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+                } else if (new Date(now - 86400000).getDate() === date.getDate()) {
+                  return `Hôm qua ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+                }
+              }
+              return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            if (locals.transactions && transactions.length > 0) { 
+              transactions.forEach(tx => {
+                let dotColor = 'secondary';
+                let typeTitle = 'Giao dịch hệ thống';
+                
+                if (tx.type === 'TOPUP') {
+                  dotColor = 'success';
+                  typeTitle = 'Nạp tiền vào ví';
+                } else if (tx.type === 'REFUND') {
+                  dotColor = 'info';
+                  typeTitle = 'Hoàn trả tiền mua';
+                } else if (tx.type === 'EARN') {
+                  dotColor = 'info';
+                  typeTitle = 'Nhận tiền bán tài nguyên';
+                } else if (tx.type === 'PURCHASE') {
+                  dotColor = 'danger';
+                  typeTitle = 'Mua tài nguyên / sản phẩm';
+                } else if (tx.type === 'SPIN') {
+                  dotColor = 'warning';
+                  typeTitle = 'Vòng quay may mắn';
+                }
+            %>
+              <!-- Timeline Item -->
+              <div class="timeline-item position-relative">
+                <div class="timeline-dot <%= dotColor %>"></div>
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="text-white font-outfit mb-0 fw-semibold"><%= typeTitle %></h6>
+                    <span class="text-secondary small"><%= tx.description %></span>
+                  </div>
+                  <div class="text-end">
+                    <span class="<%= tx.amount > 0 ? 'text-success text-glow-success' : 'text-danger' %> fw-bold font-outfit">
+                      <%= tx.amount > 0 ? '+' : '' %><%= tx.amount.toLocaleString('vi-VN') %> zCoin
+                    </span>
+                    <div class="text-muted small" style="font-size: 0.75rem;"><%= formatRelativeTime(tx.createdAt) %></div>
+                  </div>
+                </div>
+              </div>
+            <% 
+              });
+            } else { 
+            %>
+              <div class="text-center py-3">
+                <div class="text-muted mb-2"><i class="fa-solid fa-receipt fs-3"></i></div>
+                <div class="text-secondary small">Chưa có hoạt động giao dịch nào gần đây.</div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

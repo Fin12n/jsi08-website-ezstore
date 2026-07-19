@@ -1,0 +1,130 @@
+<script>
+  // Global SweetAlert2 notification helper utility
+  window.Notifier = {
+    toastMixin: Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+      background: 'rgba(30, 41, 59, 0.95)',
+      color: '#f8fafc',
+      customClass: {
+        popup: 'glass-card border border-light border-opacity-10'
+      },
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    }),
+
+    success(message, title = 'Thành công') {
+      return Swal.fire({
+        icon: 'success',
+        title: title,
+        text: message,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc',
+        customClass: { popup: 'glass-card border border-light border-opacity-10' }
+      });
+    },
+
+    error(message, title = 'Lỗi') {
+      return Swal.fire({
+        icon: 'error',
+        title: title,
+        text: message,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc',
+        customClass: { popup: 'glass-card border border-danger border-opacity-25' }
+      });
+    },
+
+    warning(message, title = 'Cảnh báo') {
+      return Swal.fire({
+        icon: 'warning',
+        title: title,
+        text: message,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc',
+        customClass: { popup: 'glass-card border border-warning border-opacity-25' }
+      });
+    },
+
+    info(message, title = 'Thông tin') {
+      return Swal.fire({
+        icon: 'info',
+        title: title,
+        text: message,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc',
+        customClass: { popup: 'glass-card border border-light border-opacity-10' }
+      });
+    },
+
+    toast(message, icon = 'success') {
+      return this.toastMixin.fire({
+        icon: icon,
+        title: message
+      });
+    },
+
+    async confirm(message, title = 'Xác nhận?', confirmBtnText = 'Đồng ý', cancelBtnText = 'Hủy') {
+      const result = await Swal.fire({
+        title: title,
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: confirmBtnText,
+        cancelButtonText: cancelBtnText,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#475569',
+        customClass: { popup: 'glass-card border border-light border-opacity-10' }
+      });
+      return result.isConfirmed;
+    }
+  };
+
+  // Automatically trigger toast notifications on page load for EJS flash messages
+  document.addEventListener('DOMContentLoaded', () => {
+    <% const currentSuccess = (typeof flashSuccess !== 'undefined' && flashSuccess) || (typeof success !== 'undefined' && success) || null; %>
+    <% const currentError = (typeof flashError !== 'undefined' && flashError) || (typeof error !== 'undefined' && error) || null; %>
+    <% const currentWarning = (typeof flashWarning !== 'undefined' && flashWarning) || (typeof warning !== 'undefined' && warning) || null; %>
+
+    if (<%= currentSuccess ? 'true' : 'false' %>) {
+      window.Notifier.toast(`<%= currentSuccess %>`, 'success');
+    }
+    
+    if (<%= currentError ? 'true' : 'false' %>) {
+      window.Notifier.error(`<%= currentError %>`);
+    }
+
+    if (<%= currentWarning ? 'true' : 'false' %>) {
+      window.Notifier.toast(`<%= currentWarning %>`, 'warning');
+    }
+
+    // Clean up query parameters to keep the URL clean
+    if (window.history.replaceState) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('success') || url.searchParams.has('error') || url.searchParams.has('warning')) {
+        url.searchParams.delete('success');
+        url.searchParams.delete('error');
+        url.searchParams.delete('warning');
+        window.history.replaceState({ path: url.href }, '', url.href);
+      }
+    }
+  });
+
+  // Helper function for quick EJS table deletions
+  function confirmDelete(event, form, message) {
+    event.preventDefault();
+    window.Notifier.confirm(message || 'Bạn có chắc chắn muốn thực hiện hành động này?', 'Xác nhận xóa', 'Đồng ý xóa', 'Hủy bỏ')
+      .then((isConfirmed) => {
+        if (isConfirmed) {
+          form.submit();
+        }
+      });
+  }
+</script>

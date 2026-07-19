@@ -1,0 +1,199 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="products-section" style="padding-top: 120px; min-height: 80vh;">
+  <div class="container">
+    <!-- Back button -->
+    <a href="/products" class="btn btn-outline-light mb-4" id="btn-back-catalog">
+      <i class="fa-solid fa-arrow-left me-2"></i>Quay lại Danh sách sản phẩm
+    </a>
+
+    <div class="row g-5 align-items-center">
+      <!-- Image Carousel -->
+      <div class="col-lg-6">
+        <style>
+          #productDetailCarousel .carousel-indicators button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #ffffff !important;
+            background-color: transparent !important;
+            opacity: 0.5;
+            transition: all 0.2s;
+            padding: 0;
+            box-sizing: content-box;
+          }
+          #productDetailCarousel .carousel-indicators button.active {
+            background-color: #ffffff !important;
+            opacity: 1 !important;
+            transform: scale(1.15);
+          }
+          #productDetailCarousel .carousel-control-prev:hover div,
+          #productDetailCarousel .carousel-control-next:hover div {
+            background: rgba(255,255,255,0.15) !important;
+            border-color: #ffffff !important;
+            transform: scale(1.08);
+          }
+        </style>
+        
+        <% if (product.carousel && product.carousel.length > 0) { %>
+          <div id="productDetailCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden position-relative" data-bs-ride="carousel">
+            <!-- Carousel indicators -->
+            <% if (product.carousel.length > 1) { %>
+              <div class="carousel-indicators" style="margin-bottom: 15px; gap: 8px;">
+                <% product.carousel.forEach((image, index) => { %>
+                  <button type="button" data-bs-target="#productDetailCarousel" data-bs-slide-to="<%= index %>" class="<%= index === 0 ? 'active' : '' %>" aria-current="<%= index === 0 ? 'true' : 'false' %>" aria-label="Slide <%= index + 1 %>"></button>
+                <% }) %>
+              </div>
+            <% } %>
+
+            <div class="carousel-inner">
+              <% product.carousel.forEach((image, index) => { %>
+                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                  <img src="<%= image %>" class="d-block w-100" style="max-height: 480px; min-height: 350px; object-fit: cover;" alt="<%= product.title %> Image <%= index + 1 %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
+                </div>
+              <% }) %>
+            </div>
+
+            <% if (product.carousel.length > 1) { %>
+              <button class="carousel-control-prev" type="button" data-bs-target="#productDetailCarousel" data-bs-slide="prev" style="width: 12%; opacity: 0.85;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.35); transition: all 0.2s;">
+                  <i class="fa-solid fa-chevron-left" style="color: #fff; font-size: 16px;"></i>
+                </div>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#productDetailCarousel" data-bs-slide="next" style="width: 12%; opacity: 0.85;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.35); transition: all 0.2s;">
+                  <i class="fa-solid fa-chevron-right" style="color: #fff; font-size: 16px;"></i>
+                </div>
+              </button>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div class="rounded-4 overflow-hidden shadow-lg">
+            <img src="<%= product.image %>" class="img-fluid w-100" alt="<%= product.title %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Core Specs -->
+      <div class="col-lg-6">
+        <div class="card glass-card p-4 h-100">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-secondary bg-opacity-25 text-warning px-3 py-2 small font-outfit text-uppercase"><%= product.category %></span>
+            <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 small font-outfit">Minecraft 1.16+</span>
+          </div>
+          <h1 class="text-white font-outfit display-5 mb-3"><%= product.title %></h1>
+          <div class="lead text-secondary mb-4 ql-editor-preview" style="font-size: 1rem;"><%- product.description %></div>
+
+          <!-- Core features checklist -->
+          <% if (product.features && product.features.length > 0) { %>
+            <ul class="list-unstyled mb-4 d-flex flex-column gap-2">
+              <% product.features.forEach(feat => { %>
+                <li class="d-flex align-items-center gap-2 small text-secondary">
+                  <i class="fa-solid fa-circle-check text-success"></i> <%= feat %>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+          <div class="product-price mb-4">
+            <% if (product.originalPrice && product.originalPrice !== product.salePrice) { %>
+              <span class="text-muted text-decoration-line-through me-2"><%= product.originalPrice %></span>
+            <% } %>
+            <span class="text-success fw-bold fs-2 font-outfit"><%= product.salePrice %></span>
+          </div>
+
+          <div class="mb-4 d-flex align-items-center gap-3">
+            <div class="avatar-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 50%;">
+              <%= (product.sellerName || 'Admin').charAt(0).toUpperCase() %>
+            </div>
+            <div>
+              <p class="mb-0 text-secondary small">Được cung cấp bởi</p>
+              <h6 class="text-white font-outfit mb-0"><%= product.sellerName || 'EZ Studio Official' %> <i class="fa-solid fa-circle-check text-info ms-1" title="Đã xác thực"></i></h6>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mb-4">
+            <form action="/cart/add" method="POST" class="d-inline">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button type="submit" class="btn btn-outline-light btn-lg px-4 font-outfit"><i class="fa-solid fa-cart-plus me-2"></i>Thêm vào giỏ</button>
+            </form>
+            <form action="/cart/add?checkout=true" method="POST" class="d-inline flex-grow-1">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button type="submit" class="btn btn-hero btn-lg w-100 font-outfit"><i class="fa-solid fa-money-bill-wave me-2"></i>Mua ngay</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Information Section -->
+    <div class="row mt-5 pt-4">
+      <div class="col-12">
+        <div class="card glass-card p-4">
+          <h2 class="text-white font-outfit mb-4 border-bottom pb-3 border-secondary border-opacity-25">
+            <i class="fa-solid fa-circle-info text-info me-2"></i>Thông tin chi tiết sản phẩm
+          </h2>
+          
+          <div class="row g-4">
+            <!-- Specs List -->
+            <% if (product.customFields && Object.keys(product.customFields).length > 0) { %>
+              <div class="col-12 mb-2">
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-sliders me-2"></i>Thông số kỹ thuật:</h4>
+                <div class="row g-3">
+                  <% Object.entries(product.customFields).forEach(([key, val]) => { %>
+                    <% if (val !== undefined && val !== null && val !== '') { %>
+                      <div class="col-sm-6 col-md-4">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);">
+                          <div class="text-secondary small" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;"><%= key %></div>
+                          <div class="text-white fw-bold font-outfit mt-1" style="font-size: 13.5px;"><%= val %></div>
+                        </div>
+                      </div>
+                    <% } %>
+                  <% }) %>
+                </div>
+              </div>
+            <% } %>
+
+            <!-- Items list -->
+            <% if (product.itemsList && product.itemsList.length > 0) { %>
+              <div class="col-md-6">
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-box-open me-2"></i>Bộ tài nguyên bao gồm:</h4>
+                <ol class="text-secondary d-flex flex-column gap-2 ps-3 small">
+                  <% product.itemsList.forEach(item => { %>
+                    <li><%= item %></li>
+                  <% }) %>
+                </ol>
+              </div>
+            <% } %>
+
+            <!-- Plugins & gifts -->
+            <div class="col-md-6">
+              <% if (product.plugins && product.plugins.length > 0) { %>
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-puzzle-piece me-2"></i>Plugins tương thích:</h4>
+                <ul class="list-unstyled text-secondary d-flex flex-wrap gap-2 mb-4">
+                  <% product.plugins.forEach(plug => { %>
+                    <li><span class="badge bg-secondary bg-opacity-25 border border-secondary border-opacity-50 text-white font-code px-3 py-1.5"><%= plug %></span></li>
+                  <% }) %>
+                </ul>
+              <% } %>
+
+              <% if (product.gifts && product.gifts.length > 0) { %>
+                <h4 class="text-warning font-outfit mb-3"><i class="fa-solid fa-gift me-2"></i>Quà tặng và Bảo hành:</h4>
+                <ul class="list-unstyled text-secondary d-flex flex-column gap-2 small">
+                  <% product.gifts.forEach(gift => { %>
+                    <li class="d-flex align-items-center gap-2">
+                      <i class="fa-solid fa-circle-dot text-success" style="font-size: 8px;"></i> <%= gift %>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

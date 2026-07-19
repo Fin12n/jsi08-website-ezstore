@@ -1,0 +1,542 @@
+<%
+const newProductHtml = `
+<!-- Quill.js CSS -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+
+<style>
+  /* Premium Quill editor custom styles */
+  .ql-toolbar.ql-snow {
+    border: 1px solid var(--border) !important;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .ql-container.ql-snow {
+    border: 1px solid var(--border) !important;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    background: rgba(10, 11, 16, 0.5);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+  }
+  .ql-editor {
+    min-height: 250px;
+  }
+  .ql-snow .ql-stroke {
+    stroke: var(--text-secondary) !important;
+  }
+  .ql-snow .ql-fill {
+    fill: var(--text-secondary) !important;
+  }
+  .ql-snow .ql-picker {
+    color: var(--text-secondary) !important;
+  }
+  .ql-snow .ql-picker-options {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border) !important;
+  }
+</style>
+
+<div class="page-header" style="margin-bottom: 28px;">
+  <div style="display:flex;align-items:center;justify-content:space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="page-title" style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(90deg, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-box-open" style="color: var(--accent); font-size: 22px;"></i> Đăng sản phẩm mới
+      </div>
+      <div class="page-subtitle" style="font-size: 13.5px; color: var(--text-secondary); opacity: 0.85;">Tạo sản phẩm mới, tích hợp các trường dữ liệu tùy biến theo danh mục.</div>
+    </div>
+    <a href="/admin/products" class="btn btn-ghost" style="display: flex; align-items: center; gap: 8px;">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+  </div>
+</div>
+
+<form action="/admin/products/new" method="POST" enctype="multipart/form-data" id="new-product-form" class="row g-4"
+  x-data="{
+    activeZone: 'gallery', // 'thumbnail' or 'gallery'
+    thumbnailData: '',
+    gallery: [],
+    productId: 'prod-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 1000),
+    newVer: '1.0.0',
+    newChangelog: 'Bản phát hành đầu tiên',
+    uploadProgress: 0,
+    isUploading: false,
+    uploadedFileKey: '',
+    uploadedFileName: '',
+    uploadedFileSize: 0,
+    isSavingProduct: false,
+    compressAndAdd(file, target) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG 0.75 to reduce size to 100-200KB
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+          if (target === 'thumbnail') {
+            this.thumbnailData = dataUrl;
+          } else {
+            this.gallery.push({ id: Date.now() + Math.random(), data: dataUrl });
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    addFiles(files, target) {
+      const dest = target || this.activeZone;
+      if (dest === 'thumbnail') {
+        const file = files[0];
+        this.compressAndAdd(file, 'thumbnail');
+      } else {
+        for (let i = 0; i < files.length; i++) {
+          this.compressAndAdd(files[i], 'gallery');
+        }
+      }
+    },
+    removeImage(id) {
+      this.gallery = this.gallery.filter(item => item.id !== id);
+    },
+    async triggerVersionUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      this.isUploading = true;
+      this.uploadProgress = 0;
+      try {
+        const res = await fetch('/admin/api/presign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, fileType: file.type, productId: this.productId })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        if (data.isLocal) {
+          const formData = new FormData();
+          formData.append('file', file);
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', data.uploadUrl, true);
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              this.uploadProgress = Math.round((event.loaded / event.total) * 100);
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              const resData = JSON.parse(xhr.responseText);
+              this.uploadedFileKey = resData.fileKey;
+              this.uploadedFileName = resData.fileName;
+              this.uploadedFileSize = resData.fileSize;
+              this.isUploading = false;
+              this.uploadProgress = 100;
+              Notifier.success('Tải tệp tin lên máy chủ thành công!');
+            } else {
+              this.isUploading = false;
+              Notifier.error('Upload cục bộ thất bại: ' + xhr.statusText);
+            }
+          };
+          xhr.onerror = () => {
+            this.isUploading = false;
+            Notifier.error('Lỗi kết nối khi tải lên server cục bộ');
+          };
+          xhr.send(formData);
+        } else {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', data.uploadUrl, true);
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              this.uploadProgress = Math.round((event.loaded / event.total) * 100);
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              this.uploadedFileKey = data.fileKey;
+              this.uploadedFileName = file.name;
+              this.uploadedFileSize = file.size;
+              this.isUploading = false;
+              this.uploadProgress = 100;
+              Notifier.success('Tải tệp tin lên Cloudflare R2 thành công!');
+            } else {
+              this.isUploading = false;
+              Notifier.error('Upload thất bại: ' + xhr.statusText);
+            }
+          };
+          xhr.onerror = () => {
+            this.isUploading = false;
+            Notifier.error('Lỗi kết nối khi tải lên Cloudflare R2');
+          };
+          xhr.send(file);
+        }
+      } catch (err) {
+        this.isUploading = false;
+        Notifier.error('Lỗi: ' + err.message);
+      }
+    }
+  }"
+  @paste.window="
+    if (['INPUT', 'TEXTAREA'].includes($event.target.tagName) || $event.target.closest('.ql-editor')) return;
+    if ($event.clipboardData && $event.clipboardData.files.length > 0) {
+      addFiles($event.clipboardData.files);
+    }
+  "
+>
+  <input type="hidden" name="description" id="hidden-description">
+
+  <!-- Left Column: Core Info & Quill Description -->
+  <div class="col-lg-8">
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); display: flex; flex-direction: column; gap: 20px; padding: 28px;">
+      <div style="font-size:16px; font-weight:700; color:var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 12px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-file-invoice" style="color: var(--accent);"></i> Thông tin cơ bản
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Tên sản phẩm *</label>
+        <input type="text" name="title" class="form-input" placeholder="VD: Premium Skyblock Spawn" required style="width:100%;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Mô tả chi tiết sản phẩm *</label>
+        <div id="editor-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Specs, Image & Dynamic Fields -->
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <!-- Pricing and Category -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-tags" style="color: var(--success);"></i> Phân loại & Giá bán
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Danh mục sản phẩm</label>
+        <select name="category" id="category-select" class="form-select" style="width:100%;" required>
+          <option value="">-- Chọn danh mục --</option>
+          ${typeof categories !== 'undefined' ? categories.map(c => '<option value="' + c.slug + '">' + c.name + '</option>').join('') : ''}
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Giá bán (zCoin) *</label>
+          <input type="number" name="salePrice" class="form-input" placeholder="100" required style="width:100%;" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Giá gốc (zCoin)</label>
+          <input type="number" name="originalPrice" class="form-input" placeholder="150" style="width:100%;" min="0">
+        </div>
+      </div>
+
+      <!-- Thumbnail Zone with Drag/Drop & Paste Support -->
+      <div class="form-group">
+        <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Ảnh Thumbnail *</label>
+        <div 
+          @click="activeZone = 'thumbnail'; $refs.thumbnailInput.click()"
+          @dragover.prevent="$el.style.borderColor = 'var(--accent)'"
+          @dragleave.prevent="$el.style.borderColor = activeZone === 'thumbnail' ? 'var(--accent)' : 'rgba(255,255,255,0.08)'"
+          @drop.prevent="$el.style.borderColor = activeZone === 'thumbnail' ? 'var(--accent)' : 'rgba(255,255,255,0.08)'; addFiles($event.dataTransfer.files, 'thumbnail')"
+          :style="activeZone === 'thumbnail' ? 'border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15);' : 'border-color: rgba(255,255,255,0.08);'"
+          style="border: 2px dashed rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.012);"
+          onmouseover="this.style.background='rgba(255, 255, 255, 0.025)'"
+          onmouseout="this.style.background='rgba(255, 255, 255, 0.012)'"
+        >
+          <template x-if="!thumbnailData">
+            <div>
+              <i class="fa-solid fa-image" style="font-size: 18px; color: var(--text-muted); margin-bottom: 4px;"></i>
+              <span style="font-size: 11.5px; color: var(--text-secondary); display: block;">Click, kéo thả hoặc dán ảnh Thumbnail</span>
+            </div>
+          </template>
+          <template x-if="thumbnailData">
+            <div style="position: relative; width: 100%; max-width: 280px; margin: 0 auto; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden; background: #000;">
+              <img :src="thumbnailData" style="width: 100%; height: 100%; object-fit: cover;">
+              <button 
+                type="button" 
+                @click.stop="thumbnailData = ''" 
+                style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(244,63,94,0.85); border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+              >
+                <i class="fa-solid fa-xmark" style="font-size: 9px;"></i>
+              </button>
+            </div>
+          </template>
+          <input 
+            type="file" 
+            x-ref="thumbnailInput" 
+            accept="image/*" 
+            @change="addFiles($event.target.files, 'thumbnail')" 
+            style="display: none;"
+          >
+          <input type="hidden" name="imageStr" :value="thumbnailData">
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Gallery Card with Drag, Drop & Ctrl+V Paste Support -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-images" style="color: var(--accent-light);"></i> Thư viện ảnh sản phẩm
+      </div>
+      
+      <!-- Drag and drop zone -->
+      <div 
+        @click="activeZone = 'gallery'; $refs.galleryInput.click()"
+        @dragover.prevent="$el.style.borderColor = 'var(--accent)'"
+        @dragleave.prevent="$el.style.borderColor = activeZone === 'gallery' ? 'var(--accent)' : 'rgba(255,255,255,0.08)'"
+        @drop.prevent="$el.style.borderColor = activeZone === 'gallery' ? 'var(--accent)' : 'rgba(255,255,255,0.08)'; addFiles($event.dataTransfer.files, 'gallery')"
+        :style="activeZone === 'gallery' ? 'border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15);' : 'border-color: rgba(255,255,255,0.08);'"
+        style="border: 2px dashed rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.015);"
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.03)'"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.015)'"
+      >
+        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;"></i>
+        <span style="font-size: 12.5px; color: var(--text-secondary); display: block; font-weight: 500;">
+          Kéo thả ảnh vào đây, hoặc <span style="color: var(--accent-light); text-decoration: underline;">chọn tệp</span>
+        </span>
+        <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">
+          Hỗ trợ nhấn <b>Ctrl + V</b> để dán ảnh trực tiếp từ Clipboard
+        </span>
+        <input 
+          type="file" 
+          x-ref="galleryInput" 
+          multiple 
+          accept="image/*" 
+          @change="addFiles($event.target.files, 'gallery')" 
+          style="display: none;"
+        >
+      </div>
+
+      <!-- Gallery Preview Flex Row -->
+      <div x-show="gallery.length > 0" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+        <template x-for="img in gallery" :key="img.id">
+          <div style="position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background: #000; flex-shrink: 0;">
+            <img :src="img.data" style="width: 100%; height: 100%; object-fit: cover;">
+            <button 
+              type="button" 
+              @click.stop="removeImage(img.id)" 
+              style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(244,63,94,0.85); border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(244,63,94,1)'"
+              onmouseout="this.style.background='rgba(244,63,94,0.85)'"
+            >
+              <i class="fa-solid fa-xmark" style="font-size: 9px;"></i>
+            </button>
+            <input type="hidden" name="galleryBase64[]" :value="img.data">
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Category Dynamic Fields -->
+    <div class="card" id="dynamic-fields-wrapper" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 24px; display: none;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-sliders" style="color: var(--warning);"></i> Thông số danh mục
+      </div>
+      <div id="dynamic-fields-container" style="display:flex; flex-direction:column; gap:14px;">
+        <!-- Inputs dynamically injected here -->
+      </div>
+    </div>
+
+    <!-- Lists inputs (Tags) -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-list-check" style="color: var(--accent-light);"></i> Các thông số bổ sung (ngăn cách bởi dấu phẩy)
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Tính năng nổi bật (Features)</label>
+        <input type="text" name="features" class="form-input" placeholder="VD: Hỗ trợ 24/7, Không lag" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Bộ tài nguyên bao gồm (Items List)</label>
+        <input type="text" name="itemsList" class="form-input" placeholder="VD: schematic, world folder" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Plugins tương thích (Plugins)</label>
+        <input type="text" name="plugins" class="form-input" placeholder="VD: WorldEdit, PlaceholderAPI" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block;">Quà tặng & Bảo hành (Gifts)</label>
+        <input type="text" name="gifts" class="form-input" placeholder="VD: Tặng kèm 1 setup phụ" style="width:100%;">
+      </div>
+    </div>
+
+    <!-- Initial Product File Version (Optional) -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-file-zipper" style="color: var(--accent-light);"></i> Tệp tài nguyên (Phiên bản đầu tiên)
+      </div>
+      
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px; display:block;">Phiên bản</label>
+          <input type="text" x-model="newVer" name="versionNumber" class="form-input" style="width:100%;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px; display:block;">Mô tả thay đổi</label>
+          <input type="text" x-model="newChangelog" name="versionChangelog" class="form-input" style="width:100%;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px; display:block;">Chọn tệp tin tài nguyên</label>
+        
+        <!-- Upload Trigger or Status -->
+        <div style="border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; background:rgba(0,0,0,0.2);">
+          <!-- When not uploading and no file uploaded -->
+          <div x-show="!isUploading && !uploadedFileKey" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span style="font-size:12px; color:var(--text-secondary);">Chưa có tệp nào được chọn</span>
+            <button type="button" @click="$refs.versionFileInput.click()" class="btn btn-sm btn-ghost" style="padding: 6px 12px; font-size:11.5px; display:flex; align-items:center; gap:4px; border:1px solid var(--border);">
+              <i class="fa-solid fa-file-import"></i> Chọn tệp
+            </button>
+          </div>
+
+          <!-- When uploading -->
+          <div x-show="isUploading" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:12px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-spinner fa-spin" style="color:var(--accent-light);"></i> Đang tải lên...
+              </span>
+              <span x-text="uploadProgress + '%'" style="font-size:12px; font-weight:700; color:var(--accent-light);"></span>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+              <div :style="'width: ' + uploadProgress + '%'" style="height:100%; background:var(--accent); transition:width 0.2s ease;"></div>
+            </div>
+          </div>
+
+          <!-- When uploaded successfully -->
+          <div x-show="!isUploading && uploadedFileKey" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="min-width:0; flex:1;">
+              <div x-text="uploadedFileName" class="text-truncate" style="font-size:12.5px; font-weight:600; color:var(--success);"></div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">
+                Dung lượng: <span x-text="Math.round(uploadedFileSize / 1024) + ' KB'"></span>
+              </div>
+            </div>
+            <button type="button" @click="uploadedFileKey=''; uploadedFileName=''; uploadedFileSize=0;" class="btn btn-sm btn-ghost" style="color:var(--danger); border:1px solid rgba(244,63,94,0.2); padding:6px 10px; display:flex; align-items:center; justify-content:center;" title="Xóa tệp">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+        
+        <input type="file" x-ref="versionFileInput" @change="triggerVersionUpload($event)" style="display:none;">
+      </div>
+
+      <!-- Hidden inputs for version metadata link -->
+      <input type="hidden" name="productId" :value="productId">
+      <input type="hidden" name="versionFileKey" :value="uploadedFileKey">
+      <input type="hidden" name="versionFileName" :value="uploadedFileName">
+      <input type="hidden" name="versionFileSize" :value="uploadedFileSize">
+    </div>
+
+    <!-- Submit Panel -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 20px;">
+      <button type="submit" class="btn btn-primary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; font-weight:700;">
+        <i class="fas fa-cloud-arrow-up"></i> Đăng sản phẩm
+      </button>
+    </div>
+  </div>
+</form>
+`;
+
+const extraScript = `
+<!-- Quill.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+  const categories = ${typeof categories !== 'undefined' ? JSON.stringify(categories) : '[]'};
+
+  function initProductsNew() {
+    // 1. Initialize Quill Editor
+    const quill = new Quill('#editor-container', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['link', 'clean']
+        ]
+      }
+    });
+
+    // 2. Handle Category Dynamic Fields
+    const selectEl = document.getElementById('category-select');
+    const wrapper = document.getElementById('dynamic-fields-wrapper');
+    const container = document.getElementById('dynamic-fields-container');
+    if (!selectEl) return;
+
+    selectEl.addEventListener('change', function() {
+      const slug = this.value;
+      const cat = categories.find(c => c.slug === slug);
+      
+      container.innerHTML = '';
+      if (cat && cat.fields && cat.fields.length > 0) {
+        wrapper.style.display = 'block';
+        cat.fields.forEach(f => {
+          let inputHtml = '';
+          const reqAttr = f.required ? 'required' : '';
+          const reqStar = f.required ? '<span style="color:var(--danger)">*</span>' : '';
+          
+          if (f.type === 'select') {
+            const optionsHtml = (f.options || []).map(opt => '<option value="' + opt + '">' + opt + '</option>').join('');
+            inputHtml = '<div class="form-group">' +
+              '<label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">' + f.name + ' ' + reqStar + '</label>' +
+              '<select name="customFields[' + f.name + ']" class="form-select" style="width:100%;" ' + reqAttr + '>' +
+                '<option value="">-- Chọn --</option>' +
+                optionsHtml +
+              '</select>' +
+            '</div>';
+          } else if (f.type === 'number') {
+            inputHtml = '<div class="form-group">' +
+              '<label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">' + f.name + ' ' + reqStar + '</label>' +
+              '<input type="number" name="customFields[' + f.name + ']" class="form-input" placeholder="Nhập số..." style="width:100%;" ' + reqAttr + '>' +
+            '</div>';
+          } else {
+            inputHtml = '<div class="form-group">' +
+              '<label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">' + f.name + ' ' + reqStar + '</label>' +
+              '<input type="text" name="customFields[' + f.name + ']" class="form-input" placeholder="Nhập chữ..." style="width:100%;" ' + reqAttr + '>' +
+            '</div>';
+          }
+          container.insertAdjacentHTML('beforeend', inputHtml);
+        });
+      } else {
+        wrapper.style.display = 'none';
+      }
+    });
+
+    // 3. Sync Quill content to hidden field before form submission
+    const form = document.getElementById('new-product-form');
+    form.addEventListener('submit', function(e) {
+      const descHtml = quill.getSemanticHTML(); // gets semantic HTML content
+      document.getElementById('hidden-description').value = descHtml;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProductsNew);
+  } else {
+    initProductsNew();
+  }
+</script>
+`;
+%>
+<%- include('./layout', { body: newProductHtml, extraScript }) %>

@@ -1,0 +1,193 @@
+<%
+const newCategoryHtml = `
+<style>
+  .custom-field-row {
+    background: rgba(255, 255, 255, 0.012);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .custom-field-row:hover {
+    background: rgba(255, 255, 255, 0.022);
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  /* Required Toggle Switch Styles */
+  .switch-slider {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .switch-slider.active {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
+  }
+  .switch-circle {
+    background-color: var(--text-muted);
+    transform: translateX(0);
+  }
+  .switch-circle.active {
+    background-color: var(--accent) !important;
+    transform: translateX(20px) !important;
+  }
+</style>
+
+<div class="page-header" style="margin-bottom: 28px;">
+  <div style="display:flex;align-items:center;justify-content:space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="page-title" style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(90deg, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-folder-tree" style="color: var(--accent); font-size: 22px;"></i> Tạo danh mục mới
+      </div>
+      <div class="page-subtitle" style="font-size: 13.5px; color: var(--text-secondary); opacity: 0.85;">Định nghĩa danh mục mới và thiết lập các trường dữ liệu tùy biến.</div>
+    </div>
+    <a href="/admin/categories" class="btn btn-ghost" style="display: flex; align-items: center; gap: 8px;">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+  </div>
+</div>
+
+<div x-data="{
+  fields: [],
+  addField() {
+    this.fields.push({ id: Date.now(), name: '', type: 'text', required: false, options: '' });
+    this.updateFieldsJson();
+  },
+  removeField(id) {
+    this.fields = this.fields.filter(f => f.id !== id);
+    this.updateFieldsJson();
+  },
+  updateFieldsJson() {
+    const parsedFields = this.fields.map(f => {
+      let optionsList = [];
+      if (f.type === 'select' && typeof f.options === 'string') {
+        optionsList = f.options.split(',').map(o => o.trim()).filter(Boolean);
+      }
+      return { name: f.name.trim(), type: f.type, required: !!f.required, options: optionsList };
+    }).filter(f => f.name !== '');
+    document.getElementById('fieldsJson').value = JSON.stringify(parsedFields);
+  }
+}">
+  <form action="/admin/categories/add" method="POST" id="add-category-form" class="row g-4" @submit="updateFieldsJson()">
+    <input type="hidden" name="fieldsJson" id="fieldsJson" value="[]">
+
+    <!-- Left Column: Basic Info -->
+    <div class="col-lg-5">
+      <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 28px; display: flex; flex-direction: column; gap: 20px; height: 100%;">
+        <div style="font-size:16px; font-weight:700; color:var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 12px; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-file-invoice" style="color: var(--accent);"></i> Thông tin danh mục
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Tên Danh Mục *</label>
+          <input type="text" name="name" class="form-input" placeholder="VD: Minecraft Map" required style="width:100%;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Mô tả danh mục (Tùy chọn)</label>
+          <textarea name="description" class="form-textarea" rows="6" placeholder="Nhập mô tả ngắn gọn về danh mục sản phẩm này..." style="width:100%; min-height:140px; resize:vertical;"></textarea>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 20px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; font-weight:700; height: 44px; border-radius: 10px;">
+            <i class="fas fa-check"></i> Tạo Danh Mục
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Dynamic Fields Config -->
+    <div class="col-lg-7">
+      <div class="card" style="background: linear-gradient(135deg, rgba(25,28,48,0.65), rgba(15,17,28,0.7)); padding: 28px; display: flex; flex-direction: column; gap: 20px; min-height: 100%;">
+        <div style="font-size:16px; font-weight:700; color:var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <span style="display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-sliders" style="color: var(--warning);"></i> Cấu hình các trường động
+          </span>
+          <button type="button" class="btn btn-ghost" @click="addField()" style="padding: 6px 12px; font-size: 12px; height: auto; border: 1px solid var(--border); border-radius: 8px; display:flex; align-items:center; gap:6px;">
+            <i class="fas fa-plus" style="font-size: 11px;"></i> Thêm trường
+          </button>
+        </div>
+
+        <div id="fields-builder-container" style="display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- Empty State -->
+          <div x-show="fields.length === 0" style="padding: 40px 20px; text-align: center; border: 2px dashed rgba(255,255,255,0.04); border-radius: 12px; color: var(--text-secondary); opacity: 0.8;">
+            <i class="fa-solid fa-folder-open" style="font-size: 28px; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+            Chưa có trường thông tin động nào. Hãy click "Thêm trường" ở trên.
+          </div>
+
+          <!-- Field rows rendered by Alpine.js -->
+          <template x-for="(field, index) in fields" :key="field.id">
+            <div class="custom-field-row">
+              
+              <!-- Top flex row: Name and Type Selector (Strictly side-by-side using calc) -->
+              <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
+                
+                <!-- Field Name Input (65%) -->
+                <div style="width: calc(65% - 6px); flex-shrink: 0;">
+                  <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; display: block;">Tên trường *</label>
+                  <div style="position: relative;">
+                    <i class="fa-solid fa-signature" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px;"></i>
+                    <input type="text" x-model="field.name" @input="updateFieldsJson()" class="form-input" placeholder="VD: Theme, Version..." style="width: 100%; padding-left: 34px; font-size: 12.5px; height: 38px; border-radius: 8px; background-color: rgba(0,0,0,0.15);" required>
+                  </div>
+                </div>
+
+                <!-- Field Type Selector (35% - Fully Inline Styled to bypass global select class hides) -->
+                <div style="width: calc(35% - 6px); flex-shrink: 0;">
+                  <label class="form-label" style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; display: block;">Kiểu dữ liệu</label>
+                  <div style="position: relative;">
+                    <i class="fa-solid fa-shapes" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px; pointer-events: none; z-index: 5;"></i>
+                    <select x-model="field.type" @change="updateFieldsJson()" style="width: 100%; padding-left: 34px; padding-right: 12px; font-size: 12.5px; height: 38px; border-radius: 8px; background-color: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); outline: none; cursor: pointer; display: block;">
+                      <option value="text" style="background-color: var(--bg-secondary); color: var(--text-primary);">Chữ (Text)</option>
+                      <option value="number" style="background-color: var(--bg-secondary); color: var(--text-primary);">Số (Number)</option>
+                      <option value="select" style="background-color: var(--bg-secondary); color: var(--text-primary);">Dropdown (Select)</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Bottom flex row: Required toggle and Delete button -->
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.03);">
+                
+                <!-- Required Toggle Switch (Left side) -->
+                <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+                  <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Bắt buộc</span>
+                  <label class="switch-toggle" style="position: relative; display: inline-block; width: 44px; height: 22px; margin: 0; cursor: pointer;">
+                    <input type="checkbox" x-model="field.required" @change="updateFieldsJson()" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer; z-index: 10; width: 100%; height: 100%; margin: 0;">
+                    <span class="switch-slider" :class="field.required ? 'active' : ''" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 34px; transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; padding: 2px;">
+                      <span class="switch-circle" :class="field.required ? 'active' : ''" style="width: 16px; height: 16px; border-radius: 50%; transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 6px rgba(0,0,0,0.3); pointer-events: none;"></span>
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Delete Trash Button (Right side) -->
+                <button type="button" class="btn btn-ghost text-danger" style="padding: 6px 12px; font-size: 11.5px; height: auto; border: 1px solid rgba(244,63,94,0.15); background: rgba(244,63,94,0.03); border-radius: 8px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" @click="removeField(field.id)">
+                  <i class="fas fa-trash-can" style="font-size: 11.5px;"></i> Xóa trường
+                </button>
+
+              </div>
+
+              <!-- Options Sub-Container for select type -->
+              <div class="options-container" x-show="field.type === 'select'" style="margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 14px;">
+                <label class="form-label" style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; display: block;">Các giá trị tùy chọn (phân cách bằng dấu phẩy) *</label>
+                <div style="position: relative;">
+                  <i class="fa-solid fa-list-ol" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px;"></i>
+                  <input type="text" x-model="field.options" @input="updateFieldsJson()" class="form-input" placeholder="VD: 1.16.5, 1.20.1, 1.21" style="width: 100%; padding-left: 34px; font-size: 12px; height: 36px; border-radius: 8px; background-color: rgba(0,0,0,0.15);" :required="field.type === 'select'">
+                </div>
+                <span style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; display: block;">Nhập các giá trị cách nhau bằng dấu phẩy để hệ thống dựng dropdown khi đăng sản phẩm.</span>
+              </div>
+
+            </div>
+          </template>
+
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+`;
+%>
+<%- include('./layout', { body: newCategoryHtml }) %>

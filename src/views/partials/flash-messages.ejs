@@ -1,0 +1,82 @@
+<script>
+  const EZToast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3500,
+    timerProgressBar: true,
+    background: 'rgba(30, 41, 59, 0.95)',
+    color: '#f8fafc',
+    customClass: {
+      popup: 'glass-card'
+    },
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  });
+
+  <% const currentSuccess = (typeof flashSuccess !== 'undefined' && flashSuccess) || (typeof success !== 'undefined' && success) || null; %>
+  <% const currentError = (typeof flashError !== 'undefined' && flashError) || (typeof error !== 'undefined' && error) || null; %>
+  <% const currentWarning = (typeof warning !== 'undefined' && warning) || null; %>
+
+  <% if (currentSuccess) { %>
+    EZToast.fire({
+      icon: 'success',
+      title: `<%= currentSuccess %>`
+    });
+  <% } %>
+  
+  <% if (currentError) { %>
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: `<%= currentError %>`,
+      background: 'rgba(30, 41, 59, 0.95)',
+      color: '#f8fafc',
+      customClass: {
+        popup: 'glass-card border border-danger border-opacity-25'
+      }
+    });
+  <% } %>
+  
+  <% if (currentWarning) { %>
+    EZToast.fire({
+      icon: 'warning',
+      title: `<%= currentWarning %>`
+    });
+  <% } %>
+
+  // Clear query parameters from URL to keep address bar clean
+  if (window.history.replaceState) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('success') || url.searchParams.has('error') || url.searchParams.has('warning')) {
+      url.searchParams.delete('success');
+      url.searchParams.delete('error');
+      url.searchParams.delete('warning');
+      window.history.replaceState({ path: url.href }, '', url.href);
+    }
+  }
+
+  // Premium UI/UX Confirm Delete Modal
+  function confirmDelete(event, form, message) {
+    event.preventDefault();
+    Swal.fire({
+      title: 'Xác nhận xóa',
+      text: message || 'Bạn có chắc chắn muốn thực hiện hành động này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#3b82f6',
+      confirmButtonText: '<i class="fa-solid fa-trash-can me-2"></i>Đồng ý xóa',
+      cancelButtonText: 'Hủy bỏ',
+      background: 'rgba(30, 41, 59, 0.95)',
+      color: '#f8fafc',
+      customClass: { popup: 'glass-card border border-danger border-opacity-25' }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        form.submit();
+      }
+    });
+  }
+</script>

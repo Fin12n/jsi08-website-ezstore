@@ -1,0 +1,637 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<style>
+  /* =====================================================
+     LIBRARY PAGE - PREMIUM CARDS + MODAL (UI/UX PRO MAX)
+     ===================================================== */
+
+  /* — Library Card — */
+  .lib-card {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.35s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.35s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .lib-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(154,91,237,0.2);
+    border-color: rgba(154,91,237,0.25);
+  }
+
+  /* Glow accent top border */
+  .lib-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(154,91,237,0.3) 0%, rgba(59,130,246,0.15) 50%, transparent 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .lib-card:hover::before { opacity: 1; }
+
+  /* — Thumbnail — */
+  .lib-card-thumb {
+    position: relative;
+    height: 168px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.3);
+    flex-shrink: 0;
+  }
+  .lib-card-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .lib-card:hover .lib-card-thumb img { transform: scale(1.06); }
+
+  .lib-card-thumb-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,12,20,0.85) 0%, transparent 55%);
+  }
+  .lib-product-id {
+    position: absolute;
+    bottom: 10px; left: 12px;
+    font-family: var(--font-code);
+    font-size: 10.5px;
+    color: hsl(45,100%,70%);
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.07em;
+    font-weight: 600;
+  }
+  .lib-status-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .lib-status-badge.active-badge {
+    background: rgba(16,185,129,0.2);
+    color: hsl(160,65%,65%);
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+
+  /* — Card Body — */
+  .lib-card-body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .lib-product-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lib-meta {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lib-meta i { color: var(--ez-accent); }
+
+  .lib-actions { margin-top: auto; display: flex; gap: 8px; }
+
+  /* — Download Button — */
+  .btn-lib-download {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    gap: 7px;
+    padding: 10px 16px;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff !important;
+    background: linear-gradient(135deg, hsl(260,70%,65%) 0%, hsl(235,75%,60%) 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 0 3px 12px rgba(154,91,237,0.3);
+  }
+  .btn-lib-download:hover {
+    background: linear-gradient(135deg, hsl(260,75%,60%) 0%, hsl(235,80%,55%) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(154,91,237,0.45);
+  }
+  .btn-lib-download:active { transform: translateY(0); }
+
+  /* Refund Button */
+  .btn-lib-refund {
+    display: flex; align-items: center; justify-content: center;
+    width: 42px; height: 42px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 12px;
+    color: hsl(0,80%,65%) !important;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .btn-lib-refund:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.45);
+    transform: translateY(-1px);
+  }
+
+  /* =====================================================
+     DOWNLOAD MODAL — PREMIUM GLASSMORPHISM
+     ===================================================== */
+  #downloadVersionsModal .modal-content {
+    background: rgba(14,16,28,0.88) !important;
+    backdrop-filter: blur(28px) saturate(1.5);
+    -webkit-backdrop-filter: blur(28px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(154,91,237,0.15);
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+  #downloadVersionsModal .modal-header {
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    padding: 22px 24px 18px;
+  }
+  #downloadVersionsModal .modal-body { padding: 20px 24px; }
+  #downloadVersionsModal .modal-footer {
+    border-top: 1px solid rgba(255,255,255,0.06) !important;
+    padding: 14px 24px;
+  }
+
+  /* Version card in modal */
+  .ver-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .ver-card:hover {
+    border-color: rgba(154,91,237,0.3);
+    background: rgba(154,91,237,0.04);
+  }
+  .ver-badge {
+    font-family: var(--font-code);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(56,189,248,0.12);
+    color: hsl(196,85%,70%);
+    border: 1px solid rgba(56,189,248,0.2);
+    white-space: nowrap;
+  }
+  .ver-filename {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  .ver-meta { font-size: 11px; color: var(--text-muted); }
+  .ver-changelog {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+    opacity: 0.8;
+  }
+
+  /* Download button inside modal */
+  .btn-ver-download {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff !important;
+    background: linear-gradient(135deg, hsl(260,70%,65%), hsl(235,75%,60%));
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 0 2px 10px rgba(154,91,237,0.3);
+  }
+  .btn-ver-download:hover {
+    background: linear-gradient(135deg, hsl(260,75%,60%), hsl(235,80%,55%));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(154,91,237,0.45);
+  }
+
+  /* =====================================================
+     LIGHT MODE OVERRIDES
+     ===================================================== */
+  :root[data-theme="light"] .lib-card {
+    background: rgba(255,255,255,0.85);
+    border-color: rgba(0,0,0,0.07);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  :root[data-theme="light"] .lib-card:hover {
+    box-shadow: 0 12px 36px rgba(0,0,0,0.1), 0 0 0 1px rgba(154,91,237,0.2);
+    border-color: rgba(154,91,237,0.2);
+  }
+  :root[data-theme="light"] .lib-product-title { color: hsl(220,25%,10%); }
+  :root[data-theme="light"] .lib-meta { color: hsl(220,15%,48%); }
+  :root[data-theme="light"] #downloadVersionsModal .modal-content {
+    background: rgba(255,255,255,0.97) !important;
+    border-color: rgba(0,0,0,0.08) !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(154,91,237,0.1);
+    color: hsl(220,25%,10%);
+  }
+  :root[data-theme="light"] #downloadVersionsModal .modal-header { border-color: rgba(0,0,0,0.06) !important; }
+  :root[data-theme="light"] #downloadVersionsModal .modal-footer { border-color: rgba(0,0,0,0.06) !important; }
+  :root[data-theme="light"] .ver-card {
+    background: rgba(0,0,0,0.02);
+    border-color: rgba(0,0,0,0.07);
+  }
+  :root[data-theme="light"] .ver-card:hover {
+    border-color: rgba(154,91,237,0.3);
+    background: rgba(154,91,237,0.04);
+  }
+  :root[data-theme="light"] .ver-filename { color: hsl(220,25%,10%); }
+  :root[data-theme="light"] .ver-meta { color: hsl(220,10%,55%); }
+  :root[data-theme="light"] .btn-close { filter: invert(1) brightness(0.4); }
+  :root[data-theme="light"] .text-secondary { color: hsl(220,15%,40%) !important; }
+  :root[data-theme="light"] .btn-lib-refund {
+    background: rgba(239,68,68,0.06);
+    border-color: rgba(239,68,68,0.18);
+  }
+
+  /* =====================================================
+     EMPTY STATE
+     ===================================================== */
+  .lib-empty-icon {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: rgba(154,91,237,0.06);
+    border: 1px solid rgba(154,91,237,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    color: hsl(260,60%,70%);
+    margin: 0 auto 20px;
+  }
+</style>
+
+<section class="user-library-section" style="padding-top: 100px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(ellipse at 15% 25%, rgba(154,91,237,0.04) 0%, transparent 55%), radial-gradient(ellipse at 85% 75%, rgba(59,130,246,0.03) 0%, transparent 55%);">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <%- include('../partials/user-sidebar') %>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <div>
+            <h3 class="font-outfit fw-bold mb-1" style="color: var(--text-primary); font-size: 1.6rem;">
+              <i class="fa-solid fa-layer-group me-2" style="color: hsl(260,70%,70%);"></i>Thư viện của tôi
+            </h3>
+            <p class="mb-0" style="font-size: 13px; color: var(--text-muted);">
+              <% if (library && library.length > 0) { %>
+                <span><%= library.length %> sản phẩm đã sở hữu</span>
+              <% } else { %>
+                Bạn chưa có sản phẩm nào
+              <% } %>
+            </p>
+          </div>
+          <a href="/products" class="btn btn-sm px-3 py-2 font-outfit" style="background: rgba(154,91,237,0.1); border: 1px solid rgba(154,91,237,0.25); color: hsl(260,70%,72%); border-radius: 10px; font-size: 13px; font-weight: 600;">
+            <i class="fa-solid fa-store me-1"></i> Cửa hàng
+          </a>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="row g-3">
+          <% if (library && library.length > 0) { %>
+            <% library.forEach(item => { %>
+              <div class="col-md-6 col-xl-4">
+                <div class="lib-card">
+                  <!-- Thumbnail -->
+                  <div class="lib-card-thumb">
+                    <img src="<%= item.productImage %>" alt="<%= item.productTitle %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'">
+                    <div class="lib-card-thumb-overlay"></div>
+                    <span class="lib-product-id"><%= item.productId.slice(0,8).toUpperCase() %></span>
+                    <span class="lib-status-badge active-badge"><i class="fa-solid fa-circle-check me-1" style="font-size:8px;"></i>Active</span>
+                  </div>
+
+                  <!-- Body -->
+                  <div class="lib-card-body">
+                    <div class="lib-product-title"><%= item.productTitle %></div>
+                    <div class="lib-meta">
+                      <i class="fa-regular fa-calendar-check"></i>
+                      Mua ngày: <%= new Date(item.purchasedAt).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
+                    </div>
+
+                    <div class="lib-actions">
+                      <button type="button"
+                              class="btn-lib-download btn-download-trigger"
+                              id="btn-dl-<%= item.productId %>"
+                              data-product-id="<%= item.productId %>"
+                              data-product-title="<%= item.productTitle %>">
+                        <i class="fa-solid fa-download"></i>
+                        Tải về
+                      </button>
+
+                      <button type="button"
+                              class="btn-lib-refund"
+                              title="Yêu cầu hoàn tiền"
+                              onclick="confirmRefund('<%= item.productId %>', '<%= item.productTitle.replace(/'/g, '\\\'') %>')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="col-12 text-center py-5 mt-3">
+              <div class="lib-empty-icon">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <h5 class="font-outfit fw-bold mb-2" style="color: var(--text-primary);">Thư viện trống</h5>
+              <p class="mb-4" style="color: var(--text-muted); font-size: 14px; max-width: 320px; margin-inline: auto;">
+                Bạn chưa mua sản phẩm nào. Khám phá cửa hàng để sở hữu các tài nguyên premium!
+              </p>
+              <a href="/products" class="btn-lib-download text-decoration-none d-inline-flex" style="width: auto; padding: 12px 28px; font-size: 14px;">
+                <i class="fa-solid fa-store"></i> Khám phá cửa hàng
+              </a>
+            </div>
+          <% } %>
+        </div>
+        <!-- /Cards Grid -->
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================
+     DOWNLOAD VERSIONS MODAL (Rebuilt - Bug-free)
+     ======================================================== -->
+<div class="modal fade" id="downloadVersionsModal" tabindex="-1" aria-hidden="true" aria-labelledby="downloadModalTitle">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-outfit fw-bold d-flex align-items-center gap-2" id="downloadModalTitle">
+          <span style="width:34px;height:34px;border-radius:10px;background:rgba(56,189,248,0.12);display:flex;align-items:center;justify-content:center;">
+            <i class="fa-solid fa-cloud-arrow-down" style="color:hsl(196,85%,65%);font-size:15px;"></i>
+          </span>
+          Tải file sản phẩm
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Product info strip -->
+        <div class="d-flex align-items-center gap-3 p-3 mb-4 rounded-3" style="background:rgba(154,91,237,0.05);border:1px solid rgba(154,91,237,0.12);">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(154,91,237,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-box" style="color:hsl(260,70%,72%);font-size:15px;"></i>
+          </div>
+          <div style="min-width:0;">
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:2px;">Sản phẩm</div>
+            <div id="modalProductTitle" class="font-outfit fw-bold text-truncate" style="font-size:14px;color:var(--text-primary);"></div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="modalLoading" class="text-center py-4">
+          <div class="spinner-border" role="status" style="color:hsl(260,70%,70%);width:36px;height:36px;border-width:3px;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 mb-0" style="font-size:13px;color:var(--text-muted);">Đang tải danh sách phiên bản...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="modalError" class="d-none rounded-3 p-3 d-flex align-items-start gap-2" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
+          <i class="fa-solid fa-circle-exclamation mt-0 pt-1" style="color:hsl(0,80%,65%);flex-shrink:0;"></i>
+          <span id="modalErrorMsg" style="font-size:13px;color:hsl(0,75%,65%);"></span>
+        </div>
+
+        <!-- Versions list -->
+        <div id="versionsContainer" class="d-flex flex-column gap-2 d-none"></div>
+      </div>
+
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn w-100 py-2 font-outfit fw-600" data-bs-dismiss="modal"
+                style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text-secondary);border-radius:12px;font-size:14px;">
+          <i class="fa-solid fa-xmark me-1"></i> Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden refund form -->
+<form id="refundForm" action="/user/refund" method="POST" style="display:none;">
+  <input type="hidden" name="productId" id="refundProductId">
+</form>
+
+<script>
+  // ==========================================================
+  //  REFUND — Use Notifier confirm
+  // ==========================================================
+  function confirmRefund(productId, productTitle) {
+    if (window.Notifier) {
+      Notifier.confirm(
+        'Xác nhận hoàn tiền',
+        'Bạn có chắc chắn muốn yêu cầu hoàn tiền cho "' + productTitle + '"? Quyền truy cập tệp tin sẽ bị tạm khoá cho đến khi xử lý xong.',
+        'Xác nhận hoàn tiền',
+        'warning'
+      ).then(result => {
+        if (result.isConfirmed) {
+          document.getElementById('refundProductId').value = productId;
+          document.getElementById('refundForm').submit();
+        }
+      });
+    } else {
+      if (confirm('Bạn có chắc chắn muốn yêu cầu hoàn tiền cho sản phẩm này?')) {
+        document.getElementById('refundProductId').value = productId;
+        document.getElementById('refundForm').submit();
+      }
+    }
+  }
+
+  // ==========================================================
+  //  DOWNLOAD MODAL — Fully re-initialised every open
+  // ==========================================================
+  (function () {
+    const modalEl = document.getElementById('downloadVersionsModal');
+    let bsModal = null;
+
+    // Get (or recreate) Bootstrap modal instance
+    function getModal() {
+      if (!bsModal) {
+        bsModal = new bootstrap.Modal(modalEl, { backdrop: true, keyboard: true });
+      }
+      return bsModal;
+    }
+
+    // Reset all inner content to "loading" state
+    function resetModalState() {
+      document.getElementById('modalLoading').classList.remove('d-none');
+      document.getElementById('modalError').classList.add('d-none');
+      const container = document.getElementById('versionsContainer');
+      container.classList.add('d-none');
+      container.innerHTML = '';
+    }
+
+    // Build one version card DOM element
+    function buildVerCard(v, productId) {
+      const fileSizeKb = v.fileSize ? Math.round(v.fileSize / 1024) : '?';
+      const uploadDate  = v.uploadedAt
+        ? new Date(v.uploadedAt).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' })
+        : '—';
+
+      const card = document.createElement('div');
+      card.className = 'ver-card';
+
+      let changelogHtml = '';
+      if (v.changelog) {
+        changelogHtml = '<div class="ver-changelog" title="' + escHtml(v.changelog) + '">📝 ' + escHtml(v.changelog) + '</div>';
+      }
+
+      card.innerHTML =
+        '<div class="d-flex flex-column gap-1" style="min-width:0;flex:1;">' +
+          '<div class="d-flex align-items-center gap-2 flex-wrap">' +
+            '<span class="ver-badge">' + (String(v.version).startsWith('v') ? '' : 'v') + escHtml(String(v.version)) + '</span>' +
+            '<span class="ver-meta"><i class="fa-regular fa-calendar me-1"></i>' + uploadDate + '</span>' +
+          '</div>' +
+          '<div class="ver-filename" title="' + escHtml(v.fileName) + '">' + escHtml(v.fileName) + ' <span class="ver-meta fw-normal ms-1">(' + fileSizeKb + ' KB)</span></div>' +
+          changelogHtml +
+        '</div>' +
+        '<a href="/user/download/' + encodeURIComponent(productId) + '/' + encodeURIComponent(v.version) + '" class="btn-ver-download" download>' +
+          '<i class="fa-solid fa-download" style="font-size:11px;"></i> Tải' +
+        '</a>';
+
+      return card;
+    }
+
+    // Open modal + fetch versions
+    function openDownloadModal(productId, productTitle) {
+      document.getElementById('modalProductTitle').textContent = productTitle;
+      resetModalState();
+
+      getModal().show();
+
+      fetch('/user/api/products/' + encodeURIComponent(productId) + '/versions')
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          document.getElementById('modalLoading').classList.add('d-none');
+
+          if (data.error) {
+            document.getElementById('modalErrorMsg').textContent = data.error;
+            document.getElementById('modalError').classList.remove('d-none');
+            return;
+          }
+
+          const container = document.getElementById('versionsContainer');
+          container.classList.remove('d-none');
+
+          if (!data.versions || data.versions.length === 0) {
+            container.innerHTML =
+              '<div class="text-center py-5">' +
+                '<i class="fa-solid fa-box-open fa-2x mb-3 d-block" style="color:var(--text-muted);opacity:.5;"></i>' +
+                '<p class="mb-0" style="font-size:13px;color:var(--text-muted);">Sản phẩm chưa có file tài nguyên.<br>Vui lòng liên hệ Admin/Seller.</p>' +
+              '</div>';
+            return;
+          }
+
+          // Deduplicate by version label (handle duplicate entries in DB)
+          const seen = new Set();
+          const unique = data.versions.filter(function (v) {
+            const key = String(v.version).trim().toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          unique.forEach(function (v) {
+            container.appendChild(buildVerCard(v, productId));
+          });
+        })
+        .catch(function (err) {
+          document.getElementById('modalLoading').classList.add('d-none');
+          document.getElementById('modalErrorMsg').textContent = 'Lỗi kết nối: ' + (err.message || 'Vui lòng thử lại');
+          document.getElementById('modalError').classList.remove('d-none');
+        });
+    }
+
+    // Ensure modal instance is cleaned up after hide so it can be reopened
+    modalEl.addEventListener('hidden.bs.modal', function () {
+      // Dispose and nullify so next open creates a fresh instance
+      if (bsModal) {
+        bsModal.dispose();
+        bsModal = null;
+      }
+    });
+
+    // Attach click listeners via event delegation (works even after DOM changes)
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.btn-download-trigger');
+      if (!btn) return;
+      e.preventDefault();
+      const productId    = btn.getAttribute('data-product-id');
+      const productTitle = btn.getAttribute('data-product-title');
+      if (productId) openDownloadModal(productId, productTitle);
+    });
+
+    // Escape HTML helper
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  })();
+</script>
+
+<%- include('../partials/footer') %>

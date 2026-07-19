@@ -1,0 +1,298 @@
+/* ==========================================================================
+   PRODUCT CARDS SYSTEM
+   ========================================================================== */
+.products-section {
+  background-color: var(--ez-bg-alt);
+  padding: 100px 0;
+}
+
+.section-title-container {
+  margin-bottom: 60px;
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.products-btn {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--text-muted);
+  transition: all 0.3s;
+}
+.products-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  padding-bottom: 4px;
+}
+
+/* Card overrides */
+.card-item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.card-img-container {
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+  background: var(--ez-bg);
+  border-radius: var(--radius-sm);
+}
+.card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-item:hover .card-img-container img {
+  transform: scale(1.04);
+}
+
+.card-category-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.card-body-custom {
+  padding: 24px 8px 12px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-title-custom {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.card-desc-custom {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  font-weight: 300;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 4.5em;
+  line-height: 1.5em;
+}
+
+.card-price-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.card-price-del {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.card-price-new {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.btn-card {
+  width: 100%;
+  background: var(--ez-bg-card);
+  color: var(--text-primary) !important;
+  border: 1px solid var(--glass-border);
+  font-weight: 500;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s;
+}
+.btn-card:hover {
+  background: var(--ez-accent);
+  color: #fff !important;
+  border-color: var(--ez-accent);
+}
+
+/* ==========================================================================
+   SERVICES SECTION
+   ========================================================================== */
+.services-section {
+  background-color: var(--ez-bg);
+  padding: 80px 0;
+}
+
+.service-card {
+  padding: 40px 30px;
+  height: 100%;
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.service-icon-box {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(51, 203, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  transition: all 0.3s;
+}
+.service-icon-box i {
+  font-size: 1.8rem;
+  color: var(--ez-blue);
+  transition: all 0.3s;
+}
+
+.service-card:hover .service-icon-box {
+  background: var(--ez-blue);
+  transform: scale(1.1);
+}
+.service-card:hover .service-icon-box i {
+  color: var(--ez-bg);
+}
+
+.service-title {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+.service-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   UI/UX PRO MAX FORM CONTROLS (Global)
+   ========================================================================== */
+/* Custom File Input */
+.form-control[type="file"] {
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+}
+
+.form-control[type="file"]::file-selector-button {
+  background: rgba(154, 91, 237, 0.1);
+  color: var(--ez-primary);
+  border: 1px solid rgba(154, 91, 237, 0.2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-right: 16px;
+  margin-left: -0.5rem;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.form-control[type="file"]::file-selector-button:hover {
+  background: var(--ez-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(154, 91, 237, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Custom Select */
+select.form-select,
+select.form-control {
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 1rem center !important;
+  background-size: 1.2em !important;
+  padding-right: 3rem !important;
+  padding-left: 1rem !important;
+}
+
+select.form-select option,
+select.form-control option {
+  background-color: var(--ez-bg-alt);
+  color: var(--text-primary);
+  padding: 12px;
+}
+
+/* ==========================================================================
+   UI/UX PRO MAX PREMIUM GLASS TABLES
+   ========================================================================== */
+.glass-card .table {
+  background: transparent !important;
+  --bs-table-bg: transparent !important;
+  --bs-table-color: var(--text-primary) !important;
+  margin-bottom: 0;
+}
+
+.glass-card .table th {
+  color: var(--text-secondary) !important;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+
+.glass-card .table td {
+  padding: 20px 12px;
+  border-bottom: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+.glass-card .table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.glass-card .table-hover tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.015) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Vòng quay may mắn (Lucky Spin Wheel) */
+.wheel-wrapper {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 0 40px rgba(243, 156, 18, 0.15);
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(231, 76, 60, 0.2));
+}
+.wheel-outer-border {
+  border: 6px solid #1e1e24;
+  border-radius: 50%;
+}
+.wheel-pointer-glow {
+  filter: drop-shadow(0 4px 8px rgba(231, 76, 60, 0.5));
+  z-index: 100;
+}

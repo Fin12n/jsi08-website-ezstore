@@ -1,0 +1,35 @@
+<%- include('partials/header', { bodyClass: 'body-no-nav' }) %>
+
+<!-- Home button -->
+<a href="/login" class="btn btn-homeback font-outfit" id="btn-back-login">
+  <i class="fa-solid fa-arrow-left me-2"></i>Quay lại
+</a>
+
+<div class="auth-wrapper">
+  <div class="card glass-card auth-card">
+    <div class="text-center mb-4">
+      <img src="/imgs/logo.webp" alt="Logo" width="60" height="60" class="mb-3 rounded-3" />
+      <h2 class="text-white font-outfit mb-1">Xác minh 2 Bước</h2>
+      <p class="text-secondary small">Vui lòng nhập mã từ ứng dụng Authenticator</p>
+    </div>
+
+    <!-- Alerts are now handled globally via SweetAlert2 Toast -->
+
+    <form action="/login/2fa" method="POST" id="login-2fa-form">
+      <div class="mb-4">
+        <label for="token" class="form-label small text-secondary">Mã bảo mật (6 chữ số) *</label>
+        <input type="text" class="form-control form-glass-input text-center fs-3 letter-spacing-2" id="token" name="token" placeholder="000000" maxlength="6" pattern="\d{6}" required autocomplete="off" autofocus />
+      </div>
+
+      <button type="submit" class="btn btn-hero w-100 py-3 font-outfit mb-3" id="btn-2fa-submit">
+        <i class="fa-solid fa-shield-halved me-2"></i>Xác minh ngay
+      </button>
+
+      <div class="text-center small text-secondary mt-3">
+        Mất thiết bị? <a href="/support" class="text-info fw-semibold">Liên hệ hỗ trợ</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

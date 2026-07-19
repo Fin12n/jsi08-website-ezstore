@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="services-section" style="padding-top: 120px; min-height: 80vh;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-subtitle">Dịch vụ chuyên nghiệp</span>
+      <h1 class="section-title text-white">Our Services</h1>
+      <p class="lead">Chúng tôi mang đến các giải pháp vận hành, bảo mật và thiết kế đồ họa Minecraft chuyên sâu.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <% if (typeof services !== 'undefined' && services.length > 0) { %>
+        <% services.forEach(service => { %>
+          <div class="col-lg-4 col-md-6">
+            <div class="card glass-card service-card p-5 h-100 d-flex flex-column align-items-center text-center">
+              <div class="service-icon-box mb-4">
+                <i class="<%= service.icon %>"></i>
+              </div>
+              <h3 class="service-title font-outfit text-white fs-4 mb-3"><%= service.title %></h3>
+              <p class="service-desc text-secondary small mb-4"><%= service.description %></p>
+              <a href="/#contact" class="btn btn-outline-light btn-sm mt-auto px-4 py-2">Liên hệ ngay</a>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,79 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="seller-add-product-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <!-- Sidebar -->
+          <div class="text-center mb-4">
+            <h5 class="text-white font-outfit mb-0"><i class="fa-solid fa-shop text-warning me-2"></i>Seller Panel</h5>
+          </div>
+          <hr class="border-secondary opacity-25">
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/seller/dashboard" class="nav-link text-white font-outfit"><i class="fa-solid fa-chart-pie me-2"></i>Thống kê</a>
+            <a href="/seller/products" class="nav-link text-white font-outfit"><i class="fa-solid fa-boxes-stacked me-2"></i>Sản phẩm của tôi</a>
+            <a href="/seller/add-product" class="nav-link active font-outfit"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng sản phẩm mới</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        <h3 class="text-white font-outfit mb-4">Đăng sản phẩm mới</h3>
+
+        <div class="card glass-card p-4">
+          <div class="alert bg-warning bg-opacity-10 border border-warning text-warning mb-4 small">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> Sản phẩm mới sẽ được chuyển vào trạng thái <strong>PENDING (Đang duyệt)</strong>. Quản trị viên sẽ kiểm tra chất lượng file trước khi cho phép hiển thị lên cửa hàng.
+          </div>
+
+          <form action="/seller/add-product" method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+              <div class="col-md-8">
+                <label class="form-label small text-secondary">Tên sản phẩm *</label>
+                <input type="text" class="form-control form-glass-input" name="title" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-secondary">Danh mục *</label>
+                <select class="form-select form-glass-input" name="category" required>
+                  <% categories.forEach(c => { %>
+                    <option value="<%= c.slug %>"><%= c.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Giá bán (zCoin) *</label>
+                <input type="number" class="form-control form-glass-input" name="price" required min="0">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Ảnh hiển thị (Banner) *</label>
+                <!-- Dùng Cloudinary giống Admin -->
+                <input type="file" class="form-control form-glass-input" name="image" accept="image/*" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-secondary">File tải lên (.zip, .rar) *</label>
+                <!-- Giả lập upload file -->
+                <input type="file" class="form-control form-glass-input" name="productFile" accept=".zip,.rar,.tar" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-secondary">Mô tả sản phẩm *</label>
+                <textarea class="form-control form-glass-input" name="description" rows="5" required></textarea>
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-hero w-100 py-3 font-outfit fs-5">
+                  <i class="fa-solid fa-upload me-2"></i>Gửi lên kiểm duyệt
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

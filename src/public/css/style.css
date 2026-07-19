@@ -1,0 +1,27 @@
+/* ==========================================================================
+   EZ STUDIO - MAIN STYLESHEET
+   ========================================================================== */
+
+/* Design tokens, variables, reset & base styles */
+@import url('variables.css?v=1.0.4');
+
+/* Global animations & visual glow classes */
+@import url('animations.css?v=1.0.4');
+
+/* Glassmorphism panel, card, and alert styling */
+@import url('glass.css?v=1.0.4');
+
+/* Header, navigation bar, and dropdown menus */
+@import url('navbar.css?v=1.0.4');
+
+/* Reusable components: cards, service boxes, form controls, tables */
+@import url('components.css?v=1.0.4');
+
+/* Page-specific layouts: landing, dashboard, authentication, contacts */
+@import url('pages.css?v=1.0.4');
+
+/* Footer section */
+@import url('footer.css?v=1.0.4');
+
+/* AI Chatbot System */
+@import url('chatbot.css?v=1.0.4');

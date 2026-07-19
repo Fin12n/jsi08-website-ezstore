@@ -1,0 +1,68 @@
+<%- include('./partials/header') %>
+<%- include('./partials/navbar') %>
+
+<section class="leaderboard-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container text-center">
+    <h2 class="text-white font-outfit mb-3"><i class="fa-solid fa-trophy text-warning me-3"></i>Bảng Vàng Phú Hộ</h2>
+    <p class="text-secondary mb-5">Danh sách những thành viên nạp tiền và hoạt động tích cực nhất trên hệ thống.</p>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card glass-card p-4 overflow-hidden">
+          <div class="table-responsive">
+            <table class="table table-dark table-borderless align-middle bg-transparent mb-0">
+              <thead>
+                <tr class="border-bottom border-secondary border-opacity-25 text-secondary small text-uppercase">
+                  <th class="py-3 px-4 bg-transparent text-center" style="width: 100px;">Hạng</th>
+                  <th class="py-3 px-4 bg-transparent text-start">Người dùng</th>
+                  <th class="py-3 px-4 bg-transparent text-end">Điểm Tích Lũy</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (topUsers && topUsers.length > 0) { %>
+                  <% topUsers.forEach((u, index) => { %>
+                    <tr class="border-bottom border-secondary border-opacity-10 <%= index < 3 ? 'fw-bold' : '' %>">
+                      <td class="py-3 px-4 bg-transparent text-center">
+                        <% if (index === 0) { %>
+                          <div class="avatar-circle bg-warning text-dark mx-auto d-flex align-items-center justify-content-center fs-4 shadow" style="width: 45px; height: 45px; border-radius: 50%;">1</div>
+                        <% } else if (index === 1) { %>
+                          <div class="avatar-circle bg-secondary text-white mx-auto d-flex align-items-center justify-content-center fs-5 shadow" style="width: 40px; height: 40px; border-radius: 50%;">2</div>
+                        <% } else if (index === 2) { %>
+                          <div class="avatar-circle text-white mx-auto d-flex align-items-center justify-content-center fs-5 shadow" style="background: #cd7f32; width: 40px; height: 40px; border-radius: 50%;">3</div>
+                        <% } else { %>
+                          <div class="text-secondary fs-5"><%= index + 1 %></div>
+                        <% } %>
+                      </td>
+                      <td class="py-3 px-4 bg-transparent text-start">
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="avatar-circle bg-dark text-white d-flex align-items-center justify-content-center border border-secondary border-opacity-25" style="width: 35px; height: 35px; border-radius: 50%;">
+                            <%= u.username.charAt(0).toUpperCase() %>
+                          </div>
+                          <span class="text-white font-outfit <%= index < 3 ? 'fs-5' : '' %>"><%= u.username %></span>
+                          <% if (u.role === 'seller' || u.role === 'admin') { %>
+                            <i class="fa-solid fa-circle-check text-info small ms-1" title="Đã xác thực"></i>
+                          <% } %>
+                        </div>
+                      </td>
+                      <td class="py-3 px-4 bg-transparent text-end">
+                        <span class="text-warning font-code"><%= (u.balance || 0).toLocaleString('vi-VN') %> zCoin</span>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="3" class="text-center py-5 text-secondary">
+                      Chưa có dữ liệu người dùng.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('./partials/footer') %>

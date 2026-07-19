@@ -1,0 +1,570 @@
+<%
+// Pre-compute all server-side values BEFORE building any HTML string
+// RULE: NEVER use backtick template literals containing HTML with class= inside EJS code blocks
+//       Instead use plain string concatenation: '<div class="x">' + val + '</div>'
+const origPriceNum = parseInt((product.originalPrice || '').replace(/[^0-9]/g, '')) || product.priceNumber || 0;
+const catList = typeof categories !== 'undefined' ? categories : [];
+const prod = typeof product !== 'undefined' ? product : {};
+const productId = prod.docId || prod.id || '';
+const safeTitle = (prod.title || '').replace(/"/g, '&quot;');
+const safeFeatures = (prod.features || []).join(', ').replace(/"/g, '&quot;');
+const safeItems = (prod.itemsList || []).join(', ').replace(/"/g, '&quot;');
+const safePlugins = (prod.plugins || []).join(', ').replace(/"/g, '&quot;');
+const safeGifts = (prod.gifts || []).join(', ').replace(/"/g, '&quot;');
+const safeImage = (prod.image || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+// Filter out any base64 data: URLs that may have leaked into Firestore — they'd cause 413 on Vercel
+const galleryCleaned = Array.isArray(prod.carousel)
+  ? prod.carousel.filter(u => u !== prod.image && u && !u.startsWith('data:'))
+  : [];
+const existingGalleryJson = JSON.stringify(galleryCleaned);
+const productVersionsJson = JSON.stringify(prod.versions || []);
+
+const categoriesJson = JSON.stringify(catList);
+// Only serialize what's needed client-side (category + customFields for dynamic field rendering).
+// Exclude heavy fields (description HTML, carousel URLs) to stay under Vercel's 4.5MB response limit.
+const prodSlim = {
+  category: prod.category || '',
+  customFields: prod.customFields || {},
+};
+const productJson = JSON.stringify(prodSlim);
+
+
+// Build category select options
+let catOptions = '<option value="">-- Chọn danh mục --</option>';
+catList.forEach(c => {
+  catOptions += '<option value="' + c.slug + '"' + (c.slug === prod.category ? ' selected' : '') + '>' + c.name + '</option>';
+});
+
+// Field/input reusable styles
+const fieldStyle = 'width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:13.5px;outline:none;';
+const labelStyle = 'font-size:12.5px;font-weight:600;color:var(--text-primary);margin-bottom:6px;display:block;';
+const cardStyle = 'background:linear-gradient(135deg,rgba(25,28,48,0.65),rgba(15,17,28,0.7));border-radius:16px;border:1px solid var(--border);';
+
+// Build page body using string concatenation — NO template literals with HTML content
+const body = 
+  '<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />' +
+  '<style>' +
+    '.ql-toolbar.ql-snow{border:1px solid var(--border)!important;border-top-left-radius:12px;border-top-right-radius:12px;background:rgba(255,255,255,0.03);}' +
+    '.ql-container.ql-snow{border:1px solid var(--border)!important;border-bottom-left-radius:12px;border-bottom-right-radius:12px;background:rgba(10,11,16,0.5);color:var(--text-primary);font-family:Inter,sans-serif;font-size:13.5px;}' +
+    '.ql-editor{min-height:250px;}' +
+    '.ql-snow .ql-stroke{stroke:var(--text-secondary)!important;}' +
+    '.ql-snow .ql-fill{fill:var(--text-secondary)!important;}' +
+    '.ql-snow .ql-picker{color:var(--text-secondary)!important;}' +
+    '.ql-snow .ql-picker-options{background-color:var(--bg-secondary)!important;border-color:var(--border)!important;}' +
+  '</style>' +
+  // Page header
+  '<div style="margin-bottom:28px;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">' +
+      '<div>' +
+        '<div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--text-primary);display:flex;align-items:center;gap:10px;">' +
+          '<i class="fas fa-pen-to-square" style="color:var(--warning);font-size:22px;"></i> Chỉnh sửa sản phẩm' +
+        '</div>' +
+        '<div style="font-size:13.5px;color:var(--text-secondary);margin-top:4px;">Sửa đổi thông tin sản phẩm và các thuộc tính động.</div>' +
+      '</div>' +
+      '<a href="/admin/products" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">' +
+        '<i class="fas fa-arrow-left"></i> Quay lại' +
+      '</a>' +
+    '</div>' +
+  '</div>' +
+  // Form
+  '<form action="/admin/products/' + productId + '/edit" method="POST" enctype="multipart/form-data" id="edit-product-form" @submit="isSavingProduct = true" x-data="editProductForm()"' +
+  '  @paste.window="if ([\'INPUT\',\'TEXTAREA\'].includes($event.target.tagName)||$event.target.closest(\'.ql-editor\')) return; if ($event.clipboardData&&$event.clipboardData.files.length>0) addFiles($event.clipboardData.files);"' +
+  '>' +
+  '<input type="hidden" name="description" id="hidden-description">' +
+  '<div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start;">' +
+
+    // === LEFT COLUMN ===
+    '<div style="display:flex;flex-direction:column;gap:24px;">' +
+      '<div style="' + cardStyle + 'padding:28px;display:flex;flex-direction:column;gap:20px;">' +
+        '<div style="font-size:16px;font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:12px;display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-file-invoice" style="color:var(--accent);"></i> Thông tin cơ bản' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<label style="' + labelStyle + '">Tên sản phẩm *</label>' +
+          '<input type="text" name="title" style="' + fieldStyle + '" value="' + safeTitle + '" required>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<label style="' + labelStyle + '">Mô tả chi tiết *</label>' +
+          '<div id="editor-container">' + (prod.description || '') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // === RIGHT COLUMN ===
+    '<div style="display:flex;flex-direction:column;gap:20px;">' +
+
+      // Pricing & Category
+      '<div style="' + cardStyle + 'padding:24px;display:flex;flex-direction:column;gap:16px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-tags" style="color:var(--success);"></i> Phân loại & Giá bán' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<label style="' + labelStyle + '">Danh mục sản phẩm</label>' +
+          '<select name="category" id="category-select" style="' + fieldStyle + '" required>' + catOptions + '</select>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+          '<div style="display:flex;flex-direction:column;gap:6px;">' +
+            '<label style="' + labelStyle + '">Giá bán (zCoin) *</label>' +
+            '<input type="number" name="price" style="' + fieldStyle + '" value="' + (prod.priceNumber || 0) + '" required min="0">' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:6px;">' +
+            '<label style="' + labelStyle + '">Giá gốc (zCoin)</label>' +
+            '<input type="number" name="originalPrice" style="' + fieldStyle + '" value="' + origPriceNum + '" min="0">' +
+          '</div>' +
+        '</div>' +
+
+        // Thumbnail zone
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<label style="' + labelStyle + '">Ảnh Thumbnail *</label>' +
+          '<div' +
+          '  @click="activeZone=\'thumbnail\';$refs.thumbnailInput.click()"' +
+          '  @dragover.prevent="$el.style.borderColor=\'var(--accent)\'"' +
+          '  @dragleave.prevent="$el.style.borderColor=activeZone===\'thumbnail\'?\'var(--accent)\'  :\'rgba(255,255,255,0.08)\'"' +
+          '  @drop.prevent="addFiles($event.dataTransfer.files,\'thumbnail\')"' +
+          '  :style="activeZone===\'thumbnail\'?\'border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15);\':\'border-color:rgba(255,255,255,0.08);\'"' +
+          '  style="border:2px dashed rgba(255,255,255,0.08);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.012);"' +
+          '  onmouseover="this.style.background=\'rgba(255,255,255,0.025)\'"' +
+          '  onmouseout="this.style.background=\'rgba(255,255,255,0.012)\'"' +
+          '>' +
+            '<template x-if="!thumbnailData">' +
+              '<div>' +
+                '<i class="fa-solid fa-image" style="font-size:18px;color:var(--text-muted);margin-bottom:4px;"></i>' +
+                '<span style="font-size:11.5px;color:var(--text-secondary);display:block;">Click, kéo thả hoặc Ctrl+V để dán ảnh Thumbnail</span>' +
+              '</div>' +
+            '</template>' +
+            '<template x-if="thumbnailData">' +
+              '<div style="position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#000;">' +
+                '<img :src="thumbnailData" style="width:100%;height:100%;object-fit:cover;">' +
+                '<button type="button" @click.stop="thumbnailData=\'\'" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(244,63,94,0.85);border:none;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                  '<i class="fa-solid fa-xmark" style="font-size:9px;"></i>' +
+                '</button>' +
+              '</div>' +
+            '</template>' +
+            '<input type="file" x-ref="thumbnailInput" accept="image/*" @change="addFiles($event.target.files,\'thumbnail\')" style="display:none;">' +
+            '<input type="hidden" name="imageStr" :value="thumbnailData">' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Gallery
+      '<div style="' + cardStyle + 'padding:24px;display:flex;flex-direction:column;gap:14px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-images" style="color:var(--accent-light);"></i> Thư viện ảnh sản phẩm' +
+        '</div>' +
+        '<div' +
+        '  @click="activeZone=\'gallery\';$refs.galleryInput.click()"' +
+        '  @dragover.prevent="$el.style.borderColor=\'var(--accent)\'"' +
+        '  @dragleave.prevent="$el.style.borderColor=activeZone===\'gallery\'?\'var(--accent)\'  :\'rgba(255,255,255,0.08)\'"' +
+        '  @drop.prevent="addFiles($event.dataTransfer.files,\'gallery\')"' +
+        '  :style="activeZone===\'gallery\'?\'border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15);\':\'border-color:rgba(255,255,255,0.08);\'"' +
+        '  style="border:2px dashed rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.015);"' +
+        '  onmouseover="this.style.background=\'rgba(255,255,255,0.03)\'"' +
+        '  onmouseout="this.style.background=\'rgba(255,255,255,0.015)\'"' +
+        '>' +
+          '<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:var(--text-muted);margin-bottom:8px;"></i>' +
+          '<span style="font-size:12.5px;color:var(--text-secondary);display:block;font-weight:500;">Kéo thả hoặc <span style="color:var(--accent-light);text-decoration:underline;">chọn tệp</span></span>' +
+          '<span style="font-size:11px;color:var(--text-muted);display:block;margin-top:4px;">Hỗ trợ nhấn <b>Ctrl+V</b> để dán từ Clipboard</span>' +
+          '<input type="file" x-ref="galleryInput" multiple accept="image/*" @change="addFiles($event.target.files,\'gallery\')" style="display:none;">' +
+        '</div>' +
+        '<div x-show="existingGallery.length > 0">' +
+          '<span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:6px;font-weight:600;">Ảnh hiện tại trong thư viện:</span>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">' +
+            '<template x-for="url in existingGallery" :key="url">' +
+              '<div style="position:relative;width:100px;height:100px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#000;flex-shrink:0;">' +
+                '<img :src="url" style="width:100%;height:100%;object-fit:cover;">' +
+                '<button type="button" @click.stop="removeExisting(url)" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(244,63,94,0.85);border:none;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                  '<i class="fa-solid fa-xmark" style="font-size:9px;"></i>' +
+                '</button>' +
+                '<input type="hidden" name="existingGallery[]" :value="url">' +
+              '</div>' +
+            '</template>' +
+          '</div>' +
+        '</div>' +
+        '<div x-show="gallery.length > 0">' +
+          '<span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:6px;font-weight:600;">Ảnh mới sẽ thêm:</span>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">' +
+            '<template x-for="img in gallery" :key="img.id">' +
+              '<div style="position:relative;width:100px;height:100px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#000;flex-shrink:0;">' +
+                '<img :src="img.data" style="width:100%;height:100%;object-fit:cover;">' +
+                '<button type="button" @click.stop="removeImage(img.id)" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(244,63,94,0.85);border:none;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                  '<i class="fa-solid fa-xmark" style="font-size:9px;"></i>' +
+                '</button>' +
+                '<input type="hidden" name="galleryBase64[]" :value="img.data">' +
+              '</div>' +
+            '</template>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Dynamic fields wrapper
+      '<div id="dynamic-fields-wrapper" style="' + cardStyle + 'padding:24px;display:none;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-sliders" style="color:var(--warning);"></i> Thông số danh mục' +
+        '</div>' +
+        '<div id="dynamic-fields-container" style="display:flex;flex-direction:column;gap:14px;"></div>' +
+      '</div>' +
+
+      // List inputs
+      '<div style="' + cardStyle + 'padding:24px;display:flex;flex-direction:column;gap:14px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-list-check" style="color:var(--accent-light);"></i> Thông số bổ sung (ngăn cách bởi dấu phẩy)' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">Tính năng nổi bật (Features)</label><input type="text" name="features" style="' + fieldStyle + '" value="' + safeFeatures + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">Bộ tài nguyên bao gồm (Items List)</label><input type="text" name="itemsList" style="' + fieldStyle + '" value="' + safeItems + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">Plugins tương thích</label><input type="text" name="plugins" style="' + fieldStyle + '" value="' + safePlugins + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">Quà tặng & Bảo hành (Gifts)</label><input type="text" name="gifts" style="' + fieldStyle + '" value="' + safeGifts + '"></div>' +
+      '</div>' +
+
+      // Submit
+      '<div style="' + cardStyle + 'padding:20px;">' +
+        '<button type="submit" :disabled="isSavingProduct" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;padding:12px;background:linear-gradient(135deg,var(--warning),#d97706);border:none;border-radius:10px;color:white;cursor:pointer;">' +
+          '<template x-if="!isSavingProduct">' +
+            '<span><i class="fas fa-floppy-disk"></i> Lưu thay đổi</span>' +
+          '</template>' +
+          '<template x-if="isSavingProduct">' +
+            '<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>' +
+          '</template>' +
+        '</button>' +
+      '</div>' +
+
+  '  </div>' + // end grid
+  
+  // Version History Card at the bottom of the form
+  '<div style="' + cardStyle + 'padding:28px;margin-top:24px;display:flex;flex-direction:column;gap:20px;">' +
+    '<div style="font-size:16px;font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:12px;display:flex;align-items:center;gap:8px;">' +
+      '<i class="fa-solid fa-code-branch" style="color:var(--accent);"></i> Quản lý phiên bản sản phẩm (ZIP, Jar, Setup files)' +
+    '</div>' +
+    
+    '<div style="display:grid;grid-template-columns:1fr 2fr;gap:28px;align-items:start;">' +
+      
+      // Upload Form (Left sub-column)
+      '<div style="display:flex;flex-direction:column;gap:14px;">' +
+        '<div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">Đăng phiên bản mới</div>' +
+        
+        '<div style="display:flex;flex-direction:column;gap:4px;">' +
+          '<label style="' + labelStyle + '">Số phiên bản *</label>' +
+          '<input type="text" x-model="newVer" placeholder="VD: 1.0.0 hoặc v1.2-Beta" style="' + fieldStyle + '">' +
+        '</div>' +
+        
+        '<div style="display:flex;flex-direction:column;gap:4px;">' +
+          '<label style="' + labelStyle + '">Nhật ký thay đổi (Changelog)</label>' +
+          '<textarea x-model="newChangelog" placeholder="Mô tả các thay đổi, sửa lỗi..." style="' + fieldStyle + 'height:70px;resize:none;"></textarea>' +
+        '</div>' +
+
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<label style="' + labelStyle + '">Tệp tin sản phẩm *</label>' +
+          '<div style="border:1px dashed var(--border);border-radius:10px;padding:16px;text-align:center;position:relative;background:rgba(255,255,255,0.01);">' +
+            '<template x-if="!uploadedFileKey && !isUploading">' +
+              '<div>' +
+                '<input type="file" @change="triggerVersionUpload($event)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;">' +
+                '<i class="fa-solid fa-file-zipper" style="font-size:20px;color:var(--text-muted);margin-bottom:6px;"></i>' +
+                '<span style="font-size:11.5px;color:var(--text-secondary);display:block;">Nhấp để chọn file tải lên</span>' +
+              '</div>' +
+            '</template>' +
+            '<template x-if="isUploading">' +
+              '<div>' +
+                '<div style="font-size:11.5px;color:var(--accent-light);font-weight:600;margin-bottom:4px;">Đang tải lên Cloudflare R2...</div>' +
+                '<div style="width:100%;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">' +
+                  '<div :style="\'width: \' + uploadProgress + \'%\'" style="height:100%;background:var(--accent);transition:width 0.2s;"></div>' +
+                '</div>' +
+                '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;" x-text="uploadProgress + \'%\'"></div>' +
+              '</div>' +
+            '</template>' +
+            '<template x-if="uploadedFileKey">' +
+              '<div style="display:flex;align-items:center;justify-content:center;gap:6px;">' +
+                '<i class="fa-solid fa-circle-check" style="color:var(--success);font-size:16px;"></i>' +
+                '<div style="text-align:left;max-width:180px;">' +
+                  '<div style="font-size:11.5px;color:var(--text-primary);font-weight:600;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;" x-text="uploadedFileName"></div>' +
+                  '<div style="font-size:10px;color:var(--text-muted);" x-text="Math.round(uploadedFileSize / 1024) + \' KB\'"></div>' +
+                '</div>' +
+                '<button type="button" @click="uploadedFileKey=\'\';uploadedFileName=\'\';uploadProgress=0;" style="background:none;border:none;color:var(--danger);cursor:pointer;padding:4px;"><i class="fa-solid fa-trash-can"></i></button>' +
+              '</div>' +
+            '</template>' +
+          '</div>' +
+        '</div>' +
+
+        '<button type="button" @click="saveNewVersion()" :disabled="isPublishingVersion || isUploading" style="width:100%;padding:10px;background:var(--accent);border:none;border-radius:10px;color:white;font-weight:600;font-size:13px;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;">' +
+          '<template x-if="!isPublishingVersion">' +
+            '<span><i class="fa-solid fa-plus"></i> Phát hành Phiên bản</span>' +
+          '</template>' +
+          '<template x-if="isPublishingVersion">' +
+            '<span><i class="fas fa-spinner fa-spin"></i> Đang phát hành...</span>' +
+          '</template>' +
+        '</button>' +
+      '</div>' +
+
+      // Version Table (Right sub-column)
+      '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
+        '<div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">Lịch sử phiên bản</div>' +
+        '<template x-if="versions.length === 0">' +
+          '<div style="padding:40px;text-align:center;background:rgba(255,255,255,0.01);border:1px solid var(--border);border-radius:12px;color:var(--text-muted);font-size:12.5px;">Sản phẩm chưa có phiên bản tải xuống nào.</div>' +
+        '</template>' +
+        '<template x-if="versions.length > 0">' +
+          '<div style="display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;padding-right:4px;">' +
+            '<template x-for="v in versions" :key="v.fileKey + v.version">' +
+              '<div style="background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+                '<div style="flex-grow:1;display:flex;flex-direction:column;gap:3px;">' +
+                  '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<span style="font-size:13px;font-weight:700;color:var(--text-primary);background:rgba(99,102,241,0.15);color:var(--accent-light);padding:2px 8px;border-radius:6px;" x-text="v.version"></span>' +
+                    '<span style="font-size:11px;color:var(--text-muted);" x-text="new Date(v.uploadedAt).toLocaleDateString(\'vi-VN\')"></span>' +
+                  '</div>' +
+                  '<div style="font-size:12px;color:var(--text-secondary);font-weight:500;" x-text="v.fileName + \' (\' + Math.round(v.fileSize / 1024) + \' KB)\'"></div>' +
+                  '<div x-show="v.changelog" style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;" x-text="\'Changelog: \' + v.changelog"></div>' +
+                '</div>' +
+                '<button type="button" @click="deleteVersion(v.fileKey, v.version)" :disabled="deletingKeys.includes(v.fileKey + \'-\' + v.version)" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.15);border-radius:8px;color:var(--danger);padding:8px 10px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:4px;" onmouseover="this.style.background=\'rgba(244,63,94,0.2)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.1)\'">' +
+                  '<template x-if="!deletingKeys.includes(v.fileKey + \'-\' + v.version)">' +
+                    '<span><i class="fa-solid fa-trash-can"></i> Xóa</span>' +
+                  '</template>' +
+                  '<template x-if="deletingKeys.includes(v.fileKey + \'-\' + v.version)">' +
+                    '<span><i class="fas fa-spinner fa-spin"></i></span>' +
+                  '</template>' +
+                '</button>' +
+              '</div>' +
+            '</template>' +
+          '</div>' +
+        '</template>' +
+      '</div>' +
+
+    '</div>' +
+  '</div>' +
+  '</form>';
+
+const extraScript =
+  '<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></sc' + 'ript>' +
+  '<script>' +
+  '  document.addEventListener("alpine:init", () => {' +
+  '    Alpine.data("editProductForm", () => ({' +
+  '      activeZone: "gallery",' +
+  '      thumbnailData: "' + safeImage + '",' +
+  '      existingGallery: ' + existingGalleryJson + ',' +
+  '      gallery: [],' +
+  '      versions: ' + productVersionsJson + ',' +
+  '      newVer: "",' +
+  '      newChangelog: "",' +
+  '      uploadProgress: 0,' +
+  '      isUploading: false,' +
+  '      uploadedFileKey: "",' +
+  '      uploadedFileName: "",' +
+  '      uploadedFileSize: 0,' +
+  '      isSavingProduct: false,' +
+  '      isPublishingVersion: false,' +
+  '      deletingKeys: [],' +
+  '      compressAndAdd(file, target) {' +
+  '        if (!file || !file.type.startsWith("image/")) return;' +
+  '        const reader = new FileReader();' +
+  '        reader.onload = (e) => {' +
+  '          const img = new Image();' +
+  '          img.onload = () => {' +
+  '            const canvas = document.createElement("canvas");' +
+  '            let width = img.width;' +
+  '            let height = img.height;' +
+  '            const MAX_WIDTH = 1200;' +
+  '            const MAX_HEIGHT = 1200;' +
+  '            if (width > height) {' +
+  '              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }' +
+  '            } else {' +
+  '              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }' +
+  '            }' +
+  '            canvas.width = width;' +
+  '            canvas.height = height;' +
+  '            const ctx = canvas.getContext("2d");' +
+  '            ctx.drawImage(img, 0, 0, width, height);' +
+  '            const dataUrl = canvas.toDataURL("image/jpeg", 0.75);' +
+  '            if (target === "thumbnail") {' +
+  '              this.thumbnailData = dataUrl;' +
+  '            } else {' +
+  '              this.gallery.push({ id: Date.now() + Math.random(), data: dataUrl });' +
+  '            }' +
+  '          };' +
+  '          img.src = e.target.result;' +
+  '        };' +
+  '        reader.readAsDataURL(file);' +
+  '      },' +
+  '      addFiles(files, target) {' +
+  '        const dest = target || this.activeZone;' +
+  '        if (dest === "thumbnail") {' +
+  '          const file = files[0];' +
+  '          this.compressAndAdd(file, "thumbnail");' +
+  '        } else {' +
+  '          for (let i = 0; i < files.length; i++) {' +
+  '            this.compressAndAdd(files[i], "gallery");' +
+  '          }' +
+  '        }' +
+  '      },' +
+  '      removeImage(id) { this.gallery = this.gallery.filter(item => item.id !== id); },' +
+  '      removeExisting(url) { this.existingGallery = this.existingGallery.filter(u => u !== url); },' +
+  '      async triggerVersionUpload(e) {' +
+  '        const file = e.target.files[0];' +
+  '        if (!file) return;' +
+  '        this.isUploading = true;' +
+  '        this.uploadProgress = 0;' +
+  '        try {' +
+  '          const res = await fetch("/admin/api/presign", {' +
+  '            method: "POST",' +
+  '            headers: { "Content-Type": "application/json" },' +
+  '            body: JSON.stringify({ fileName: file.name, fileType: file.type, productId: "' + productId + '" })' +
+  '          });' +
+  '          const data = await res.json();' +
+  '          if (data.error) throw new Error(data.error);' +
+  '          if (data.isLocal) {' +
+  '            const formData = new FormData();' +
+  '            formData.append("file", file);' +
+  '            const xhr = new XMLHttpRequest();' +
+  '            xhr.open("POST", data.uploadUrl, true);' +
+  '            xhr.upload.onprogress = (event) => {' +
+  '              if (event.lengthComputable) {' +
+  '                this.uploadProgress = Math.round((event.loaded / event.total) * 100);' +
+  '              }' +
+  '            };' +
+  '            xhr.onload = () => {' +
+  '              if (xhr.status === 200) {' +
+  '                const resData = JSON.parse(xhr.responseText);' +
+  '                this.uploadedFileKey = resData.fileKey;' +
+  '                this.uploadedFileName = resData.fileName;' +
+  '                this.uploadedFileSize = resData.fileSize;' +
+  '                this.isUploading = false;' +
+  '                this.uploadProgress = 100;' +
+  '                Notifier.success("Tải tệp tin lên máy chủ thành công!");' +
+  '              } else {' +
+  '                this.isUploading = false;' +
+  '                Notifier.error("Upload cục bộ thất bại: " + xhr.statusText);' +
+  '              }' +
+  '            };' +
+  '            xhr.onerror = () => {' +
+  '              this.isUploading = false;' +
+  '              Notifier.error("Lỗi kết nối khi tải lên server cục bộ");' +
+  '            };' +
+  '            xhr.send(formData);' +
+  '          } else {' +
+  '            const xhr = new XMLHttpRequest();' +
+  '            xhr.open("PUT", data.uploadUrl, true);' +
+  '            xhr.setRequestHeader("Content-Type", file.type);' +
+  '            xhr.upload.onprogress = (event) => {' +
+  '              if (event.lengthComputable) {' +
+  '                this.uploadProgress = Math.round((event.loaded / event.total) * 100);' +
+  '              }' +
+  '            };' +
+  '            xhr.onload = () => {' +
+  '              if (xhr.status === 200) {' +
+  '                this.uploadedFileKey = data.fileKey;' +
+  '                this.uploadedFileName = file.name;' +
+  '                this.uploadedFileSize = file.size;' +
+  '                this.isUploading = false;' +
+  '                this.uploadProgress = 100;' +
+  '                Notifier.success("Tải tệp tin lên Cloudflare R2 thành công!");' +
+  '              } else {' +
+  '                this.isUploading = false;' +
+  '                Notifier.error("Upload thất bại: " + xhr.statusText);' +
+  '              }' +
+  '            };' +
+  '            xhr.onerror = () => {' +
+  '              this.isUploading = false;' +
+  '              Notifier.error("Lỗi kết nối khi tải lên Cloudflare R2");' +
+  '            };' +
+  '            xhr.send(file);' +
+  '          }' +
+  '        } catch (err) {' +
+  '          this.isUploading = false;' +
+  '          Notifier.error("Lỗi: " + err.message);' +
+  '        }' +
+  '      },' +
+  '      async saveNewVersion() {' +
+  '        if (!this.newVer || !this.uploadedFileKey) {' +
+  '          Notifier.warning("Vui lòng điền số phiên bản và upload tệp tin!");' +
+  '          return;' +
+  '        }' +
+  '        this.isPublishingVersion = true;' +
+  '        try {' +
+  '          const res = await fetch("/admin/api/products/' + productId + '/versions", {' +
+  '            method: "POST",' +
+  '            headers: { "Content-Type": "application/json" },' +
+  '            body: JSON.stringify({' +
+  '              version: this.newVer,' +
+  '              changelog: this.newChangelog,' +
+  '              fileKey: this.uploadedFileKey,' +
+  '              fileName: this.uploadedFileName,' +
+  '              fileSize: this.uploadedFileSize' +
+  '            })' +
+  '          });' +
+  '          const data = await res.json();' +
+  '          if (data.error) throw new Error(data.error);' +
+  '          this.versions.unshift(data.version);' +
+  '          this.newVer = "";' +
+  '          this.newChangelog = "";' +
+  '          this.uploadedFileKey = "";' +
+  '          this.uploadedFileName = "";' +
+  '          this.uploadedFileSize = 0;' +
+  '          this.uploadProgress = 0;' +
+  '          Notifier.success("Đã phát hành phiên bản mới!");' +
+  '        } catch (err) {' +
+  '          Notifier.error("Lỗi khi lưu: " + err.message);' +
+  '        } finally {' +
+  '          this.isPublishingVersion = false;' +
+  '        }' +
+  '      },' +
+  '      async deleteVersion(fileKey, versionStr) {' +
+  '        const isConfirmed = await Notifier.confirm("Bạn có chắc muốn xóa phiên bản " + versionStr + "?", "Xác nhận xóa", "Xóa", "Hủy");' +
+  '        if (!isConfirmed) return;' +
+  '        const targetKey = fileKey + "-" + versionStr;' +
+  '        this.deletingKeys.push(targetKey);' +
+  '        try {' +
+  '          const res = await fetch("/admin/api/products/' + productId + '/versions/delete", {' +
+  '            method: "POST",' +
+  '            headers: { "Content-Type": "application/json" },' +
+  '            body: JSON.stringify({ fileKey: fileKey, version: versionStr })' +
+  '          });' +
+  '          const data = await res.json();' +
+  '          if (data.error) throw new Error(data.error);' +
+  '          this.versions = this.versions.filter(v => !(v.fileKey === fileKey && v.version === versionStr));' +
+  '          Notifier.success("Đã xóa phiên bản thành công!");' +
+  '        } catch (err) {' +
+  '          Notifier.error("Lỗi khi xóa: " + err.message);' +
+  '        } finally {' +
+  '          this.deletingKeys = this.deletingKeys.filter(k => k !== targetKey);' +
+  '        }' +
+  '      }' +
+  '    }));' +
+  '  });' +
+  '  const categories = ' + categoriesJson + ';' +
+  '  const product = ' + productJson + ';' +
+  '  const currentCustomFields = product.customFields || {};' +
+  '  function initProductsEdit() {' +
+  '    const quill = new Quill("#editor-container", { theme:"snow", modules:{ toolbar:[[{header:[1,2,3,false]}],["bold","italic","underline","strike"],[{list:"ordered"},{list:"bullet"}],["link","clean"]] } });' +
+  '    const selectEl = document.getElementById("category-select");' +
+  '    const wrapper = document.getElementById("dynamic-fields-wrapper");' +
+  '    const container = document.getElementById("dynamic-fields-container");' +
+  '    if (!selectEl) return;' +
+  '    function renderFields(slug) {' +
+  '      const cat = categories.find(c => c.slug === slug);' +
+  '      container.innerHTML = "";' +
+  '      if (cat && cat.fields && cat.fields.length > 0) {' +
+  '        wrapper.style.display = "block";' +
+  '        cat.fields.forEach(f => {' +
+  '          const reqAttr = f.required ? "required" : "";' +
+  '          const reqStar = f.required ? \'<span style="color:var(--danger)">*</span>\' : "";' +
+  '          const currentVal = currentCustomFields[f.name] !== undefined ? currentCustomFields[f.name] : "";' +
+  '          const fs = "width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:13px;outline:none;";' +
+  '          const ls = "font-size:12.5px;font-weight:600;color:var(--text-primary);margin-bottom:6px;display:block;";' +
+  '          let h = "";' +
+  '          if (f.type === "select") {' +
+  '            const opts = (f.options||[]).map(o => \'<option value="\' + o + \'"\' + (String(o)===String(currentVal)?" selected":"") + \'>\' + o + "</option>").join("");' +
+  '            h = \'<div style="display:flex;flex-direction:column;gap:4px;"><label style="\' + ls + \'">\' + f.name + " " + reqStar + \'</label><select name="customFields[\' + f.name + \']" style="\' + fs + \'" \' + reqAttr + \'><option value="">-- Chọn --</option>\' + opts + "</select></div>";' +
+  '          } else if (f.type === "number") {' +
+  '            h = \'<div style="display:flex;flex-direction:column;gap:4px;"><label style="\' + ls + \'">\' + f.name + " " + reqStar + \'</label><input type="number" name="customFields[\' + f.name + \']" style="\' + fs + \'" value="\' + currentVal + \'" \' + reqAttr + \'></div>\';' +
+  '          } else {' +
+  '            h = \'<div style="display:flex;flex-direction:column;gap:4px;"><label style="\' + ls + \'">\' + f.name + " " + reqStar + \'</label><input type="text" name="customFields[\' + f.name + \']" style="\' + fs + \'" value="\' + currentVal + \'" \' + reqAttr + \'></div>\';' +
+  '          }' +
+  '          container.insertAdjacentHTML("beforeend", h);' +
+  '        });' +
+  '      } else { wrapper.style.display = "none"; }' +
+  '    }' +
+  '    if (selectEl.value) renderFields(selectEl.value);' +
+  '    selectEl.addEventListener("change", function() { renderFields(this.value); });' +
+  '    document.getElementById("edit-product-form").addEventListener("submit", function() {' +
+  '      document.getElementById("hidden-description").value = quill.getSemanticHTML();' +
+  '    });' +
+  '  }' +
+  '  if (document.readyState==="loading") { document.addEventListener("DOMContentLoaded",initProductsEdit); } else { initProductsEdit(); }' +
+  '</sc' + 'ript>';
+%>
+<%- include('./layout', { body: body, extraScript: extraScript }) %>

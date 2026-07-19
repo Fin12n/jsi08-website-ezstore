@@ -1,0 +1,213 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="user-spin-section" style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(circle at 10% 20%, rgba(154, 91, 237, 0.03) 0%, transparent 50%);">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <%- include('../partials/user-sidebar') %>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <!-- Alerts -->
+        <% if (locals.success) { %>
+          <div class="alert bg-success bg-opacity-10 border border-success border-opacity-20 text-success alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-check fs-5"></i>
+            <div><%= success %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+        <% if (locals.error) { %>
+          <div class="alert bg-danger bg-opacity-10 border border-danger border-opacity-20 text-danger alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-circle-exclamation fs-5"></i>
+            <div><%= error %></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close" style="padding: 1.25rem;"></button>
+          </div>
+        <% } %>
+
+        <div class="text-center mb-5">
+          <h2 class="text-warning font-outfit fw-bold tracking-tight display-5 text-glow-warning mb-1">EZ Lucky Spin</h2>
+          <p class="text-secondary small">Thử vận may của bạn! Mỗi lượt quay tốn 10 zCoin</p>
+        </div>
+
+        <div class="row g-4 justify-content-center align-items-stretch">
+          <!-- Wheel Graphic Card -->
+          <div class="col-md-6">
+            <div class="card glass-card p-4 text-center d-flex flex-column justify-content-between h-100" style="border-color: rgba(255, 255, 255, 0.05); background: rgba(255,255,255,0.015);">
+              
+              <!-- The Wheel Graphic -->
+              <div class="wheel-wrapper mx-auto my-3" style="width: 290px; height: 290px;">
+                <div class="wheel-outer-border w-100 h-100 position-relative rounded-circle overflow-hidden shadow-lg">
+                  <!-- Pointer -->
+                  <div class="position-absolute top-0 start-50 translate-middle-x wheel-pointer-glow" style="z-index: 100; margin-top: -8px;">
+                    <i class="fa-solid fa-location-pin text-danger fs-2"></i>
+                  </div>
+                  
+                  <!-- Wheel -->
+                  <div id="spinWheel" class="w-100 h-100 rounded-circle position-relative" style="background: conic-gradient(
+                      #f39c12 0deg 60deg, 
+                      #e74c3c 60deg 120deg, 
+                      #9b59b6 120deg 180deg, 
+                      #3498db 180deg 240deg, 
+                      #2ecc71 240deg 300deg, 
+                      #1abc9c 300deg 360deg
+                    ); transition: transform 4s cubic-bezier(0.15, 0.8, 0.15, 1); transform: rotate(0deg);">
+                    
+                    <!-- Slice Labels (Absolute Positioned & Rotated) -->
+                    <!-- Slice 0 (30deg): Jackpot -->
+                    <div class="position-absolute text-white fw-bold font-outfit" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(30deg); transform-origin: 50% 130px; font-size: 0.72rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">500 zC</div>
+                    
+                    <!-- Slice 1 (90deg): Mất lượt -->
+                    <div class="position-absolute text-white fw-semibold font-outfit opacity-80" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(90deg); transform-origin: 50% 130px; font-size: 0.68rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Lượt sau</div>
+                    
+                    <!-- Slice 2 (150deg): 50k -->
+                    <div class="position-absolute text-white fw-bold font-outfit" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(150deg); transform-origin: 50% 130px; font-size: 0.72rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">50 zC</div>
+                    
+                    <!-- Slice 3 (210deg): Mất lượt -->
+                    <div class="position-absolute text-white fw-semibold font-outfit opacity-80" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(210deg); transform-origin: 50% 130px; font-size: 0.68rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Lượt sau</div>
+                    
+                    <!-- Slice 4 (270deg): 100k -->
+                    <div class="position-absolute text-white fw-bold font-outfit" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(270deg); transform-origin: 50% 130px; font-size: 0.72rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">100 zC</div>
+                    
+                    <!-- Slice 5 (330deg): 10k -->
+                    <div class="position-absolute text-white fw-bold font-outfit" style="top: 15px; left: 50%; transform: translateX(-50%) rotate(330deg); transform-origin: 50% 130px; font-size: 0.72rem; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">10 zC</div>
+                    
+                    <!-- Center hub overlay -->
+                    <div class="position-absolute top-50 start-50 translate-middle rounded-circle bg-dark border border-3 border-warning d-flex align-items-center justify-content-center shadow-lg" style="width: 44px; height: 44px; z-index: 10;">
+                      <i class="fa-solid fa-star text-warning" style="font-size: 14px;"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <h6 class="text-secondary font-outfit mb-3">Số dư khả dụng: 
+                  <strong class="text-success font-code fs-5 text-glow-success"><%= (user.balance || 0).toLocaleString('vi-VN') %> zCoin</strong>
+                </h6>
+                
+                <form action="/user/spin" method="POST" id="spinForm">
+                  <button type="submit" class="btn btn-hero btn-lg w-100 font-outfit fw-bold rounded-3 shadow-lg text-uppercase tracking-wider py-2.5" id="spinBtn" <%= (user.balance || 0) < 10 ? 'disabled' : '' %> style="font-size: 0.95rem;">
+                    <i class="fa-solid fa-rotate me-2"></i> Quay Ngay (10 zCoin)
+                  </button>
+                </form>
+                <% if ((user.balance || 0) < 10) { %>
+                  <p class="text-danger small mt-2.5 mb-0 d-flex align-items-center justify-content-center gap-1.5"><i class="fa-solid fa-circle-exclamation"></i> Số dư của bạn không đủ để quay.</p>
+                <% } %>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Reward Description Card -->
+          <div class="col-md-6">
+            <div class="card glass-card p-4 h-100 d-flex flex-column justify-content-between" style="border-color: rgba(255, 255, 255, 0.05); background: rgba(255,255,255,0.015);">
+              <div>
+                <h4 class="text-white font-outfit mb-3 fw-bold border-bottom border-secondary border-opacity-15 pb-2.5">
+                  <i class="fa-solid fa-gift me-2 text-warning"></i>Phần thưởng có thể nhận
+                </h4>
+                
+                <div class="table-responsive">
+                  <table class="table table-dark table-hover mb-0 bg-transparent align-middle">
+                    <tbody>
+                      <tr class="border-secondary border-opacity-10">
+                        <td class="bg-transparent text-center" style="width: 40px;"><span class="badge bg-danger rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 24px; height: 24px;">1</span></td>
+                        <td class="bg-transparent text-white fw-bold font-outfit">Giải Jackpot</td>
+                        <td class="bg-transparent text-end text-warning font-code fw-bold text-glow-warning">500 zCoin</td>
+                      </tr>
+                      <tr class="border-secondary border-opacity-10">
+                        <td class="bg-transparent text-center" style="width: 40px;"><span class="badge bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 24px; height: 24px;">2</span></td>
+                        <td class="bg-transparent text-white fw-bold font-outfit">Giải Nhất</td>
+                        <td class="bg-transparent text-end text-warning font-code fw-bold text-glow-warning">100 zCoin</td>
+                      </tr>
+                      <tr class="border-secondary border-opacity-10">
+                        <td class="bg-transparent text-center" style="width: 40px;"><span class="badge bg-info text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 24px; height: 24px;">3</span></td>
+                        <td class="bg-transparent text-white fw-bold font-outfit">Giải Nhì</td>
+                        <td class="bg-transparent text-end text-warning font-code fw-bold text-glow-warning">50 zCoin</td>
+                      </tr>
+                      <tr class="border-secondary border-opacity-10">
+                        <td class="bg-transparent text-center" style="width: 40px;"><span class="badge bg-success rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 24px; height: 24px;">4</span></td>
+                        <td class="bg-transparent text-white fw-bold font-outfit">Hoàn Tiền</td>
+                        <td class="bg-transparent text-end text-success font-code fw-bold text-glow-success">10 zCoin</td>
+                      </tr>
+                      <tr class="border-secondary border-opacity-10">
+                        <td class="bg-transparent text-center" style="width: 40px;"><span class="badge bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 24px; height: 24px;">5</span></td>
+                        <td class="bg-transparent text-secondary font-outfit">Chúc bạn may mắn</td>
+                        <td class="bg-transparent text-end text-secondary font-code">0 zCoin</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              <div class="mt-4 alert bg-secondary bg-opacity-5 border border-secondary border-opacity-15 rounded-3 mb-0 p-3 small">
+                <i class="fa-solid fa-shield-halved me-1.5 text-info"></i> Tỷ lệ trúng giải được cấu hình ngẫu nhiên minh bạch thông qua thuật toán máy chủ. Chúc bạn may mắn!
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SweetAlert2 for animation and result display -->
+<script>
+  <% if (typeof spinResult !== 'undefined' && spinResult) { %>
+    document.addEventListener("DOMContentLoaded", function() {
+      const wheel = document.getElementById('spinWheel');
+      
+      // Calculate target angle based on the prize won to align perfectly with pointer at top (0deg / 360deg)
+      // Slices:
+      // Slice 0 (30deg): Jackpot (500k) -> Rotate: 330deg
+      // Slice 1 (90deg): Lượt sau (0) -> Rotate: 270deg
+      // Slice 2 (150deg): Giải Nhì (50k) -> Rotate: 210deg
+      // Slice 3 (210deg): Lượt sau (0) -> Rotate: 150deg
+      // Slice 4 (270deg): Giải Nhất (100k) -> Rotate: 90deg
+      // Slice 5 (330deg): Hoàn Tiền (10k) -> Rotate: 30deg
+      let targetWedgeAngle = 270; // default to fail
+      
+      const prize = '<%= spinResult.prizeName %>';
+      if (prize === 'Jackpot') {
+        targetWedgeAngle = 330;
+      } else if (prize === 'Giải Nhất') {
+        targetWedgeAngle = 90;
+      } else if (prize === 'Giải Nhì') {
+        targetWedgeAngle = 210;
+      } else if (prize === 'Hoàn Tiền') {
+        targetWedgeAngle = 30;
+      } else {
+        // Fail has two slices: 90 or 210. Choose randomly.
+        targetWedgeAngle = Math.random() > 0.5 ? 270 : 150;
+      }
+      
+      // We spin 5 full rotations (1800deg) + the target angle
+      const finalRotation = 1800 + targetWedgeAngle;
+      
+      // Execute spin animation
+      wheel.style.transform = `rotate(${finalRotation}deg)`;
+      
+      // Wait for animation to finish, then show SweetAlert
+      setTimeout(() => {
+        Swal.fire({
+          title: '<%= spinResult.title %>',
+          text: '<%= spinResult.message %>',
+          icon: '<%= spinResult.isWin ? "success" : "error" %>',
+          background: 'rgba(20,20,20,0.95)',
+          color: '#fff',
+          confirmButtonColor: '#f39c12'
+        });
+      }, 4000); // 4 seconds transition duration
+    });
+  <% } %>
+
+  document.getElementById('spinForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('spinBtn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang quay...';
+    btn.disabled = true;
+  });
+</script>
+
+<%- include('../partials/footer') %>

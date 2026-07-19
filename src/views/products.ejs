@@ -1,0 +1,228 @@
+<%
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '')
+             .replace(/&nbsp;/g, ' ')
+             .replace(/&amp;/g, '&')
+             .replace(/&lt;/g, '<')
+             .replace(/&gt;/g, '>')
+             .trim();
+}
+%>
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="products-section" style="padding-top: 120px;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-subtitle">Danh mục của EZ Studio</span>
+      <h1 class="section-title text-white">Products Catalog</h1>
+      <p class="lead">Khám phá các mô hình 3D, bản đồ và cấu hình máy chủ Minecraft chất lượng tốt nhất.</p>
+    </div>
+
+    <!-- Search and Filters Panel -->
+    <div class="card glass-card p-4 mb-5 border border-secondary border-opacity-15">
+      <form action="/products" method="GET" class="row g-3 align-items-end">
+        <!-- Keyword Search -->
+        <div class="col-lg-4 col-md-6">
+          <label class="form-label text-white-50 font-outfit small fw-600 mb-2">Tìm kiếm từ khóa</label>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-muted">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" name="q" class="form-control bg-transparent border-secondary border-opacity-25 text-white placeholder-muted font-outfit" style="border-left: none; outline: none; box-shadow: none;" placeholder="Nhập tên, mô tả sản phẩm..." value="<%= filters.q %>">
+          </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-lg-2 col-md-6">
+          <label class="form-label text-white-50 font-outfit small fw-600 mb-2">Danh mục</label>
+          <select name="category" class="form-select bg-transparent border-secondary border-opacity-25 text-white font-outfit select-custom" style="outline: none; box-shadow: none;">
+            <option value="" style="background: var(--ez-bg-card); color: var(--text-primary);">Tất cả danh mục</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.slug %>" style="background: var(--ez-bg-card); color: var(--text-primary);" <%= filters.category === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="col-lg-2 col-md-4">
+          <label class="form-label text-white-50 font-outfit small fw-600 mb-2">Giá sản phẩm</label>
+          <select name="price" class="form-select bg-transparent border-secondary border-opacity-25 text-white font-outfit select-custom" style="outline: none; box-shadow: none;">
+            <option value="" style="background: var(--ez-bg-card); color: var(--text-primary);">Tất cả giá</option>
+            <option value="free" style="background: var(--ez-bg-card); color: var(--text-primary);" <%= filters.price === 'free' ? 'selected' : '' %>>Miễn phí</option>
+            <option value="paid" style="background: var(--ez-bg-card); color: var(--text-primary);" <%= filters.price === 'paid' ? 'selected' : '' %>>Có phí</option>
+          </select>
+        </div>
+
+        <!-- Version Filter -->
+        <div class="col-lg-2 col-md-4">
+          <label class="form-label text-white-50 font-outfit small fw-600 mb-2">Phiên bản</label>
+          <select name="version" class="form-select bg-transparent border-secondary border-opacity-25 text-white font-outfit select-custom" style="outline: none; box-shadow: none;">
+            <option value="" style="background: var(--ez-bg-card); color: var(--text-primary);">Tất cả phiên bản</option>
+            <% versions.forEach(ver => { %>
+              <option value="<%= ver %>" style="background: var(--ez-bg-card); color: var(--text-primary);" <%= filters.version === ver ? 'selected' : '' %>><%= ver %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Size Filter -->
+        <div class="col-lg-2 col-md-4">
+          <label class="form-label text-white-50 font-outfit small fw-600 mb-2">Size sản phẩm</label>
+          <select name="size" class="form-select bg-transparent border-secondary border-opacity-25 text-white font-outfit select-custom" style="outline: none; box-shadow: none;">
+            <option value="" style="background: var(--ez-bg-card); color: var(--text-primary);">Tất cả size</option>
+            <% sizes.forEach(sz => { %>
+              <option value="<%= sz.value %>" style="background: var(--ez-bg-card); color: var(--text-primary);" <%= filters.size === sz.value ? 'selected' : '' %>><%= sz.label %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+          <a href="/products" class="btn btn-outline-secondary font-outfit px-4 border-secondary border-opacity-25 text-white-50 hover-light reset-btn" style="border-radius: var(--radius-sm); display: <%= (filters.q || filters.category || filters.price || filters.version || filters.size) ? 'inline-flex' : 'none' %>; align-items: center;">
+            <i class="fa-solid fa-arrow-rotate-left me-2"></i>Đặt lại
+          </a>
+          <button type="submit" class="btn btn-primary font-outfit px-4 d-none" style="background: var(--ez-accent); border-color: var(--ez-accent); color: white; border-radius: var(--radius-sm); align-items: center;">
+            <i class="fa-solid fa-filter me-2"></i>Lọc sản phẩm
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div id="products-list-container" style="transition: opacity 0.2s ease;">
+      <% if (typeof groupedProducts !== 'undefined' && groupedProducts.length > 0) { %>
+        <% groupedProducts.forEach(group => { %>
+          <% if (group.products && group.products.length > 0) { %>
+            <div class="mb-5" id="category-<%= group.category.slug %>">
+              <div class="d-flex align-items-center mb-4 border-bottom pb-2 border-secondary border-opacity-25">
+                <i class="fa-solid fa-folder-open text-primary-custom fs-3 me-2"></i>
+                <h2 class="text-white font-outfit mb-0 fs-3"><%= group.category.name %></h2>
+              </div>
+              <div class="row g-4">
+                <% group.products.forEach(product => { %>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="card glass-card card-item">
+                      <div class="card-img-container">
+                        <img src="<%= product.image %>" alt="<%= product.title %>" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
+                        <span class="card-category-badge"><%= group.category.name %></span>
+                      </div>
+                      <div class="card-body-custom">
+                        <div>
+                          <h3 class="card-title-custom"><%= product.title %></h3>
+                          <p class="card-desc-custom"><%= stripHtml(product.description) %></p>
+                        </div>
+                        <div>
+                          <div class="card-price-container">
+                            <span class="card-price-del"><del><%= product.originalPrice %></del></span>
+                            <span class="card-price-new"><%= product.salePrice %></span>
+                          </div>
+                          <a href="/product/<%= product.id %>" class="btn btn-card">
+                            <i class="fa-solid fa-eye me-2"></i>Xem Chi Tiết
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <div class="text-center text-muted py-5">
+          <i class="fa-solid fa-box-open fs-1 mb-3"></i>
+          <p>Không tìm thấy sản phẩm phù hợp.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('.glass-card form');
+  if (!form) return;
+
+  const searchInput = form.querySelector('input[name="q"]');
+  const selects = form.querySelectorAll('select');
+  const resetBtn = form.querySelector('.reset-btn');
+  const container = document.getElementById('products-list-container');
+  
+  let debounceTimeout = null;
+
+  function updateResetButtonVisibility() {
+    const hasActiveFilter = (searchInput && searchInput.value.trim() !== '') || 
+                            Array.from(selects).some(s => s.value !== '');
+    if (resetBtn) {
+      resetBtn.style.setProperty('display', hasActiveFilter ? 'inline-flex' : 'none', 'important');
+    }
+  }
+
+  async function updateProducts() {
+    updateResetButtonVisibility();
+
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (const [key, value] of formData.entries()) {
+      if (value.trim() !== '') {
+        params.append(key, value.trim());
+      }
+    }
+
+    const queryString = params.toString();
+    const newUrl = '/products' + (queryString ? '?' + queryString : '');
+
+    window.history.pushState({ path: newUrl }, '', newUrl);
+
+    try {
+      if (container) container.style.opacity = '0.5';
+
+      const response = await fetch(newUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const htmlText = await response.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      const newContainer = doc.getElementById('products-list-container');
+
+      if (container && newContainer) {
+        container.innerHTML = newContainer.innerHTML;
+      }
+    } catch (error) {
+      console.error('Error fetching filtered products:', error);
+    } finally {
+      if (container) container.style.opacity = '1';
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(updateProducts, 250);
+    });
+  }
+
+  selects.forEach(select => {
+    select.addEventListener('change', updateProducts);
+  });
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      form.reset();
+      if (searchInput) searchInput.value = '';
+      selects.forEach(select => select.value = '');
+      updateProducts();
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    updateProducts();
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

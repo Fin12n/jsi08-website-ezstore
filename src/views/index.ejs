@@ -1,0 +1,204 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<!-- Modern Hero Section -->
+<section class="home-section d-flex align-items-center position-relative overflow-hidden" id="home" style="min-height: 100vh; padding-top: 80px;">
+  <div class="hero-glow position-absolute top-50 start-50 translate-middle" style="width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(52, 152, 219, 0.15) 0%, transparent 70%); z-index: -1;"></div>
+  
+  <div class="container position-relative z-1">
+    <div class="row align-items-center">
+      <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill border border-secondary border-opacity-25 bg-dark bg-opacity-50 mb-4 backdrop-blur">
+          <span class="badge bg-primary rounded-pill">New</span>
+          <span class="text-secondary small font-outfit"><%= __('hero_badge') %></span>
+        </div>
+        <h1 class="font-outfit display-2 fw-bold mb-4 text-glow-primary" style="line-height: 1.1;">
+          <%= __('hero_title_1') %> <br /> <span class="text-primary"><%= __('hero_title_2') %></span> <br /> <%= __('hero_title_3') %>
+        </h1>
+        <p class="lead text-secondary mb-5" style="max-width: 500px;">
+          <%= __('hero_subtitle') %>
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+          <a href="#products" class="btn btn-hero btn-lg px-4 py-3 rounded-pill fw-bold letter-spacing-1 shadow-lg">
+            <i class="fa-solid fa-rocket me-2"></i> <%= __('explore_now') %>
+          </a>
+          <a href="https://discord.gg/ezstudio" target="_blank" class="btn btn-hero-outline btn-lg px-4 py-3 rounded-pill fw-bold">
+            <i class="fa-brands fa-discord me-2 text-primary"></i> <%= __('join_community') %>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 position-relative d-none d-lg-block">
+        <!-- Abstract 3D Floating Elements Simulation -->
+        <div class="position-relative w-100" style="height: 500px; perspective: 1000px;">
+          <div class="glass-card position-absolute shadow-lg border border-primary border-opacity-25" style="width: 250px; height: 320px; top: 10%; right: 10%; transform: rotateY(-15deg) rotateX(10deg); background: rgba(20,20,25,0.6);">
+            <img src="/imgs/1Banner_sapphire.png" class="img-fluid rounded-3 h-100 object-fit-cover" alt="Model" />
+          </div>
+          <div class="glass-card position-absolute shadow-lg border border-warning border-opacity-25" style="width: 200px; height: 260px; bottom: 5%; left: 10%; transform: rotateY(15deg) rotateX(-5deg); background: rgba(20,20,25,0.8); z-index: 2;">
+            <img src="/imgs/banner1.webp" class="img-fluid rounded-3 h-100 object-fit-cover" alt="Setup" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="products-section py-5" id="products">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5">
+      <div>
+        <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small"><i class="fa-solid fa-fire me-2"></i><%= __('featured_resources') %></span>
+        <h2 class="display-5 text-white font-outfit fw-bold mt-2 mb-0"><%= __('trending_resources') %></h2>
+      </div>
+      <a href="/products" class="btn btn-outline-secondary rounded-pill px-4 mt-3 mt-md-0 btn-hover-glow">
+        <%= __('view_all') %> <i class="fa-solid fa-arrow-right ms-2"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      <% if (typeof products !== 'undefined' && products.length > 0) { %>
+        <% products.slice(0, 3).forEach(product => { %>
+          <div class="col-lg-4 col-md-6">
+            <div class="card glass-card h-100 border-0 shadow-lg overflow-hidden product-card-hover" style="transition: all 0.3s ease;">
+              <div class="position-relative overflow-hidden" style="height: 220px;">
+                <img src="<%= product.image %>" alt="<%= product.title %>" class="w-100 h-100 object-fit-cover transition-transform" onerror="this.onerror=null;this.src='/imgs/logo.webp'" />
+                <div class="position-absolute top-0 end-0 m-3">
+                  <span class="badge bg-dark bg-opacity-75 border border-secondary text-white px-3 py-2 rounded-pill backdrop-blur">
+                    <% 
+                      let catName = 'Sản phẩm';
+                      if (typeof categories !== 'undefined') {
+                        let foundCat = categories.find(c => c.slug === product.category);
+                        if (foundCat) catName = foundCat.name;
+                      }
+                    %>
+                    <%= catName %>
+                  </span>
+                </div>
+              </div>
+              <div class="card-body p-4 d-flex flex-column bg-dark bg-opacity-50">
+                <h4 class="text-white font-outfit fw-bold text-truncate mb-2"><%= product.title %></h4>
+                <p class="text-secondary small mb-4" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"><%= product.description %></p>
+                <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                  <div>
+                    <span class="text-secondary text-decoration-line-through small d-block" style="font-size: 0.75rem;"><%= product.originalPrice %></span>
+                    <span class="text-warning fw-bold fs-5"><%= product.salePrice %></span>
+                  </div>
+                  <a href="/product/<%= product.id %>" class="btn btn-primary rounded-circle w-40px h-40px d-flex align-items-center justify-content-center btn-hover-glow" title="Xem Chi Tiết">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="col-12 text-center py-5">
+          <p class="text-secondary"><i class="fa-solid fa-box-open fs-1 mb-3 d-block"></i><%= __('no_products') %></p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- Modern Services Section -->
+<section class="services-section py-5 position-relative" id="services">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small"><%= __('services_subtitle') %></span>
+      <h2 class="display-5 text-white font-outfit fw-bold mt-2"><%= __('services_title') %></h2>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <% if (typeof services !== 'undefined' && services.length > 0) { %>
+        <% services.forEach((service, idx) => { %>
+          <div class="col-lg-4 col-md-6">
+            <div class="glass-card p-4 h-100 rounded-4 border-top border-<%= idx===0?'primary':(idx===1?'warning':'info') %> border-3 service-card-pro">
+              <div class="icon-wrapper mb-4 rounded-circle bg-<%= idx===0?'primary':(idx===1?'warning':'info') %> bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                <i class="<%= service.icon %> fs-3 text-<%= idx===0?'primary':(idx===1?'warning':'info') %>"></i>
+              </div>
+              <h4 class="text-white font-outfit mb-3"><%= service.title %></h4>
+              <p class="text-secondary"><%= service.description %></p>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- Split Screen About & Contact -->
+<section class="split-section py-5 mb-5" id="about-contact">
+  <div class="container">
+    <div class="row g-0 rounded-5 overflow-hidden shadow-lg border border-secondary border-opacity-25">
+      <!-- About Half -->
+      <div class="col-lg-6 bg-dark p-5 position-relative">
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('/imgs/2Banner_sapphire.jpg') center/cover; opacity: 0.15;"></div>
+        <div class="position-relative z-1 h-100 d-flex flex-column justify-content-center">
+          <span class="text-primary font-outfit fw-bold tracking-wider text-uppercase small mb-2"><%= __('about_title') %></span>
+          <h2 class="display-6 text-white font-outfit fw-bold mb-4">EZ Studio</h2>
+          <p class="text-secondary fs-5 mb-4" style="line-height: 1.8;">
+            <%= __('about_desc') %>
+          </p>
+          <div class="mt-auto pt-4">
+            <h6 class="text-white font-outfit mb-3"><%= __('partner_title') %></h6>
+            <a href="https://card2k.com/" target="_blank" class="d-inline-block bg-white bg-opacity-10 p-2 rounded-3 border border-secondary border-opacity-25 hover-lift">
+              <img src="/imgs/2K9XTEAM_851_x_315_px.png" alt="Card2K" style="height: 30px; object-fit: contain;">
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contact Half -->
+      <div class="col-lg-6 glass-panel p-5 d-flex flex-column justify-content-center">
+        <h3 class="text-white font-outfit fw-bold mb-2"><%= __('contact_title') %></h3>
+        <p class="text-secondary mb-4"><%= __('contact_desc') %></p>
+        
+        <form action="#" method="POST" class="modern-form">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <input type="text" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="<%= __('contact_name') %>" required>
+            </div>
+            <div class="col-md-6">
+              <input type="email" class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" placeholder="<%= __('contact_email') %>" required>
+            </div>
+          </div>
+          <div class="mb-4">
+            <textarea class="form-control bg-dark border-secondary text-white px-4 py-3 rounded-3" rows="3" placeholder="<%= __('contact_msg') %>" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold letter-spacing-1 shadow-sm">
+            <%= __('send_msg') %> <i class="fa-solid fa-paper-plane ms-2"></i>
+          </button>
+        </form>
+
+        <div class="d-flex align-items-center gap-4 mt-5 pt-4 border-top border-secondary border-opacity-25">
+          <a href="https://discord.gg/ezstudio" target="_blank" class="text-secondary hover-text-primary text-decoration-none d-flex align-items-center gap-2">
+            <i class="fa-brands fa-discord fs-4"></i> <span class="small">Discord</span>
+          </a>
+          <a href="#" class="text-secondary hover-text-primary text-decoration-none d-flex align-items-center gap-2">
+            <i class="fa-brands fa-telegram fs-4"></i> <span class="small">Telegram</span>
+          </a>
+          <a href="mailto:tranthinh2000bn@gmail.com" class="text-secondary hover-text-primary text-decoration-none d-flex align-items-center gap-2">
+            <i class="fa-solid fa-envelope fs-4"></i> <span class="small">Email</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* Scoped overrides for Pro Max layout */
+.w-40px { width: 40px; }
+.h-40px { height: 40px; }
+.hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.hover-lift:hover { transform: translateY(-3px); }
+.hover-text-primary:hover { color: var(--primary-color) !important; }
+.service-card-pro { transition: transform 0.3s, box-shadow 0.3s; background: rgba(30,30,35,0.4); backdrop-filter: blur(10px); }
+.service-card-pro:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.product-card-hover:hover .transition-transform { transform: scale(1.05); }
+.transition-transform { transition: transform 0.5s ease; }
+.glass-panel { background: var(--glass-card-bg); backdrop-filter: blur(20px); border-left: 1px solid var(--glass-border); }
+.form-control:focus { background-color: var(--ez-bg-alt) !important; color: var(--text-primary) !important; box-shadow: 0 0 0 0.25rem var(--ez-accent-glow); border-color: var(--ez-accent); }
+</style>
+
+<%- include('partials/footer') %>

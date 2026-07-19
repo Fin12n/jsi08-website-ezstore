@@ -1,0 +1,149 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<section class="checkout-payment-section" style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh; background: radial-gradient(circle at 50% 10%, rgba(154, 91, 237, 0.04) 0%, transparent 60%);">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        <div class="text-center mb-5">
+          <h2 class="text-white font-outfit fw-bold tracking-tight display-6">Thanh Toán Đơn Hàng</h2>
+          <p class="text-secondary small mt-2">Đơn hàng của bạn đã được khởi tạo thành công. Vui lòng quét mã QR hoặc chuyển khoản để hoàn tất đơn hàng.</p>
+        </div>
+
+        <div class="card glass-card p-4 border border-secondary border-opacity-15">
+          <div class="alert bg-warning bg-opacity-10 border border-warning border-opacity-20 text-warning mb-4 text-start small d-flex gap-2">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5 fs-5"></i>
+            <div>
+              <strong>Chú ý quan trọng:</strong> Bạn cần chuyển khoản chính xác <strong>Số tiền</strong> và <strong>Nội dung chuyển khoản</strong>. Hệ thống sẽ tự động kích hoạt đơn hàng sau 1-3 phút. Không tắt trang này cho đến khi nhận được thông báo thành công.
+            </div>
+          </div>
+
+          <div class="row g-4 align-items-center">
+            <% 
+              const bankName = (locals.settings && settings.bankInfo && settings.bankInfo.bankName) || 'MBBank';
+              const accountName = (locals.settings && settings.bankInfo && settings.bankInfo.accountName) || 'NGUYEN VAN A';
+              const accountNumber = (locals.settings && settings.bankInfo && settings.bankInfo.accountNumber) || '000000000000';
+            %>
+            
+            <!-- QR Frame Column -->
+            <div class="col-md-5 text-center d-flex flex-column align-items-center justify-content-center">
+              <div class="bg-white p-3 rounded-4 d-inline-block shadow-lg border border-light border-opacity-10 position-relative mb-4">
+                <img src="https://qr.sepay.vn/img?bank=<%= bankName %>&acc=<%= accountNumber %>&template=compact&amount=<%= order.amountVnd %>&des=EZS%20<%= order.id %>" alt="QR Code Thanh Toán" class="img-fluid" style="max-width: 200px; border-radius: 8px;">
+                <div class="position-absolute top-100 start-50 translate-middle mt-2.5">
+                  <span class="badge bg-dark text-white border border-secondary border-opacity-20 px-2.5 py-1 text-uppercase font-outfit" style="font-size: 0.65rem;">Quét Mã QR</span>
+                </div>
+              </div>
+              <div class="mt-3 text-center">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                <span class="text-secondary small font-outfit">Đang chờ thanh toán tự động...</span>
+              </div>
+            </div>
+
+            <!-- Transfer Details Column -->
+            <div class="col-md-7 text-start ps-md-4 mt-5 mt-md-0 border-start border-secondary border-opacity-15">
+              <h5 class="text-white font-outfit mb-3 fw-bold border-bottom border-secondary border-opacity-15 pb-2">
+                <i class="fa-solid fa-qrcode me-2 text-warning"></i>Thông tin chuyển khoản
+              </h5>
+              
+              <div class="row g-3">
+                <div class="col-6">
+                  <p class="text-secondary mb-0.5 small">Ngân hàng:</p>
+                  <h6 class="text-info font-outfit mb-0 fw-semibold"><%= bankName %></h6>
+                </div>
+                <div class="col-6">
+                  <p class="text-secondary mb-0.5 small">Chủ tài khoản:</p>
+                  <h6 class="text-white font-outfit mb-0 fw-semibold"><%= accountName %></h6>
+                </div>
+                <div class="col-12">
+                  <p class="text-secondary mb-0.5 small">Số tài khoản:</p>
+                  <div class="d-flex align-items-center gap-2">
+                    <h5 class="text-white font-code mb-0 fw-bold"><%= accountNumber %></h5>
+                    <button class="btn btn-sm btn-outline-secondary py-1 px-2 border-opacity-25 text-secondary" onclick="copyText('<%= accountNumber %>', 'Số tài khoản')">
+                      <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <p class="text-secondary mb-0.5 small">Số tiền cần chuyển:</p>
+                  <div class="d-flex align-items-center gap-2">
+                    <h4 class="text-success font-outfit mb-0 fw-bold"><%= order.amountVnd.toLocaleString('vi-VN') %>đ</h4>
+                    <button class="btn btn-sm btn-outline-secondary py-1 px-2 border-opacity-25 text-secondary" onclick="copyText('<%= order.amountVnd %>', 'Số tiền')">
+                      <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                  </div>
+                  <span class="text-muted small fs-7">(Quy đổi từ: <%= order.totalAmount %>)</span>
+                </div>
+
+                <div class="col-12 mt-2">
+                  <p class="text-secondary mb-1.5 small fw-semibold">Nội dung chuyển khoản (Bắt buộc phải ghi chính xác):</p>
+                  <div class="p-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-15 rounded-3 d-flex align-items-center justify-content-between">
+                    <h4 class="text-warning font-code mb-0 fw-bold tracking-wider">EZS <%= order.id %></h4>
+                    <button class="btn btn-warning py-1.5 px-3 font-outfit" style="border-radius: 6px; font-size: 13px;" onclick="copyText('EZS <%= order.id %>', 'Nội dung chuyển khoản')">
+                      <i class="fa-regular fa-copy me-1"></i> Sao chép
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-center">
+          <a href="/cart" class="text-danger font-outfit hover-underline small">
+            <i class="fa-solid fa-xmark me-1"></i> Hủy đơn hàng và quay lại giỏ hàng
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function copyText(text, label) {
+    navigator.clipboard.writeText(text).then(() => {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Đã sao chép ${label}!`,
+        showConfirmButton: false,
+        timer: 1500,
+        background: 'rgba(30, 41, 59, 0.95)',
+        color: '#f8fafc'
+      });
+    });
+  }
+
+  // Poll order status every 5 seconds
+  const orderId = '<%= order.id %>';
+  const statusInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`/api/checkout/status/${orderId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'completed') {
+          clearInterval(statusInterval);
+          Swal.fire({
+            title: 'Thanh toán thành công!',
+            text: 'Cảm ơn bạn đã ủng hộ EZ Studio. Sản phẩm đã được thêm vào thư viện của bạn.',
+            icon: 'success',
+            background: 'rgba(30, 41, 59, 0.95)',
+            color: '#f8fafc',
+            confirmButtonText: 'Tới thư viện ngay',
+            confirmButtonColor: '#3b82f6',
+            allowOutsideClick: false
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/user/library';
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error polling order status:', err);
+    }
+  }, 5000);
+</script>
+
+<%- include('partials/footer') %>

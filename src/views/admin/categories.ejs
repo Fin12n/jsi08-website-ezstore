@@ -1,0 +1,74 @@
+<%
+  // Build HTML using string concatenation - avoids EJS parse issues with template literals
+  // containing HTML class attributes or ES6 class keyword.
+  const catList = typeof categories !== 'undefined' ? categories : [];
+  
+  let catRows = '';
+  if (catList.length > 0) {
+    for (let i = 0; i < catList.length; i++) {
+      const cat = catList[i];
+      let fieldBadges = '';
+      if (cat.fields && cat.fields.length > 0) {
+        fieldBadges += '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">';
+        for (let j = 0; j < cat.fields.length; j++) {
+          const f = cat.fields[j];
+          const reqMark = f.required ? '<span style="color:var(--danger)">*</span>' : '';
+          const optStr = (f.type === 'select' && f.options && f.options.length) ? ': [' + f.options.join(', ') + ']' : '';
+          fieldBadges += '<span style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);color:var(--accent-light);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;display:inline-block;margin:1px;">' + f.name + ' (' + f.type + ')' + reqMark + optStr + '</span>';
+        }
+        fieldBadges += '</div>';
+      }
+      catRows +=
+        '<tr>' +
+          '<td><span style="background:var(--info-glow);border:1px solid var(--info);color:var(--info);font-size:11px;font-weight:600;font-family:monospace;padding:2px 8px;border-radius:4px;display:inline-block;">' + cat.slug + '</span></td>' +
+          '<td style="font-weight:700;color:var(--text-primary);font-size:13.5px;">' + cat.name + fieldBadges + '</td>' +
+          '<td style="color:var(--text-secondary);font-size:12.5px;">' + (cat.description || 'Không có mô tả') + '</td>' +
+          '<td style="text-align:center;">' +
+            '<form action="/admin/categories/' + cat.id + '/delete" method="POST" style="display:inline;margin:0;" onsubmit="return confirm(\'Bạn có chắc chắn muốn xóa danh mục này?\')">' +
+              '<button type="submit" style="width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);color:var(--danger);cursor:pointer;" title="Xóa">' +
+                '<i class="fas fa-trash-can" style="font-size:11px;"></i>' +
+              '</button>' +
+            '</form>' +
+          '</td>' +
+        '</tr>';
+    }
+  } else {
+    catRows = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);font-weight:500;padding:40px;">Chưa có danh mục nào.</td></tr>';
+  }
+
+  const pageContent =
+    '<div class="page-header" style="margin-bottom:28px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">' +
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;background:linear-gradient(90deg,#ffffff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:10px;">' +
+            '<i class="fas fa-folder-tree" style="color:var(--accent);font-size:22px;-webkit-text-fill-color:var(--accent);"></i> Quản lý Danh mục' +
+          '</div>' +
+          '<div style="font-size:13.5px;color:var(--text-secondary);opacity:0.85;">Quản lý các danh mục sản phẩm và cấu hình các trường thông tin động.</div>' +
+        '</div>' +
+        '<a href="/admin/categories/new" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:var(--accent);color:white;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">' +
+          '<i class="fas fa-plus"></i> Thêm danh mục mới' +
+        '</a>' +
+      '</div>' +
+    '</div>' +
+    '<div class="stats-grid" style="grid-template-columns:repeat(12,1fr);gap:24px;align-items:start;">' +
+      '<div class="card" style="grid-column:span 12;min-width:0;background:linear-gradient(135deg,rgba(25,28,48,0.65),rgba(15,17,28,0.7));padding:24px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;">' +
+          '<i class="fas fa-list" style="color:var(--accent);"></i> Danh Sách Danh Mục' +
+        '</div>' +
+        '<div class="table-wrap">' +
+          '<table class="admin-table">' +
+            '<thead>' +
+              '<tr>' +
+                '<th>Slug</th>' +
+                '<th>Tên Danh Mục</th>' +
+                '<th>Mô tả</th>' +
+                '<th style="width:80px;text-align:center;">Thao tác</th>' +
+              '</tr>' +
+            '</thead>' +
+            '<tbody>' + catRows + '</tbody>' +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+%>
+<%- include('./layout', { body: pageContent }) %>

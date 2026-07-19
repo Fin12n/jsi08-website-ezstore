@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<section class="seller-dashboard-section" style="padding-top: 100px; min-height: 80vh;">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+          <div class="text-center mb-4">
+            <h5 class="text-white font-outfit mb-0"><i class="fa-solid fa-shop text-warning me-2"></i>Seller Panel</h5>
+            <span class="badge bg-success bg-opacity-25 text-success small mt-2">Đang hoạt động</span>
+          </div>
+
+          <hr class="border-secondary opacity-25">
+
+          <div class="nav flex-column nav-pills gap-2">
+            <a href="/seller/dashboard" class="nav-link active font-outfit"><i class="fa-solid fa-chart-pie me-2"></i>Thống kê</a>
+            <a href="/seller/products" class="nav-link text-white font-outfit"><i class="fa-solid fa-boxes-stacked me-2"></i>Sản phẩm của tôi</a>
+            <a href="/seller/add-product" class="nav-link text-white font-outfit"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng sản phẩm mới</a>
+            <a href="/user/dashboard" class="nav-link text-info font-outfit mt-3 border border-info border-opacity-25"><i class="fa-solid fa-user me-2"></i>Về User Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+        <h3 class="text-white font-outfit mb-4">Tổng quan Bán hàng</h3>
+        
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="card glass-card p-4 text-center h-100 border-info border-opacity-25">
+              <i class="fa-solid fa-box-open text-info fs-1 mb-3"></i>
+              <h3 class="text-white font-outfit mb-1"><%= productsCount %></h3>
+              <p class="text-secondary small mb-0">Sản phẩm đã đăng</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card glass-card p-4 text-center h-100 border-warning border-opacity-25">
+              <i class="fa-solid fa-eye text-warning fs-1 mb-3"></i>
+              <h3 class="text-white font-outfit mb-1"><%= totalViews %></h3>
+              <p class="text-secondary small mb-0">Lượt xem sản phẩm</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card glass-card p-4 text-center h-100 border-success border-opacity-25">
+              <i class="fa-solid fa-cart-shopping text-success fs-1 mb-3"></i>
+              <h3 class="text-white font-outfit mb-1"><%= totalSales %></h3>
+              <p class="text-secondary small mb-0">Lượt mua thành công</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card glass-card p-4">
+          <h5 class="text-warning font-outfit mb-4 border-bottom border-secondary border-opacity-25 pb-2">Doanh thu dự kiến tháng này</h5>
+          <div class="text-center py-4">
+            <h1 class="text-success font-outfit display-4 fw-bold">0 đ</h1>
+            <p class="text-secondary">Chưa có giao dịch nào trong tháng này.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
